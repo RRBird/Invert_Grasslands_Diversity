@@ -218,6 +218,7 @@ max(TaxModel$Diversity,na.rm=T)
 TaxModel$Diversity[is.na(TaxModel$Diversity)] <- 0
 
 
+
 #add variables
 
 TaxModel <- merge(TaxModel,variables,by = "Point",all.x = T)
@@ -225,3 +226,149 @@ head(TaxModel);dim(TaxModel)
 
 
 #Setting up for RLQ Analysis----
+
+
+
+#filter out morphospecies which are not at least ID'd to Order
+
+length(which(is.na(invert$Order)))
+
+invert_filtered <- invert[-which(is.na(invert$Order)), ]
+
+head(invert_filtered);dim(invert_filtered) 
+dim(invert);dim(invert_filtered)
+
+##L Data (Site x Species)----
+
+head(invert_filtered);dim(invert_filtered)
+
+
+#Count occurrences of each morphospecies at each site
+L_table <- invert_filtered %>%
+  group_by(Point, Morphospecies) %>%
+  summarise(abundance = n(), .groups = 'drop') %>%
+  pivot_wider(names_from = Morphospecies, 
+              values_from = abundance, 
+              values_fill = 0)
+head(L_table);dim(L_table)
+L_table[1,1]
+
+#Convert to data frame with points as row names
+L_matrix <- L_table %>%
+  column_to_rownames("Point") %>%
+  as.data.frame()
+head(L_matrix);dim(L_matrix)
+
+##Q Data (Species x Trait)----
+
+head(invert_filtered)
+
+#Get unique morphospecies with traits
+Q_table <- invert_filtered %>%
+  select(Morphospecies, Order, Size, Hunting_Style, Trophic) %>%
+  distinct()
+head(Q_table);dim(Q_table)
+
+Q_matrix <- Q_table %>%
+  column_to_rownames("Morphospecies") %>%
+  as.data.frame()
+head(Q_matrix);dim(Q_matrix)
+
+
+##R Data (Site x Environmental)----
+
+head(variables);dim(variables)
+
+R_table <- variables %>%
+  select(-Property)
+head(R_table);dim(R_table)
+
+#to make the next part transform correctly
+R_table <- as.data.frame(R_table)
+rownames(R_table) <- NULL
+
+R_matrix <- R_table %>%
+  column_to_rownames("Point") %>%
+  as.data.frame()
+##Checking that it worked----
+
+#first up is points
+
+points_L <- rownames(L_matrix)
+points_R <- rownames(R_matrix)
+
+if (!all(points_L %in% points_R)) {
+  warning("Some points in L table are not in R table")
+  print(setdiff(points_L, points_R))
+} #Needs fixing
+
+if (!all(points_R %in% points_L)) {
+  warning("Some points in R table are not in L table")
+  print(setdiff(points_R, points_L))
+} #Needs fixing
+
+#RQL can't handle missing data so can't have sites with no species included in the analysis
+common_sites <- intersect(points_L, points_R)
+L_matrix <- L_matrix[common_sites, ]
+R_matrix <- R_matrix[common_sites, ]
+
+points_L.2 <- rownames(L_matrix)
+points_R.2 <- rownames(R_matrix)
+
+if (!all(points_R.2 %in% points_L.2)) {
+  warning("Some points in R table are not in L table")
+  print(setdiff(points_R.2, points_L.2))
+} #fixed they match
+
+#Now checking morphospecies 
+
+species_L <- colnames(L_matrix)
+species_Q <- rownames(Q_matrix)
+
+if (!all(species_L %in% species_Q)) {
+  warning("Some morphospecies in L table are not in Q table")
+  print(setdiff(species_L, species_Q))
+} #looks good
+
+if (!all(species_Q %in% species_L)) {
+  warning("Some morphospecies in Q table are not in L table")
+  print(setdiff(species_Q, species_L))
+} #looks good
+
+#match Q order to L
+Q_matrix <- Q_matrix[species_L, ]
+
+##Fixing missing values----
+
+any(is.na(L_matrix)) #No NA's
+any(is.na(R_matrix)) #No NA's
+any(is.na(Q_matrix)) #NA's
+
+any(is.na(Q_matrix$Order)) #No NA's
+any(is.na(Q_matrix$Size)) #No NA's
+any(is.na(Q_matrix$Hunting_Style)) #No NA's
+any(is.na(Q_matrix$Trophic)) #NA's
+
+Q_matrix$Trophic[which(is.na(Q_matrix$Trophic))] <- "Unknown"
+any(is.na(Q_matrix)) #No NA's
+
+
+head(L_matrix[,1:10]);dim(L_matrix)
+head(R_matrix[,1:10]);dim(R_matrix)
+head(Q_matrix);dim(Q_matrix)
+
+#Traits need to be factors
+
+Q_matrix[] <- lapply(Q_matrix, as.factor)
+str(Q_matrix)
+
+levels(Q_matrix$Size) #not in the right order
+Q_matrix$Size <- factor(Q_matrix$Size, 
+                        levels = c("0-2.5mm", "2.5-5mm", 
+                                   "5-10mm", ">10mm", "No_Size",
+                                   "Unknown"),
+                        ordered = TRUE)
+levels(Q_matrix$Size)
+
+
+#END----

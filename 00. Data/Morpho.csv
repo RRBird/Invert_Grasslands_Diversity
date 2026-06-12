@@ -98,9 +98,9 @@
 98,No_Sample,Black_Hemiptera,Insecta,Hemiptera,NA,NA,NA,NA,True_Bug_Sp.,Order,Unknown,NA,Unknown,NA
 99,No_Sample,Hemiptera_Thin_Grey_Wings,Insecta,Hemiptera,NA,NA,NA,NA,True_Bug_Sp.,Order,Unknown,NA,Unknown,NA
 100,No_Sample,Large_Black_Orange_Wasp,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Parasitic,Active_Hunting,Unknown,NA
-101,G95,Orange_Leg_Small_Fly,Insecta,Diptera,NA,NA,NA,NA,Fly_Sp.,Order,Unknown,NA,0-2.5,NA
+101,G95,Orange_Leg_Small_Fly,Insecta,Diptera,NA,NA,NA,NA,Fly_Sp.,Order,Unknown,NA,0-2.5mm,NA
 102,G96,Fruit_Fly_Sp.,Insecta,Diptera,Tephritidae,Spathulina ,acroleuca,Spathulina_acroleuca,Fruit_Fly_Sp.,Species,Herbivore,NA,2.5-5mm,"G145, G192"
-103,G97,Tiny_Typical_Leafhopper_3,Insecta,Hemiptera,Cicadellidae,NA,NA,NA,Typical_Leafhopper_Sp.,Family,Herbivore,NA,0-2.5,G57
+103,G97,Tiny_Typical_Leafhopper_3,Insecta,Hemiptera,Cicadellidae,NA,NA,NA,Typical_Leafhopper_Sp.,Family,Herbivore,NA,0-2.5mm,G57
 104,G98,Dark_Brown_Leafhopper_2,Insecta,Hemiptera,Cicadellidae,NA,NA,NA,Typical_Leafhopper_Sp.,Family,Herbivore,NA,2.5-5mm,NA
 105,G99,Fruit_Fly_Sp_2,Insecta,Diptera,Tephritidae,NA,NA,NA,Fruit_Fly_Sp.,Family,Herbivore,NA,2.5-5mm,NA
 106,G100,Black-brown_Ant,Insecta,Hymenoptera,Formicidae,NA,NA,NA,Ant_Sp.,Family,Unknown,NA,2.5-5mm,"G156, G186, G194, G24"
