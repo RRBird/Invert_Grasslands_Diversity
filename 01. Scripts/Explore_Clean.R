@@ -367,7 +367,7 @@ Q_matrix$Size <- factor(Q_matrix$Size,
                         levels = c("0-2.5mm", "2.5-5mm", 
                                    "5-10mm", ">10mm", "No_Size",
                                    "Unknown"),
-                        ordered = TRUE)
+                        ordered = FALSE)
 levels(Q_matrix$Size)
 
 
