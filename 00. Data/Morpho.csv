@@ -120,7 +120,7 @@
 120,G117,Trig_Sp_5,Insecta,Orthoptera,Trigonidiidae,NA,NA,NA,Trig_Sp.,Family,Herbivore,NA,2.5-5mm,NA
 121,G118,Aphid_Black,Insecta,Hemiptera,Aphididae,NA,NA,NA,Aphid_Sp.,Family,Herbivore,NA,0-2.5mm,G129
 122,G119,Aphid_Black_2,Insecta,Hemiptera,Aphididae,NA,NA,NA,Aphid_Sp.,Family,Herbivore,NA,0-2.5mm,NA
-123,G120,Kangaroo_Tick,Arachnida,Ixodida,Ixodidae,Amblyomma ,triguttatum,NA,Kangaroo_Tick,Species,Hematophage,Ambush_Hunters,NA,"G48, G160, G167, G253"
+123,G120,Kangaroo_Tick,Arachnida,Ixodida,Ixodidae,Amblyomma ,triguttatum,NA,Kangaroo_Tick,Species,Omnivore,Ambush_Hunters,NA,"G48, G160, G167, G253"
 124,G122,Jumping_Spider,Arachnida,Araneae,Salticidae,NA,NA,NA,Jumping_Spider_Sp.,Family,Predator,Active_Hunting,NA,"G314, G222"
 125,G123,Black_Beetle,Insecta,Coleoptera,NA,NA,NA,NA,Beetle_Sp.,Order,Herbivore,NA,2.5-5mm,NA
 126,No_Sample,Dark_Small_Leafhopper,Insecta,Hemiptera,Cicadellidae,NA,NA,NA,Typical_Leafhopper_Sp.,Family,Herbivore,NA,0-2.5mm,NA
