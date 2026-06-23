@@ -2,7 +2,7 @@
 1,G1,Trig_Sp.,Insecta,Orthoptera,Trigonidiidae,Trigonidium,NA,NA,Trig_Sp.,Genus,Herbivore,NA,5-10mm,NA
 2,G2,Green_Mirid,Insecta,Hemiptera,Miridae,Creontiades,dilutus,Creontiades_dilutus,Green_Mirid,Species,Herbivore,NA,5-10mm,"G19, G115, G148, G176, G266"
 3,G3,Unknown_Midge,Insecta,Diptera,NA,NA,NA,NA,Fly_Sp.,Order,Unknown,NA,2.5-5mm,NA
-4,G4,Black_Long-legged_Fly,Insecta,Diptera,Dolichopodidae,NA,NA,NA,Long-legged_Fly_Sp.,Family,Predator,NA,2.5-5mm,NA
+4,G4,Black_Long-legged_Fly,Insecta,Diptera,Dolichopodidae,NA,NA,NA,Long-legged_Fly_Sp.,Family,Predator,Active_Hunting,2.5-5mm,NA
 5,G5,Tiny_Green_Typical_Leafhopper,Insecta,Hemiptera,Cicadellidae,NA,NA,NA,Typical_Leafhopper_Sp.,Family,Herbivore,NA,0-2.5mm,NA
 6,G6,Green-Head_Ant,Insecta,Hymenoptera,Formicidae,Rhytidoponera,metallica,Rhytidoponera_metallica,Green-head_Ant,Species,Omnivore,Active_Hunting,5-10mm,NA
 7,G7,Tiny_Typical_Leafhopper,Insecta,Hemiptera,Cicadellidae,NA,NA,NA,Typical_Leafhopper_Sp.,Family,Herbivore,NA,0-2.5mm,NA

@@ -88,7 +88,7 @@ plot(hc2) #uninterpretable
 #Calinsky-Harabasz criteria to find best partition 
 #calinski didn't work so dchanged it to calinhara 
 
-ntest <- 8
+ntest <-10
 res <- rep(0,ntest - 1)
 
 for (i in 2:ntest){
@@ -104,15 +104,18 @@ mtext(side=3,line=0,at = 1.2,'a)',cex=1.1)
 plot(3:ntest, diff(res), type='b', pch=20, xlab="Number of groups", ylab = "Diff in C-H index")
 mtext(side=3,line=0,at = 2.2,'b)',cex=1.1)
 
-#Nine functional groups
+#Eight functional groups
 
 
 spe.group2 <- as.factor(cutree(hc2, k = which.max(res) +1))
 summary(spe.group2)
-levels(spe.group2) <- c("A","B","C","D","E","F","G","H","I")
+levels(spe.group2) <- c("A","B","C","D","E","F","G","H")
 
 
-#biplot (trait groups + Traits and also with trait groups + enviro)----
+#biplots----
+
+#trait groups + Traits and also with trait groups + enviro 
+
 dev.new(height=10,width=10,dpi=80,pointsize=14,noRStudioGD = T)
 ade4::s.class(rlq1$lQ, spe.group2, col= 1:nlevels(spe.group2))
 s.arrow(rlq1$c1, add.plot = T,clab=0.8)
@@ -189,17 +192,7 @@ colnames(heatmap_data)
 str(heatmap_data)
 colnames(heatmap_data)[4] <- "Functional_Group"
 
-#Trying to get a better order for each functional group traits
 
-heatmap_data <- heatmap_data %>%
-  group_by(Functional_Group) %>%
-  mutate(Traits = if(unique(Functional_Group) == "Size") {
-    factor(Traits, levels = c(
-      "Unknown","No Size","0-2.5mm","2.5-5mm","5-10mm", ">10mm"))
-  } else {
-    factor(Traits, levels = sort(unique(Traits)))
-  }) %>%
-  ungroup()
 
 dev.new(height=10,width=15,dpi=80,pointsize=14,noRStudioGD = T)
 ggplot(heatmap_data, aes(x = Group, y = Traits, fill = Proportion)) +
@@ -218,8 +211,20 @@ heatmap_data$Traits <- gsub("Active_Hunting", "Active", heatmap_data$Traits)
 heatmap_data$Traits <- gsub("Ambush_Hunters", "Ambush", heatmap_data$Traits)
 heatmap_data$Traits <- gsub("Web_Building", "Web", heatmap_data$Traits)
 
+#Trying to get a better order for each functional group traits
 
-dev.new(height=20,width=17,dpi=80,pointsize=14,noRStudioGD = T)
+heatmap_data <- heatmap_data %>%
+  group_by(Functional_Group) %>%
+  mutate(Traits = if(unique(Functional_Group) == "Size") {
+    factor(Traits, levels = c(
+      "Unknown","No Size","0-2.5mm","2.5-5mm","5-10mm", ">10mm"))
+  } else {
+    factor(Traits, levels = sort(unique(Traits)))
+  }) %>%
+  ungroup()
+
+
+dev.new(height=20,width=20,dpi=80,pointsize=14,noRStudioGD = T)
 ggplot(heatmap_data, aes(x = Group, y = Traits, fill = Proportion)) +
   geom_tile() +
   facet_grid(Functional_Group ~ ., scales = "free_y", space = "free_y",
@@ -342,22 +347,9 @@ colnames(FDModel)[9] <- "H_Rich"
 FDModel$H_Rich[is.na(FDModel$H_Rich)] <- 0
 head(FDModel);dim(FDModel)
 
-#Trait Group I
-TG_I <- invert_trait_group[invert_trait_group$trait_group=="I",]
-head(TG_I);dim(TG_I)
-
-FUNrichness_I <- aggregate(Morphospecies ~ Point, data = TG_I, FUN = function(x) length(unique(x)))
-FDModel <- merge(FDModel,FUNrichness_I,by = "Point",all.x = T)
-head(FDModel);dim(FDModel)
-colnames(FDModel)[10] <- "I_Rich"
-
-FDModel$I_Rich[is.na(FDModel$I_Rich)] <- 0
-head(FDModel);dim(FDModel)
-
-
 #Now we check proportion of 0's
 
-lapply(FDModel[,2:10], function(x){length(which(x==0))/length(x)})
+lapply(FDModel[,2:9], function(x){length(which(x==0))/length(x)})
 
 #All groups except Group D are binomial
 
@@ -369,7 +361,6 @@ FDModel$E_Rich <- ifelse(FDModel$E_Rich>0, yes = 1,no = 0)
 FDModel$F_Rich <- ifelse(FDModel$F_Rich>0, yes = 1,no = 0)
 FDModel$G_Rich <- ifelse(FDModel$G_Rich>0, yes = 1,no = 0)
 FDModel$H_Rich <- ifelse(FDModel$H_Rich>0, yes = 1,no = 0)
-FDModel$I_Rich <- ifelse(FDModel$I_Rich>0, yes = 1,no = 0)
 
 colnames(FDModel)[2] <- "TG_A"
 colnames(FDModel)[3] <- "TG_B"
@@ -378,7 +369,6 @@ colnames(FDModel)[6] <- "TG_E"
 colnames(FDModel)[7] <- "TG_F"
 colnames(FDModel)[8] <- "TG_G"
 colnames(FDModel)[9] <- "TG_H"
-colnames(FDModel)[10] <- "TG_I"
 head(FDModel);dim(FDModel)
 
 #Diversity----
@@ -392,7 +382,7 @@ FDModel <- merge(FDModel,FUNdiversity_D,by = "Point",all.x = T)
   
 head(FDModel);dim(FDModel)
 
-colnames(FDModel)[11] <- "D_Div"
+colnames(FDModel)[10] <- "D_Div"
 
 FDModel$D_Div[is.na(FDModel$D_Div)] <- 0.00001
 
