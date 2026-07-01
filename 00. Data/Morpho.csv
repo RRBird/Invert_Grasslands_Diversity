@@ -13,7 +13,7 @@
 12,G12,Small_Pale_Hemiptera,Insecta,Hemiptera,NA,NA,NA,NA,True_Bug_Sp.,Order,Unknown,NA,2.5-5mm,NA
 13,G13,Tiny_Pale_Hemiptera,Insecta,Hemiptera,NA,NA,NA,NA,True_Bug_Sp.,Order,Unknown,NA,0-2.5mm,NA
 14,G14,Minute_Brown_Scavenger_Beetle,Insecta,Coleoptera,Latridiidae,NA,NA,NA,Minute_Brown_Scavenger_Beetle_Sp.,Family,Fungivore,NA,0-2.5mm,"G83, G94,G181,G294, G51, G332"
-15,G15,Black_Wasp_Yellow_Ab,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Parasitic,Unknown,2.5-5mm,NA
+15,G15,Black_Wasp_Yellow_Ab,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Omnivore,Unknown,2.5-5mm,NA
 16,G16,Small_Pale_Grasshopper,Insecta,Orthoptera,NA,NA,NA,NA,Grasshopper_Sp.,Order,Herbivore,NA,2.5-5mm,NA
 18,G18,Fly_Dent_Wing,Insecta,Diptera,NA,NA,NA,NA,Fly_Sp.,Order,Unknown,NA,2.5-5mm,NA
 19,No_Sample,Fly_Unknown_5,Insecta,Diptera,NA,NA,NA,NA,Fly_Sp.,Order,Unknown,NA,2.5-5mm,NA
@@ -64,7 +64,7 @@
 64,G61,Black_Winged_Insect,Insecta,NA,NA,NA,NA,NA,Insect_Sp.,Class,Unknown,NA,Unknown,NA
 65,G62,Sheet_Dwarf_Sp.,Insecta,Araneae,Linyphiidae,NA,NA,NA,Sheetweb_Dwarf_Weaver_Sp.,Family,Predator,Web_Building,NA,NA
 66,G63,Bright_Green_Leafhopper_2,Insecta,Hemiptera,Cicadellidae,NA,NA,NA,Typical_Leafhopper_Sp.,Family,Herbivore,NA,0-2.5mm,NA
-67,G64,Braconid_Wasp_Sp.,Insecta,Hymenoptera,Braconidae,NA,NA,NA,Braconid_Wasp_Sp.,Family,Parasitic,Active_Hunting,2.5-5mm,NA
+67,G64,Braconid_Wasp_Sp.,Insecta,Hymenoptera,Braconidae,NA,NA,NA,Braconid_Wasp_Sp.,Family,Omnivore,Active_Hunting,2.5-5mm,NA
 68,G65,Mosquito_Sp_2,Insecta,Diptera,Culicidae,NA,NA,NA,Mosquito_Sp.,Family,Omnivore,NA,0-2.5mm,NA
 69,G66,Orbweaver_Black_White,Arachnida,Araneae,Araneidae,NA,NA,NA,Orbweaver_Sp.,Family,Predator,Web_Building,NA,"G67, G81"
 70,G68,Small_Lepidoptera_Looper_3 ,Insecta,Lepidoptera,NA,NA,NA,NA,Lepidoptera_Sp.,Order,Herbivore,NA,2.5-5mm,NA
@@ -80,7 +80,7 @@
 80,G71b,Black_Mosquito_1,Insecta,Diptera,Culicidae,NA,NA,NA,Mosquito_Sp.,Family,Omnivore,Active_Hunting,2.5-5mm,NA
 81,G72b,Orange_Aphid,Insecta,Hemiptera,Aphididae,NA,NA,NA,Aphid_Sp.,Family,Herbivore,NA,0-2.5mm,G75b
 82,G73b,False_Chinch_Bug_Sp.,Insecta,Hemiptera,Lygaeidae,Nysius,NA,NA,False_Chinch_Bug_Sp.,Genus,Herbivore,NA,2.5-5mm,NA
-83,G74b,Small_Black_Wasp,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Parasitic,NA,0-2.5mm,"G161, G204"
+83,G74b,Small_Black_Wasp,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Omnivore,NA,0-2.5mm,"G161, G204"
 84,G76,Mottled_Brown_Leafhopper,Insecta,Hemiptera,Cicadellidae,NA,NA,NA,Typical_Leafhopper_Sp.,Family,Herbivore,NA,2.5-5mm,G203
 85,G77,Typical_Treehopper,Insecta,Hemiptera,Membracidae,NA,NA,NA,Typical_Treehopper_Sp.,Family,Herbivore,NA,2.5-5mm,"G164, G191"
 86,G78,Black_Hemiptera_2,Insecta,Hemiptera,NA,NA,NA,NA,True_Bug_Sp.,Order,Unknown,NA,0-2.5mm,NA
@@ -90,14 +90,14 @@
 90,G87,Little_Brown_Fly_4,Insecta,Diptera,NA,NA,NA,NA,Fly_Sp.,Order,Unknown,NA,0-2.5mm,NA
 91,G88,Flea_Beetle_Sp_1,Insecta,Coleoptera,Chrysomelidae,Arsipoda,NA,NA,Flea_Beetle_Sp.,Genus,Herbivore,NA,2.5-5mm,NA
 92,G89,Flea_Beetle_Sp_2,Insecta,Coleoptera,Chrysomelidae,Phyllotreta,NA,NA,Flea_Beetle_Sp.,Family,Herbivore,NA,0-2.5mm,G158
-93,G90,Small_Black_Wasp_2,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Parasitic,Active_Hunting,0-2.5mm,NA
+93,G90,Small_Black_Wasp_2,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Omnivore,Active_Hunting,0-2.5mm,NA
 94,G91,Transverse_Ladybug,Insecta,Coleoptera,Coccinellidae,Coccinella,transversalis,Coccinella_transversalis,Transverse_Ladybug,Species,Predator,Active_Hunting,5-10mm,G302
 95,G92,Brown_Orbweaver_3,Arachnida,Araneae,Araneidae,NA,NA,NA,Orbweaver_Sp.,Family,Predator,Web_Building,NA,NA
-96,G93,Small_Black_Wasp_3,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Parasitic,Active_Hunting,0-2.5mm,NA
+96,G93,Small_Black_Wasp_3,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Omnivore,Active_Hunting,0-2.5mm,NA
 97,No_Sample,Fly_Unknown_6,Insecta,Diptera,NA,NA,NA,NA,Fly_Sp.,Order,Unknown,NA,Unknown,NA
 98,No_Sample,Black_Hemiptera,Insecta,Hemiptera,NA,NA,NA,NA,True_Bug_Sp.,Order,Unknown,NA,Unknown,NA
 99,No_Sample,Hemiptera_Thin_Grey_Wings,Insecta,Hemiptera,NA,NA,NA,NA,True_Bug_Sp.,Order,Unknown,NA,Unknown,NA
-100,No_Sample,Large_Black_Orange_Wasp,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Parasitic,Active_Hunting,Unknown,NA
+100,No_Sample,Large_Black_Orange_Wasp,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Omnivore,Active_Hunting,Unknown,NA
 101,G95,Orange_Leg_Small_Fly,Insecta,Diptera,NA,NA,NA,NA,Fly_Sp.,Order,Unknown,NA,0-2.5mm,NA
 102,G96,Fruit_Fly_Sp.,Insecta,Diptera,Tephritidae,Spathulina ,acroleuca,Spathulina_acroleuca,Fruit_Fly_Sp.,Species,Herbivore,NA,2.5-5mm,"G145, G192"
 103,G97,Tiny_Typical_Leafhopper_3,Insecta,Hemiptera,Cicadellidae,NA,NA,NA,Typical_Leafhopper_Sp.,Family,Herbivore,NA,0-2.5mm,G57
@@ -105,10 +105,10 @@
 105,G99,Fruit_Fly_Sp_2,Insecta,Diptera,Tephritidae,NA,NA,NA,Fruit_Fly_Sp.,Family,Herbivore,NA,2.5-5mm,NA
 106,G100,Black-brown_Ant,Insecta,Hymenoptera,Formicidae,NA,NA,NA,Ant_Sp.,Family,Unknown,NA,2.5-5mm,"G156, G186, G194, G24"
 107,G101,Tiny_Pale_Hemiptera_2,Insecta,Hemiptera,NA,NA,NA,NA,True_Bug_Sp.,Order,Unknown,NA,0-2.5mm,NA
-108,G102,Orange_Wasp,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Parasitic,Active_Hunting,2.5-5mm,NA
+108,G102,Orange_Wasp,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Omnivore,Active_Hunting,2.5-5mm,NA
 109,G103,Black_Hemiptera_3,Insecta,Hemiptera,NA,NA,NA,NA,True_Bug_Sp.,Order,Unknown,NA,0-2.5mm,NA
 110,G104,Psylloid_Sp.,Insecta,Hemiptera,Aphalaridae,NA,NA,NA,Psylloid_Sp.,Family,Herbivore,NA,0-2.5mm,NA
-111,G105,Black_Wasp_2,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Parasitic,Active_Hunting,0-2.5mm,NA
+111,G105,Black_Wasp_2,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Omnivore,Active_Hunting,0-2.5mm,NA
 112,G106,Grass_Lynx_3,Arachnida,Araneae,Oxyopidae,Oxyopes,NA,NA,Grass_Lynx_Spider_Sp.,Genus,Predator,Active_Hunting,NA,G232
 113,G108,Pale_Brown_Moth_4,Insecta,Lepidoptera,NA,NA,NA,NA,Moth_Sp.,Order,Herbivore,NA,5-10mm,NA
 114,G109,Tiny_Black_Fly_2,Insecta,Diptera,NA,NA,NA,NA,Fly_Sp.,Order,Unknown,NA,0-2.5mm,NA
@@ -120,7 +120,7 @@
 120,G117,Trig_Sp_5,Insecta,Orthoptera,Trigonidiidae,NA,NA,NA,Trig_Sp.,Family,Herbivore,NA,2.5-5mm,NA
 121,G118,Aphid_Black,Insecta,Hemiptera,Aphididae,NA,NA,NA,Aphid_Sp.,Family,Herbivore,NA,0-2.5mm,G129
 122,G119,Aphid_Black_2,Insecta,Hemiptera,Aphididae,NA,NA,NA,Aphid_Sp.,Family,Herbivore,NA,0-2.5mm,NA
-123,G120,Kangaroo_Tick,Arachnida,Ixodida,Ixodidae,Amblyomma ,triguttatum,NA,Kangaroo_Tick,Species,Omnivore,Ambush_Hunters,NA,"G48, G160, G167, G253"
+123,G120,Kangaroo_Tick,Arachnida,Ixodida,Ixodidae,Amblyomma ,triguttatum,NA,Kangaroo_Tick,Species,Hematophagous,Ambush_Hunters,NA,"G48, G160, G167, G253"
 124,G122,Jumping_Spider,Arachnida,Araneae,Salticidae,NA,NA,NA,Jumping_Spider_Sp.,Family,Predator,Active_Hunting,NA,"G314, G222"
 125,G123,Black_Beetle,Insecta,Coleoptera,NA,NA,NA,NA,Beetle_Sp.,Order,Herbivore,NA,2.5-5mm,NA
 126,No_Sample,Dark_Small_Leafhopper,Insecta,Hemiptera,Cicadellidae,NA,NA,NA,Typical_Leafhopper_Sp.,Family,Herbivore,NA,0-2.5mm,NA
@@ -167,7 +167,7 @@
 167,G165,Jumping_Spider_2,Arachnida,Araneae,Salticidae,NA,NA,NA,Jumping_Spider_Sp.,Family,Predator,Active_Hunting,NA,NA
 168,G166,Black_Long_Antenna_Beetle,Insecta,Coleoptera,NA,NA,NA,NA,Beetle_Sp.,Order,Unknown,NA,2.5-5mm,NA
 169,G168,Coleoptera_Larvae_2,Insecta,Coleoptera,NA,NA,NA,NA,Beetle_Sp.,Order,Unknown,NA,2.5-5mm,NA
-170,G169,Small_Black_Wasp_4,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Parasitic,NA,2.5-5mm,NA
+170,G169,Small_Black_Wasp_4,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Omnivore,NA,2.5-5mm,NA
 171,G170,Aphid_Black_3,Insecta,Hemiptera,Aphididae,NA,NA,NA,Aphid_Sp.,Family,Herbivore,NA,0-2.5mm,NA
 172,G171,Small_Brown_Beetle_2,Insecta,Coleoptera,NA,NA,NA,NA,Beetle_Sp.,Order,Unknown,NA,0-2.5mm,NA
 173,G172,Black_Fly,Insecta,Diptera,NA,NA,NA,NA,Fly_Sp.,Order,Unknown,NA,2.5-5mm,NA
@@ -190,7 +190,7 @@
 190,G198,Lynx_Spider_Sp.,Arachnida,Araneae,Oxyopidae,NA,NA,NA,Lynx_Spider_Sp.,Family,Predator,Ambush_Hunters,NA,"G248, G322"
 191,G200,Straight-snouted_Weevil_Sp.,Insecta,Coleoptera,Brentidae,NA,NA,NA,Straight-snouted_Weevil_Sp.,Family,Herbivore,NA,2.5-5mm,NA
 192,G202,Dark_Brown_Leafhopper_3,Insecta,Hemiptera,Cicadellidae,NA,NA,NA,Typical_Leafhopper_Sp.,Family,Herbivore,NA,2.5-5mm,NA
-193,G207,Small_Black_Wasp_6,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Parasitic,NA,0-2.5mm,NA
+193,G207,Small_Black_Wasp_6,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Omnivore,NA,0-2.5mm,NA
 194,G208,Flea_Beetle_Sp_3,Insecta,Coleoptera,Chrysomelidae,NA,NA,NA,Flea_Beetle_Sp.,Family,Herbivore,NA,2.5-5mm,G214
 195,G210,Jumping_Spider_4,Arachnida,Araneae,Salticidae,NA,NA,NA,Jumping_Spider_Sp.,Family,Predator,Active_Hunting,NA,NA
 196,G211,Upturned_Abdomen_Leafhopper,Insecta,Hemiptera,NA,NA,NA,NA,Leafhopper_Sp.,Order,Herbivore,NA,2.5-5mm,NA
@@ -203,7 +203,7 @@
 203,No_Sample,Orange_Leg_Cricket,Insecta,Orthoptera,NA,NA,NA,NA,Cricket_Sp.,Order,Herbivore,NA,5-10mm,NA
 204,No_Sample,Large_Black_Fly,Insecta,Diptera,NA,NA,NA,NA,Fly_Sp.,Order,NA,NA,2.5-5mm,NA
 205,G220,Short_Horn_Grasshopper_Sp,Insecta,Orthoptera,Acrididae,NA,NA,NA,Short_Horn_Grasshopper_Sp.,Family,Herbivore,NA,>10mm,NA
-206,G221,Small_Black_Wasp_5,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Parasitic,NA,0-2.5mm,NA
+206,G221,Small_Black_Wasp_5,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Omnivore,NA,0-2.5mm,NA
 207,G223,White_Fruit_Fly_2,Insecta,Diptera,Tephritidae,NA,NA,NA,Fruit_Fly_Sp.,Family,Unknown,NA,2.5-5mm,NA
 208,G224,Pale_Striped_Leafhopper,Insecta,Hemiptera,Cicadellidae,NA,NA,NA,Typical_Leafhopper_Sp.,Family,Herbivore,NA,2.5-5mm,"G258, G296"
 209,G226a,Black_Fly_Orange_Legs,Insecta,Diptera,NA,NA,NA,NA,Fly_Sp.,Order,Unknown,NA,2.5-5mm,NA
@@ -220,7 +220,7 @@
 220,No_Sample,Tiny_Hemiptera_Red,Insecta,Hemiptera,NA,NA,NA,NA,True_Bug_Sp.,Order,Unknown,NA,0-2.5mm,NA
 221,No_Sample,Small_Fly_Unknown,Insecta,Diptera,NA,NA,NA,NA,Fly_Sp.,Order,Unknown,NA,NA,NA
 222,No_Sample,Small_Brown_Grasshopper_2,Insecta,Orthoptera,NA,NA,NA,NA,Grasshopper_Sp.,Order,Herbivore,NA,2.5-5mm,NA
-223,No_Sample,Wasp_Abdomen_Up,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Parasitic,NA,NA,NA
+223,No_Sample,Wasp_Abdomen_Up,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Omnivore,NA,NA,NA
 224,G251,Small_Lepidoptera_Looper ,Insecta,Lepidoptera,NA,NA,NA,NA,Lepidoptera_Sp.,Order,Herbivore,NA,2.5-5mm,NA
 225,G252,Small_Black_Fly_4,Insecta,Diptera,NA,NA,NA,NA,Fly_Sp.,Order,Unknown,NA,0-2.5mm,NA
 226,G254,Blow_Fly_Sp_2,Insecta,Diptera,Calliphoridae,NA,NA,NA,Blow_Fly_Sp.,Family,Detritivore,NA,5-10mm,"G272, G291, G107"
@@ -257,12 +257,12 @@
 257,G297,Orbweaver_Brown_11,Arachnida,Araneae,Araneidae,NA,NA,NA,Orbweaver_Sp.,Family,Predator,Web_Building,NA,NA
 258,G299,Stretched_Philodromid,Arachnida,Araneae,Philodromidae,Tibellus,tenellus,Tibellus_tenellus,Stretched_Philodromid,Species,Predator,Active_Hunting,NA,G361
 259,G301,Thrips_Sp.,Insecta,Thysanoptera,NA,NA,NA,NA,Thrips_Sp.,Order,Unknown,NA,0-2.5mm,NA
-260,G303,Green_Wasp,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Parasitic,Active_Hunting,2.5-5mm,NA
+260,G303,Green_Wasp,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Omnivore,Active_Hunting,2.5-5mm,NA
 261,G304,Moth_Pale_Brown,Insecta,Lepidoptera,NA,NA,NA,NA,Moth_Sp.,Order,Herbivore,NA,5-10mm,NA
 262,G305,Long_Nosed_Planthopper_Brown,Insecta,Hemiptera,Dictyopharidae,Thanatodictya,NA,NA,Planthopper_Sp.,Genus,Herbivore,NA,5-10mm,NA
 263,G306,Assassin_Bug_Sp.,Insecta,Hemiptera,Reduviidae,NA,NA,NA,Assassian_Bug_Sp.,Family,Predator,Ambush_Hunters,2.5-5mm,NA
 264,G307,Hairy_Lepidoptera_2 ,Insecta,Lepidoptera,NA,NA,NA,NA,Lepidoptera_Sp.,Order,Herbivore,NA,5-10mm,NA
-265,G308,Black_Wasp,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Parasitic,Active_Hunting,2.5-5mm,NA
+265,G308,Black_Wasp,Insecta,Hymenoptera,NA,NA,NA,NA,Wasp_Sp.,Order,Omnivore,Active_Hunting,2.5-5mm,NA
 266,G309,Mirid_Sp.,Insecta,Hemiptera,Miridae,NA,NA,NA,Mirid_Sp.,Family,Herbivore,NA,5-10mm,NA
 267,G310,Coleoptera_Larvae,Insecta,Coleoptera,NA,NA,NA,NA,Coleoptera_Sp.,Order,Unknown,NA,2.5-5mm,NA
 268,G311,Ant-like_Flower_Beetle_Sp.,Insecta,Coleoptera,Anthicidae,NA,NA,NA,Ant-like_Flower_Beetle_Sp.,Family,Omnivore,NA,2.5-5mm,NA
@@ -280,7 +280,7 @@
 280,G319,Orbweaver_Brown_12,Arachnida,Araneae,Araneidae,NA,NA,NA,Orbweaver_Sp.,Family,Predator,Web_Building,NA,G354
 281,G320,Square-ended_Crab_Spider_Sp.,Arachnida,Araneae,Thomisidae,Sidymella,NA,NA,Square-ended_Crab_Spider_Sp.,Genus,Predator,Web_Building,NA,NA
 282,G323,Peacock_Spider,Arachnida,Araneae,Salticidae,Maratus,NA,NA,Peacock_Spider_Sp.,Genus,Predator,Active_Hunting,NA,NA
-283,G325,Split_Leg_Wasp_2,Insecta,Hymenoptera,Encyrtidae,NA,NA,NA,Wasp_Sp.,Family,Parasitic,Active_Hunting,0-2.5mm,NA
+283,G325,Split_Leg_Wasp_2,Insecta,Hymenoptera,Encyrtidae,NA,NA,NA,Wasp_Sp.,Family,Omnivore,Active_Hunting,0-2.5mm,NA
 284,G326,Dark_Brown_Leafhopper_4,Insecta,Hemiptera,Cicadellidae,NA,NA,NA,Typical_Leafhopper_Sp.,Family,Herbivore,NA,2.5-5mm,NA
 285,G327,Lynx_Spider_Sp.2,Arachnida,Araneae,Oxyopidae,NA,NA,NA,Lynx_Spider_Sp.,Family,Predator,Ambush_Hunters,NA,NA
 286,G328,Cricket,Insecta,Orthoptera,NA,NA,NA,NA,Cricket_Sp.,Order,Herbivore,NA,2.5-5mm,NA
@@ -294,7 +294,7 @@
 294,G338,Insect_Pupa,Insecta,NA,NA,NA,NA,NA,Insect_Sp.,Class,Unknown,NA,2.5-5mm,NA
 295,G339,Small_Orange_Leafhopper,Insecta,Hemiptera,Cicadellidae,NA,NA,NA,Typical_Leafhopper_Sp.,Family,Herbivore,NA,0-2.5mm,G317
 296,G341,Dusky_Lady_Beetle_Sp,Insecta,Coleoptera,Coccinellidae,NA,NA,NA,Dusky_Lady_Beetle_Sp.,Family,Predator,Active_Hunting,0-2.5mm,NA
-297,G342,Split_Leg_Wasp,Insecta,Hymenoptera,Encyrtidae,NA,NA,NA,Wasp_Sp.,Family,Parasitic,Active_Hunting,0-2.5mm,NA
+297,G342,Split_Leg_Wasp,Insecta,Hymenoptera,Encyrtidae,NA,NA,NA,Wasp_Sp.,Family,Omnivore,Active_Hunting,0-2.5mm,NA
 298,G343,Angulate_Spider_Sp.,Arachnida,Araneae,Araneidae,Araneus,NA,NA,Angulate_Spider_Sp.,Genus,Predator,Web_Building,NA,NA
 299,G344,Green_Midge,Insecta,Diptera,NA,NA,NA,NA,Midge_Sp.,Order,Unknown,NA,2.5-5mm,NA
 300,G345,Mirid_Sp_2,Insecta,Hemiptera,Miridae,Rayieria,acaciae,Rayieria_acaciae,Mirid_Sp.,Species,Herbivore,NA,5-10mm,NA

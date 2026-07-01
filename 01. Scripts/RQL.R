@@ -19,17 +19,27 @@ str(Q_matrix)
 str(L_matrix)
 str(R_matrix)
 
-#need to update some of the r matrix up to factors
+#STILL NEED TO REFINE THIS -----
 
-R_matrix$Dominant_Herb_Weed <- factor(R_matrix$Dominant_Herb_Weed,
-                                      ordered = FALSE)
-
-R_matrix$Dominat_Grass <- factor(R_matrix$Dominat_Grass,
-                                      ordered = FALSE)
+#need to update character of the r matrix up to factors
 
 R_matrix$X500m.Dominant.Landscape.Class <- factor(
   R_matrix$X500m.Dominant.Landscape.Class,ordered = FALSE)
 
+R_matrix$Grass_Status <- factor(R_matrix$Grass_Status,
+                                ordered = FALSE)
+
+R_matrix$Grass_Status <- factor(R_matrix$Grass_Status,
+                                ordered = FALSE)
+
+R_matrix$Weed_Estimate <- as.factor(R_matrix$Weed_Estimate)
+levels(R_matrix$Weed_Estimate) #in the right order
+
+R_matrix$Dominant_Herb_Weed <- factor(R_matrix$Dominant_Herb_Weed,
+                                ordered = FALSE)
+
+R_matrix$Dominat_Grass <- factor(R_matrix$Dominant_Herb_Weed,
+                                      ordered = FALSE)
 str(R_matrix) #Good
 
 #Species responses to environmental gradients----
@@ -88,7 +98,7 @@ plot(hc2) #uninterpretable
 #Calinsky-Harabasz criteria to find best partition 
 #calinski didn't work so dchanged it to calinhara 
 
-ntest <-10
+ntest <-7
 res <- rep(0,ntest - 1)
 
 for (i in 2:ntest){
@@ -104,12 +114,12 @@ mtext(side=3,line=0,at = 1.2,'a)',cex=1.1)
 plot(3:ntest, diff(res), type='b', pch=20, xlab="Number of groups", ylab = "Diff in C-H index")
 mtext(side=3,line=0,at = 2.2,'b)',cex=1.1)
 
-#Eight functional groups
+#Six functional groups
 
 
 spe.group2 <- as.factor(cutree(hc2, k = which.max(res) +1))
 summary(spe.group2)
-levels(spe.group2) <- c("A","B","C","D","E","F","G","H")
+levels(spe.group2) <- c("A","B","C","D","E","F")
 
 
 #biplots----
@@ -235,6 +245,7 @@ ggplot(heatmap_data, aes(x = Group, y = Traits, fill = Proportion)) +
   theme(strip.text.y.left = element_text(hjust = 0, vjust = 1, angle = 0),
         strip.placement = "outside")
 
+#ONLY RUN UP TO HERE----
 
 #Extracting Trait Groups----
 
@@ -311,68 +322,25 @@ colnames(FDModel)[6] <- "E_Rich"
 FDModel$E_Rich[is.na(FDModel$E_Rich)] <- 0
 head(FDModel);dim(FDModel)
 
-#Trait Group F
-TG_F <- invert_trait_group[invert_trait_group$trait_group=="F",]
-head(TG_F);dim(TG_F)
-
-FUNrichness_F <- aggregate(Morphospecies ~ Point, data = TG_F, FUN = function(x) length(unique(x)))
-FDModel <- merge(FDModel,FUNrichness_F,by = "Point",all.x = T)
-head(FDModel);dim(FDModel)
-colnames(FDModel)[7] <- "F_Rich"
-
-FDModel$F_Rich[is.na(FDModel$F_Rich)] <- 0
-head(FDModel);dim(FDModel)
-
-#Trait Group G
-TG_G <- invert_trait_group[invert_trait_group$trait_group=="G",]
-head(TG_G);dim(TG_G)
-
-FUNrichness_G <- aggregate(Morphospecies ~ Point, data = TG_G, FUN = function(x) length(unique(x)))
-FDModel <- merge(FDModel,FUNrichness_G,by = "Point",all.x = T)
-head(FDModel);dim(FDModel)
-colnames(FDModel)[8] <- "G_Rich"
-
-FDModel$G_Rich[is.na(FDModel$G_Rich)] <- 0
-head(FDModel);dim(FDModel)
-
-#Trait Group H
-TG_H <- invert_trait_group[invert_trait_group$trait_group=="H",]
-head(TG_H);dim(TG_H)
-
-FUNrichness_H <- aggregate(Morphospecies ~ Point, data = TG_H, FUN = function(x) length(unique(x)))
-FDModel <- merge(FDModel,FUNrichness_H,by = "Point",all.x = T)
-head(FDModel);dim(FDModel)
-colnames(FDModel)[9] <- "H_Rich"
-
-FDModel$H_Rich[is.na(FDModel$H_Rich)] <- 0
-head(FDModel);dim(FDModel)
 
 #Now we check proportion of 0's
 
-lapply(FDModel[,2:9], function(x){length(which(x==0))/length(x)})
+lapply(FDModel[,2:6], function(x){length(which(x==0))/length(x)})
 
-#All groups except Group D are binomial
+#Group A, B and E are binomial models and C and D can be SR and Diversity
 
 #update to pres/abs
 FDModel$A_Rich <- ifelse(FDModel$A_Rich>0, yes = 1,no = 0)
 FDModel$B_Rich <- ifelse(FDModel$B_Rich>0, yes = 1,no = 0)
-FDModel$C_Rich <- ifelse(FDModel$C_Rich>0, yes = 1,no = 0)
 FDModel$E_Rich <- ifelse(FDModel$E_Rich>0, yes = 1,no = 0)
-FDModel$F_Rich <- ifelse(FDModel$F_Rich>0, yes = 1,no = 0)
-FDModel$G_Rich <- ifelse(FDModel$G_Rich>0, yes = 1,no = 0)
-FDModel$H_Rich <- ifelse(FDModel$H_Rich>0, yes = 1,no = 0)
+
 
 colnames(FDModel)[2] <- "TG_A"
 colnames(FDModel)[3] <- "TG_B"
-colnames(FDModel)[4] <- "TG_C"
 colnames(FDModel)[6] <- "TG_E"
-colnames(FDModel)[7] <- "TG_F"
-colnames(FDModel)[8] <- "TG_G"
-colnames(FDModel)[9] <- "TG_H"
 head(FDModel);dim(FDModel)
 
 #Diversity----
-
 
 TG_D2 <- invert_trait_group[invert_trait_group$trait_group=="D",]
   
@@ -382,9 +350,22 @@ FDModel <- merge(FDModel,FUNdiversity_D,by = "Point",all.x = T)
   
 head(FDModel);dim(FDModel)
 
-colnames(FDModel)[10] <- "D_Div"
+colnames(FDModel)[7] <- "D_Div"
 
 FDModel$D_Div[is.na(FDModel$D_Div)] <- 0.00001
+
+
+TG_C2 <- invert_trait_group[invert_trait_group$trait_group=="C",]
+
+FUNdiversity_C <- aggregate(Morphospecies ~ Point, data = TG_C2, FUN = function(x) diversity(table(x), index = "invsimpson"))
+
+FDModel <- merge(FDModel,FUNdiversity_C,by = "Point",all.x = T)
+
+head(FDModel);dim(FDModel)
+
+colnames(FDModel)[8] <- "C_Div"
+
+FDModel$C_Div[is.na(FDModel$C_Div)] <- 0.00001
 
 
 #Finally add variables----

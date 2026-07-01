@@ -114,7 +114,7 @@ cordata <- merge(cordata,property, by = "Property")
 
 head(cordata);dim(cordata)
 
-cordata <- cordata %>% dplyr::select(Elevation, Plant_Height, Ground_Cover,Prop_Green_GC,Weed_Estimate,Dominant_Herb_Weed,Dominat_Grass,Natual_Grazing_1km,Cropping_1km,Naural_Grazing_500m,Cropping_500m,X500m.Simspson,X500m.Dominant.Landscape.Class,Day_Sampled)
+cordata <- cordata %>% dplyr::select(Elevation, Plant_Height, Ground_Cover,Prop_Green_GC,Weed_Estimate,Grass_Status, Natual_Grazing_1km,Cropping_1km,Naural_Grazing_500m,Cropping_500m,X500m.Simspson,X500m.Dominant.Landscape.Class,Day_Sampled)
 
 str(cordata)
 
@@ -122,25 +122,20 @@ cordata$Weed_Estimate <- as.factor(cordata$Weed_Estimate)
 levels(cordata$Weed_Estimate) #already in the right order
 cordata$Weed_Estimate <- as.numeric(cordata$Weed_Estimate)
 
-cordata$Dominant_Herb_Weed <- as.factor(cordata$Dominant_Herb_Weed)
-cordata$Dominant_Herb_Weed <- as.numeric(cordata$Dominant_Herb_Weed)
-
-cordata$Dominat_Grass <- as.factor(cordata$Dominat_Grass)
-cordata$Dominat_Grass <- as.numeric(cordata$Dominat_Grass)
-
-
 cordata$X500m.Dominant.Landscape.Class <- as.factor(
   cordata$X500m.Dominant.Landscape.Class)
 cordata$X500m.Dominant.Landscape.Class <- as.numeric(
   cordata$X500m.Dominant.Landscape.Class)
 
+cordata$Grass_Status <- as.factor(cordata$Grass_Status)
+cordata$Grass_Status <- as.numeric(cordata$Grass_Status)
 
 str(cordata) #confirmed no character columns left
 
 cor <- cor(cordata,method = "spearman")
 
-colnames(cor) <- c("Elevation", "Height", "Ground Cover","Green Ground Cover","Weed Cover","Dom Herb Weed","Dom Grass","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Simpson","Dom Landscape Class", "Day Sampled")
-rownames(cor) <- c("Elevation", "Height", "Ground Cover","Green Ground Cover","Weed Cover","Dom Herb Weed","Dom Grass","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Simpson","Dom Landscape Class", "Day Sampled")
+colnames(cor) <- c("Elevation", "Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Simpson","Dom Landscape Class", "Day Sampled")
+rownames(cor) <- c("Elevation", "Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Simpson","Dom Landscape Class", "Day Sampled")
 
 dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
 corrplot::corrplot(cor,method="color",  
@@ -148,7 +143,7 @@ corrplot::corrplot(cor,method="color",
 
 head(cor)
 
-#removed due to correlation Simpson landscape, grazing 500m and crops 1km
+#removed due to correlation: grazing 500m, grazing 1km, and crops 1km
 
 #Merging data bases----
 
@@ -161,7 +156,7 @@ variables <- merge(variables,property, by = "Property")
 
 head(variables);dim(variables)
 
-variables <- variables %>% dplyr::select(-Grass_Status,-Cropping_1km,-Naural_Grazing_500m,-X500m.Simspson,-Sample_Date,-Julian_date,-Land_Use,-Graze_Animal,-Land_for_Wildlife,-Chemical.,-Slash.,-Burning.,-Rain_Week_Before_mm)
+variables <- variables %>% dplyr::select(-Cropping_1km,-Naural_Grazing_500m,-Sample_Date,-Julian_date,-Land_Use,-Graze_Animal,-Land_for_Wildlife,-Chemical.,-Slash.,-Burning.,-Rain_Week_Before_mm,-Natual_Grazing_1km,-Cropping_1km,-Natual_Grazing_1km, -Dominant_Herb_Weed,-Dominat_Grass)
 head(variables);dim(variables)
 
 variables$Weed_Estimate <- as.factor(variables$Weed_Estimate)
@@ -277,10 +272,11 @@ head(Q_matrix);dim(Q_matrix)
 
 ##R Data (Site x Environmental)----
 
-head(variables);dim(variables)
+head(point);dim(point)
 
-R_table <- variables %>%
-  select(-Property)
+R_table <- point %>%
+  select(-Property,-Natual_Grazing_1km,-Cropping_1km,
+         -Naural_Grazing_500m)
 head(R_table);dim(R_table)
 
 #to make the next part transform correctly
