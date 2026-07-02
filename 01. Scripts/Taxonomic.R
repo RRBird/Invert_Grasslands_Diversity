@@ -567,7 +567,7 @@ mtext(side=3,line=0,at = 1,'a)',cex=1.1)
 polygon(x = c(Seventh_richpred2$Prop_Green_GC,rev(Seventh_richpred2$Prop_Green_GC)), y = c(Seventh_richpred2$lci,rev(Seventh_richpred2$uci)),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=Seventh_richpred2$Prop_Green_GC,y = Seventh_richpred2$fit,lwd = 2,col = 'grey30')
 
-#Supporting Figure TO DO----
+#Supporting Figure----
 
 ##Elevation + Landscape Simpson
 ##Green Ground Cover + Grass Status

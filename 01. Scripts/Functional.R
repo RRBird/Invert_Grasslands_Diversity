@@ -10,5 +10,169 @@ options(scipen = 999) #So R doesn't use scientific notation
 
 
 
+#Group A----
+
+##Species Richness-----
+
+###Modelling----
+
+####Day----
+
+####Single----
+
+####Additive----
+
+####Interaction----
+
+####Final models----
+
+###Predictions----
+
+###Visualize----
+
+##Diversity----
+
+###Modelling----
+
+####Day----
+
+####Single----
+
+####Additive----
+
+####Interaction----
+
+####Final models----
+
+###Predictions----
+
+###Visualize----
+
+#Group C----
+
+##Species Richness-----
+
+###Modelling----
+
+####Day----
+
+####Single----
+
+####Additive----
+
+####Interaction----
+
+####Final models----
+
+###Predictions----
+
+###Visualize----
+
+##Diversity----
+
+###Modelling----
+
+####Day----
+
+####Single----
+
+####Additive----
+
+####Interaction----
+
+####Final models----
+
+###Predictions----
+
+###Visualize----
+
+#Species Rich Figures
+
+##Main----
+
+##Supporting info----
+
+#Diversity Figures
+
+##Main----
+
+##Supporting info----
 
 
+#Group B----
+
+###Modelling----
+
+####Day----
+
+####Single----
+
+####Additive----
+
+####Interaction----
+
+####Final models----
+
+###Predictions----
+
+###Visualize----
+
+#Group D----
+
+###Modelling----
+
+####Day----
+
+####Single----
+
+####Additive----
+
+####Interaction----
+
+####Final models----
+
+###Predictions----
+
+###Visualize----
+
+#Group E----
+
+###Modelling----
+
+####Day----
+
+####Single----
+
+####Additive----
+
+####Interaction----
+
+####Final models----
+
+###Predictions----
+
+###Visualize----
+
+#Group F----
+
+###Modelling----
+
+####Day----
+
+####Single----
+
+####Additive----
+
+####Interaction----
+
+####Final models----
+
+###Predictions----
+
+###Visualize----
+
+#Probability of Occurance Figures----
+
+##Main----
+
+##Supporting info----

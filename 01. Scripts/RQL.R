@@ -19,8 +19,6 @@ str(Q_matrix)
 str(L_matrix)
 str(R_matrix)
 
-#STILL NEED TO REFINE THIS -----
-
 #need to update character of the r matrix up to factors
 
 R_matrix$X500m.Dominant.Landscape.Class <- factor(
@@ -234,7 +232,7 @@ heatmap_data <- heatmap_data %>%
   ungroup()
 
 
-dev.new(height=20,width=20,dpi=80,pointsize=14,noRStudioGD = T)
+dev.new(height=20,width=17,dpi=80,pointsize=14,noRStudioGD = T)
 ggplot(heatmap_data, aes(x = Group, y = Traits, fill = Proportion)) +
   geom_tile() +
   facet_grid(Functional_Group ~ ., scales = "free_y", space = "free_y",
@@ -245,7 +243,6 @@ ggplot(heatmap_data, aes(x = Group, y = Traits, fill = Proportion)) +
   theme(strip.text.y.left = element_text(hjust = 0, vjust = 1, angle = 0),
         strip.placement = "outside")
 
-#ONLY RUN UP TO HERE----
 
 #Extracting Trait Groups----
 
@@ -322,37 +319,55 @@ colnames(FDModel)[6] <- "E_Rich"
 FDModel$E_Rich[is.na(FDModel$E_Rich)] <- 0
 head(FDModel);dim(FDModel)
 
+#Trait Group F
+TG_F <- invert_trait_group[invert_trait_group$trait_group=="F",]
+head(TG_F);dim(TG_F)
+
+FUNrichness_F <- aggregate(Morphospecies ~ Point, data = TG_F, FUN = function(x) length(unique(x)))
+FDModel <- merge(FDModel,FUNrichness_F,by = "Point",all.x = T)
+head(FDModel);dim(FDModel)
+colnames(FDModel)[7] <- "F_Rich"
+
+FDModel$F_Rich[is.na(FDModel$F_Rich)] <- 0
+head(FDModel);dim(FDModel)
+
+
 
 #Now we check proportion of 0's
 
-lapply(FDModel[,2:6], function(x){length(which(x==0))/length(x)})
+lapply(FDModel[,2:7], function(x){length(which(x==0))/length(x)})
 
-#Group A, B and E are binomial models and C and D can be SR and Diversity
+#Proportion of 0's must be less than 30% to do biodiversity models other binomial
+#Binomial Models: B,D,E,F
+#Richness and Diversity models: A, C
 
 #update to pres/abs
-FDModel$A_Rich <- ifelse(FDModel$A_Rich>0, yes = 1,no = 0)
 FDModel$B_Rich <- ifelse(FDModel$B_Rich>0, yes = 1,no = 0)
+FDModel$D_Rich <- ifelse(FDModel$D_Rich>0, yes = 1,no = 0)
 FDModel$E_Rich <- ifelse(FDModel$E_Rich>0, yes = 1,no = 0)
+FDModel$F_Rich <- ifelse(FDModel$F_Rich>0, yes = 1,no = 0)
 
 
-colnames(FDModel)[2] <- "TG_A"
 colnames(FDModel)[3] <- "TG_B"
+colnames(FDModel)[5] <- "TG_D"
 colnames(FDModel)[6] <- "TG_E"
+colnames(FDModel)[7] <- "TG_F"
 head(FDModel);dim(FDModel)
 
 #Diversity----
 
-TG_D2 <- invert_trait_group[invert_trait_group$trait_group=="D",]
+TG_A2 <- invert_trait_group[invert_trait_group$trait_group=="A",]
   
-FUNdiversity_D <- aggregate(Morphospecies ~ Point, data = TG_D2, FUN = function(x) diversity(table(x), index = "invsimpson"))
+FUNdiversity_A <- aggregate(Morphospecies ~ Point, data = TG_A2, FUN = function(x) diversity(table(x), index = "invsimpson"))
   
-FDModel <- merge(FDModel,FUNdiversity_D,by = "Point",all.x = T)
+FDModel <- merge(FDModel,FUNdiversity_A,by = "Point",all.x = T)
   
 head(FDModel);dim(FDModel)
 
-colnames(FDModel)[7] <- "D_Div"
+colnames(FDModel)[8] <- "A_Div"
 
-FDModel$D_Div[is.na(FDModel$D_Div)] <- 0.00001
+FDModel$A_Div[is.na(FDModel$A_Div)] <- 0.00001
+head(FDModel)
 
 
 TG_C2 <- invert_trait_group[invert_trait_group$trait_group=="C",]
@@ -363,10 +378,10 @@ FDModel <- merge(FDModel,FUNdiversity_C,by = "Point",all.x = T)
 
 head(FDModel);dim(FDModel)
 
-colnames(FDModel)[8] <- "C_Div"
+colnames(FDModel)[9] <- "C_Div"
 
 FDModel$C_Div[is.na(FDModel$C_Div)] <- 0.00001
-
+head(FDModel)
 
 #Finally add variables----
 
