@@ -604,7 +604,7 @@ lines(x=Third_richpred2$Prop_Green_GC[CC],y = Third_richpred2$fit[CC],lwd = 2,co
 
 
 plot(x = 1:2,y = Third_richpred2$fit[C_C][c(1,3)],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,20),cex.axis = 1.2, cex.lab=1.3)
-axis(side=1,at=1:2,labels=c('Introduced','Native'),cex=1.3)
+axis(side=1,at=c(0.9,2.1),labels=c('Introduced','Native'),cex.axis=1.4)
 arrows(x0=1:2, y0=Third_richpred2$lci [C_C][c(1,3)],x1=1:2, y1=Third_richpred2$uci[C_C][c(1,3)],angle=90,length=0.1, code=3, lwd=2,col = "black")
 mtext(side=3,line=0,at = -0.2,'d)',cex=0.8)
 

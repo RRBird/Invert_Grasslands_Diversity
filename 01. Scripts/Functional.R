@@ -1154,13 +1154,102 @@ polygon(x = c(TG_A_toprichpred2$Ground_Cover,rev(TG_A_toprichpred2$Ground_Cover)
 lines(x=TG_A_toprichpred2$Ground_Cover,y = TG_A_toprichpred2$fit,lwd = 2,col = 'grey30')
 mtext(side=3,line=,at = 70,'Flies, small herbivorous \nHemiptera and small Orthoptera',cex=0.7, font = 2)
 
-##Supporting info TO DO----
+##Supporting info----
 
-#based on extras of the others we'll decide what supporting info should be 
-#I.E. a different SI for each group extras (if there are some with no equivalent) or all equivalent Species rich together and all equivalent binomial together.
-#Also might depend on what Annabel things of chapter 4
+dev.new(height=10,width=10,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,2,2),mfrow=c(2,2),mgp=c(2.5,1,0),xpd = T)
+
+plot(x = FDModel$Ground_Cover,y = FDModel$A_Rich,xlab = expression("Ground Cover (%)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,ylim = c(0,5),cex.axis = 0.9)
+mtext(side=3,line=0,at = 32,'a)',cex=0.9)
+
+polygon(x = c(TG_A_toprichpred5$Ground_Cover[GG],rev(TG_A_toprichpred5$Ground_Cover[GG])), y = c(TG_A_toprichpred5$lci[GG],rev(TG_A_toprichpred5$uci[GG])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_A_toprichpred5$Ground_Cover[GG],y = TG_A_toprichpred5$fit[GG],lwd = 2,col = 'grey30')
+
+
+plot(x = 1:3,y = TG_A_toprichpred5$fit [G_G],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(0,5))
+axis(side=1,at=1:3,labels=c(' ',' ', " "))
+arrows(x0=1:3, y0=TG_A_toprichpred5$lci [G_G],x1=1:3, y1=TG_A_toprichpred5$uci[G_G],angle=90,length=0.1, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.3,'b)',cex=0.9)
+mtext(side=1,line=1.5,at = 0.7,'Woody\nClosed',cex=0.7)
+mtext(side=1,line=1.5,at = 2,'Herbaceous\nOpen',cex=0.7)
+mtext(side=1,line=1.5,at = 3.3,"Woody\nOpen",cex=0.7)
+
+points(x = jitter(raw_x3, factor = 1),y = FDModel$A_Rich, pch = 16, cex = 0.4, col = "black")
+
+
+plot(x = FDModel$X500m.Simspson,y = FDModel$A_Rich,xlab = expression("Habitat Diversity within 500m"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
+mtext(side=3,line=0,at = 0,'c)',cex=0.9)
+
+polygon(x = c(TG_A_toprichpred8$X500m.Simspson[H_H],rev(TG_A_toprichpred8$X500m.Simspson[H_H])), y = c(TG_A_toprichpred8$lci[H_H],rev(TG_A_toprichpred8$uci[H_H])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_A_toprichpred8$X500m.Simspson[H_H],y = TG_A_toprichpred8$fit[H_H],lwd = 2,col = 'grey30')
+
+
+
+
+dev.new(height=10,width=15,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,2,2),mfrow=c(2,3),mgp=c(2.5,1,0),xpd = T)
+
+plot(x = FDModel$Plant_Height,y = FDModel$C_Rich,xlab = expression("Grass Height (cm)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.axis=1.2,cex.lab=1.2)
+mtext(side=3,line=0,at = -2.05,'a)',cex=0.9)
+
+polygon(x = c(TG_C_toprichpred5$Plant_Height[JJ],rev(TG_C_toprichpred5$Plant_Height[JJ])), y = c(TG_C_toprichpred5$lci[JJ],rev(TG_C_toprichpred5$uci[JJ])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_C_toprichpred5$Plant_Height[JJ],y = TG_C_toprichpred5$fit[JJ],lwd = 2,col = 'grey30')
+
+
+plot(x = 1:3,y = TG_C_toprichpred5$fit [J_J],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(0,10),cex.axis=1.2,cex.lab=1.2)
+axis(side=1,at=1:3,labels=c(' ',' ', " "))
+arrows(x0=1:3, y0=TG_C_toprichpred5$lci [J_J],x1=1:3, y1=TG_C_toprichpred5$uci[J_J],angle=90,length=0.1, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.3,'b)',cex=0.9)
+mtext(side=1,line=2,at = 0.7,'Woody\nClosed',cex=0.8)
+mtext(side=1,line=2,at = 2,'Herbaceous\nOpen',cex=0.8)
+mtext(side=1,line=2,at = 3.3,"Woody\nOpen",cex=0.8)
+
+points(x = jitter(raw_x3, factor = 1),y = FDModel$C_Rich, pch = 16, cex = 0.4, col = "black")
+
+plot(x = FDModel$Elevation_Scaled,y = FDModel$C_Rich,xlab = expression("Elevation (m)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,xaxt = 'n',,cex.axis=1.2,cex.lab=1.2)
+axis(side=1, at=seq(from=min(TG_C_toprichpred8$Elevation_Scaled),to=max(TG_C_toprichpred8$Elevation_Scaled),length.out=5),labels=round(seq(from=min(FDModel$Elevation),to=max(FDModel$Elevation),length.out=5),0),cex.axis=1.2)
+mtext(side=3,line=0,at = -2.05,'c)',cex=0.9)
+
+polygon(x = c(TG_C_toprichpred8$Elevation_Scaled[KK],rev(TG_C_toprichpred8$Elevation_Scaled[KK])), y = c(TG_C_toprichpred8$lci[KK],rev(TG_C_toprichpred8$uci[KK])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_C_toprichpred8$Elevation_Scaled[KK],y = TG_C_toprichpred8$fit[KK],lwd = 2,lty = 1, col = 'grey30')
+
+polygon(x = c(TG_C_toprichpred8$Elevation_Scaled[K_K],rev(TG_C_toprichpred8$Elevation_Scaled[K_K])), y = c(TG_C_toprichpred8$lci[K_K],rev(TG_C_toprichpred8$uci[K_K])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_C_toprichpred8$Elevation_Scaled[K_K],y = TG_C_toprichpred8$fit[K_K],lwd = 2,lty = 2, col = 'grey30')
+
+polygon(x = c(TG_C_toprichpred8$Elevation_Scaled[K_K_K],rev(TG_C_toprichpred8$Elevation_Scaled[K_K_K])), y = c(TG_C_toprichpred8$lci[K_K_K],rev(TG_C_toprichpred8$uci[K_K_K])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_C_toprichpred8$Elevation_Scaled[K_K_K],y = TG_C_toprichpred8$fit[K_K_K],lwd = 2,lty = 3, col = 'grey30')
+
+legend('topleft',legend = c("Woody Closed", "Herbaceous Open", "Woody Open"), lty = c(1,2,3), col = 'grey30',pt.cex = 1)
+
+
+plot(x = 1:3,y = TG_C_toprichpred11$fit [LL],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(0,10),cex.axis=1.2,cex.lab=1.2)
+axis(side=1,at=1:3,labels=c(' ',' ', " "))
+arrows(x0=1:3, y0=TG_C_toprichpred11$lci [LL],x1=1:3, y1=TG_C_toprichpred11$uci[LL],angle=90,length=0.1, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.3,'d)',cex=0.9)
+mtext(side=1,line=1.5,at = 0.7,'Introduced',cex=0.8)
+mtext(side=1,line=1.5,at = 2.1,'Unknown',cex=0.8)
+mtext(side=1,line=1.5,at = 3.2,"Native",cex=0.8)
+
+points(x = jitter(raw_x3, factor = 1),y = FDModel$C_Rich, pch = 16, cex = 0.4, col = "black")
+
+
+plot(x = FDModel$Plant_Height,y = FDModel$C_Rich,xlab = expression("Grass Height (cm)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.axis=1.2,cex.lab=1.2)
+mtext(side=3,line=0,at = -2.05,'e)',cex=0.9)
+
+polygon(x = c(TG_C_toprichpred14$Plant_Height[MM],rev(TG_C_toprichpred14$Plant_Height[MM])), y = c(TG_C_toprichpred14$lci[MM],rev(TG_C_toprichpred14$uci[MM])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_C_toprichpred14$Plant_Height[MM],y = TG_C_toprichpred14$fit[MM],lwd = 2, lty = 1, col = 'grey30')
+
+polygon(x = c(TG_C_toprichpred14$Plant_Height[M_M],rev(TG_C_toprichpred14$Plant_Height[M_M])), y = c(TG_C_toprichpred14$lci[M_M],rev(TG_C_toprichpred14$uci[M_M])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_C_toprichpred14$Plant_Height[M_M],y = TG_C_toprichpred14$fit[M_M],lwd = 2, lty = 2, col = 'grey30')
+
+polygon(x = c(TG_C_toprichpred14$Plant_Height[M_M_M],rev(TG_C_toprichpred14$Plant_Height[M_M_M])), y = c(TG_C_toprichpred14$lci[M_M_M],rev(TG_C_toprichpred14$uci[M_M_M])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_C_toprichpred14$Plant_Height[M_M_M],y = TG_C_toprichpred14$fit[M_M_M],lwd = 2, lty = 3, col = 'grey30')
+
+legend('topright',legend = c("Woody Closed", "Herbaceous Open", "Woody Open"), lty = c(1,2,3), col = 'grey30',pt.cex = 1)
+
 
 #Group B----
+
 
 ###Modelling----
 
@@ -2392,6 +2481,93 @@ points(x = jitter(raw_x4, factor = 1),y = FDModel$TG_F, pch = 16, cex = 0.4, col
 
 #Probability of Occurrence Figures----
 
-##Main----
+##Main TO DO----
 
-##Supporting info----
+#TO DO - Add names of functional groups above models
+
+#TO DO - axis ----
+
+dev.new(height=15,width=15,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,2,2),mfrow=c(3,3),mgp=c(2.5,1,0),xpd = T)
+
+plot(x = FDModel$Day_Sampled,y = FDModel$TG_F,xlab = expression("Day Sampled"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
+mtext(side=3,line=0,at = -5,'a)',cex=0.9)
+
+polygon(x = c(TG_F_pred2$Day_Sampled[UU],rev(TG_F_pred2$Day_Sampled[UU])), y = c(TG_F_pred2$lci[UU],rev(TG_F_pred2$uci[UU])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_F_pred2$Day_Sampled[UU],y = TG_F_pred2$fit[UU],lwd = 2,col = 'grey30')
+
+
+plot(x = 1:3,y = TG_F_pred2$fit [U_U],xlab = " ",ylab = 'Probability of Occurrence', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(0,1))
+axis(side=1,at=1:3,labels=c(' ',' ', " "))
+arrows(x0=1:3, y0=TG_F_pred2$lci [U_U],x1=1:3, y1=TG_F_pred2$uci[U_U],angle=90,length=0.1, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.3,'b)',cex=0.9)
+mtext(side=1,line=1,at = 1,'WC',cex=0.7)
+mtext(side=1,line=1,at = 2,'HO',cex=0.7)
+mtext(side=1,line=1,at = 3,"WO",cex=0.7)
+
+points(x = jitter(raw_x3, factor = 1),y = FDModel$TG_F, pch = 16, cex = 0.4, col = "black")
+
+
+#TO DO fitting labels----
+
+plot(x = 1:5,y = TG_F_pred2$fit [UUU],xlab = " ",ylab = 'Probability of Occurrence', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,6),ylim = c(-0.1,1.1))
+axis(side=1,at=1:5,labels=c(' ',' ', " ","",""))
+arrows(x0=1:5, y0=TG_F_pred2$lci [UUU],x1=1:5, y1=TG_F_pred2$uci[UUU],angle=90,length=0.05, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.5,'c)',cex=0.9)
+mtext(side=1,line=2.5,at = 3,"Weed Estimate (%)",cex=0.8)
+mtext(side=1,line=0.5,at = 0.6,'0-20',cex=0.7)
+mtext(side=1,line=1,at = 1.8,'20-40',cex=0.7)
+mtext(side=1,line=0.5,at = 3,"40-60",cex=0.7)
+mtext(side=1,line=1,at = 4.2,"60-80",cex=0.7)
+mtext(side=1,line=0.5,at = 5.6,"80-100",cex=0.7)
+
+points(x = jitter(raw_x4, factor = 1),y = FDModel$TG_F, pch = 16, cex = 0.4, col = "black")
+
+
+plot(x = FDModel$Elevation,y = FDModel$TG_D,xlab = expression("Elevation (m)"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
+mtext(side=3,line=0,at = 60,'d)',cex=0.9)
+
+polygon(x = c(TG_D_pred2$Elevation[PP],rev(TG_D_pred2$Elevation[PP])), y = c(TG_D_pred2$lci[PP],rev(TG_D_pred2$uci[PP])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_D_pred2$Elevation[PP],y = TG_D_pred2$fit[PP],lwd = 2,col = 'grey30')
+
+plot(x = FDModel$X500m.Simspson,y = FDModel$TG_D,xlab = expression("Habitat Diversity within 500m"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
+mtext(side=3,line=0,at = 0,'e)',cex=0.9)
+
+polygon(x = c(TG_D_pred2$X500m.Simspson[P_P],rev(TG_D_pred2$X500m.Simspson[P_P])), y = c(TG_D_pred2$lci[P_P],rev(TG_D_pred2$uci[P_P])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_D_pred2$X500m.Simspson[P_P],y = TG_D_pred2$fit[P_P],lwd = 2,col = 'grey30')
+
+
+
+plot(x = FDModel$Ground_Cover,y = FDModel$TG_B,xlab = expression("Ground Cover (%)"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
+mtext(side=3,line=0,at = 32,'f)',cex=0.9)
+
+polygon(x = c(TG_B_pred5$Ground_Cover[NN],rev(TG_B_pred5$Ground_Cover[NN])), y = c(TG_B_pred5$lci[NN],rev(TG_B_pred5$uci[NN])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_B_pred5$Ground_Cover[NN],y = TG_B_pred5$fit[NN],lwd = 2,col = 'grey30')
+
+polygon(x = c(TG_B_pred5$Ground_Cover[N_N],rev(TG_B_pred5$Ground_Cover[N_N])), y = c(TG_B_pred5$lci[N_N],rev(TG_B_pred5$uci[N_N])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_B_pred5$Ground_Cover[N_N],y = TG_B_pred5$fit[N_N],lwd = 2,col = 'grey30',lty=2)
+
+legend('topleft',legend = c("Low Crop", "High Crop"), lty = c(1,2), col = 'grey30',pt.cex = 1)
+
+
+
+plot(x = FDModel$Ground_Cover,y = FDModel$TG_E,xlab = expression("Ground Cover"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
+mtext(side=3,line=0,at = 33,'g)',cex=0.9)
+
+polygon(x = c(TG_E_pred2$Ground_Cover[RR],rev(TG_E_pred2$Ground_Cover[RR])), y = c(TG_E_pred2$lci[RR],rev(TG_E_pred2$uci[RR])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_E_pred2$Ground_Cover[RR],y = TG_E_pred2$fit[RR],lwd = 2,col = 'grey30')
+
+polygon(x = c(TG_E_pred2$Ground_Cover[R_R],rev(TG_E_pred2$Ground_Cover[R_R])), y = c(TG_E_pred2$lci[R_R],rev(TG_E_pred2$uci[R_R])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_E_pred2$Ground_Cover[R_R],y = TG_E_pred2$fit[R_R],lwd = 2,col = 'grey30',lty = 2)
+
+legend('bottomright',legend = c("Short", "Tall"), lty = c(1,2), col = 'grey30',pt.cex = 1)
+
+plot(x = FDModel$Day_Sampled,y = FDModel$TG_E,xlab = expression("Day Sampled"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
+mtext(side=3,line=0,at = -3,'h)',cex=0.9)
+
+polygon(x = c(TG_E_pred2$Day_Sampled[RRR],rev(TG_E_pred2$Day_Sampled[RRR])), y = c(TG_E_pred2$lci[RRR],rev(TG_E_pred2$uci[RRR])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_E_pred2$Day_Sampled[RRR],y = TG_E_pred2$fit[RRR],lwd = 2,col = 'grey30')
+
+
+
+##Supporting info TO DO----
