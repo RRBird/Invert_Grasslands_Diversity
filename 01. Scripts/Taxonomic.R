@@ -589,7 +589,7 @@ polygon(x = c(second_richpred2$Elevation[BB],rev(second_richpred2$Elevation[BB])
 lines(x=second_richpred2$Elevation[BB],y = second_richpred2$fit[BB],lwd = 2,col = 'grey30')
 
 
-plot(x = TaxModel$X500m.Simspson,y = TaxModel$Species_Rich,xlab = expression("Landscape Diversity within 500m"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.axis = 1.2, cex.lab=1.3)
+plot(x = TaxModel$X500m.Simspson,y = TaxModel$Species_Rich,xlab = expression("Habitat Diversity within 500m"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.axis = 1.2, cex.lab=1.3)
 mtext(side=3,line=0,at = 0,'b)',cex=0.8)
 
 polygon(x = c(second_richpred2$X500m.Simspson[B_B],rev(second_richpred2$X500m.Simspson[B_B])), y = c(second_richpred2$lci[B_B],rev(second_richpred2$uci[B_B])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)

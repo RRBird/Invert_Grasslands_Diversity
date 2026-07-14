@@ -134,8 +134,8 @@ str(cordata) #confirmed no character columns left
 
 cor <- cor(cordata,method = "spearman")
 
-colnames(cor) <- c("Elevation", "Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Simpson","Landscape Class", "Day Sampled")
-rownames(cor) <- c("Elevation", "Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Simpson","Landscape Class", "Day Sampled")
+colnames(cor) <- c("Elevation", "Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Habitat Diversity","Habitat Structure", "Day Sampled")
+rownames(cor) <- c("Elevation", "Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Habitat Diversity","Habitat Structure", "Day Sampled")
 
 dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
 corrplot::corrplot(cor,method="color",  

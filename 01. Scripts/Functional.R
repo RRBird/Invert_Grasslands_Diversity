@@ -1126,7 +1126,7 @@ par(mar=c(4,4,2,2),mfrow=c(2,2),mgp=c(2.5,1,0),xpd = T)
 
 plot(x = FDModel$Elevation_Scaled,y = FDModel$C_Rich,xlab = expression("Elevation (m)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,ylim = c(0,6),xaxt = 'n')
 axis(side=1, at=seq(from=min(TG_C_toprichpred2$Elevation_Scaled),to=max(TG_C_toprichpred2$Elevation_Scaled),length.out=5),labels=round(seq(from=min(FDModel$Elevation),to=max(FDModel$Elevation),length.out=5),0),cex.axis=1)
-mtext(side=3,line=0,at = -2.05,'a)',cex=1)
+mtext(side=3,line=0,at = -2.05,'a)',cex=0.9)
 
 polygon(x = c(TG_C_toprichpred2$Elevation_Scaled[II],rev(TG_C_toprichpred2$Elevation_Scaled[II])), y = c(TG_C_toprichpred2$lci[II],rev(TG_C_toprichpred2$uci[II])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=TG_C_toprichpred2$Elevation_Scaled[II],y = TG_C_toprichpred2$fit[II],lwd = 2,col = 'grey30')
@@ -1135,24 +1135,24 @@ lines(x=TG_C_toprichpred2$Elevation_Scaled[II],y = TG_C_toprichpred2$fit[II],lwd
 plot(x = 1:3,y = TG_C_toprichpred2$fit [I_I],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(0,7))
 axis(side=1,at=1:3,labels=c(' ',' ', " "))
 arrows(x0=1:3, y0=TG_C_toprichpred2$lci [I_I],x1=1:3, y1=TG_C_toprichpred2$uci[I_I],angle=90,length=0.1, code=3, lwd=2,col = "black")
-mtext(side=3,line=0,at = -0.3,'b)',cex=1)
+mtext(side=3,line=0,at = -0.3,'b)',cex=0.9)
 mtext(side=1,line=1.5,at = 0.6,'Woody\nClosed',cex=0.7)
 mtext(side=1,line=1.5,at = 2,'Herbaceous\nOpen',cex=0.7)
 mtext(side=1,line=1.5,at = 3.3,"Woody\nOpen",cex=0.7)
 
 points(x = jitter(raw_x3, factor = 1),y = FDModel$C_Rich, pch = 16, cex = 0.4, col = "black")
 
-mtext(side=3,line=1,at = -2,'----------------------------------GROUP C NAME----------------------------------',cex=0.8, font = 2)
+mtext(side=3,line=1,at = -2,'Non-web building spiders, herbivorous Hemiptera and medium/large grasshoppers',cex=0.7, font = 2)
 
 
 
 plot(x = FDModel$Ground_Cover,y = FDModel$A_Rich,xlab = expression("Ground Cover (%)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,xaxt = 'n')
 axis(side=1, at=seq(from=min(FDModel$Ground_Cover),to=max(FDModel$Ground_Cover),length.out=5),labels=round(seq(from=min(FDModel$Ground_Cover),to=max(FDModel$Ground_Cover),length.out=5),0),cex.axis=1)
-mtext(side=3,line=0,at = 30,'c)',cex=1)
+mtext(side=3,line=0,at = 30,'c)',cex=0.9)
 
 polygon(x = c(TG_A_toprichpred2$Ground_Cover,rev(TG_A_toprichpred2$Ground_Cover)), y = c(TG_A_toprichpred2$lci,rev(TG_A_toprichpred2$uci)),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=TG_A_toprichpred2$Ground_Cover,y = TG_A_toprichpred2$fit,lwd = 2,col = 'grey30')
-mtext(side=3,line=1,at = 70,'GROUP A NAME',cex=0.8, font = 2)
+mtext(side=3,line=,at = 70,'Flies, small herbivorous \nHemiptera and small Orthoptera',cex=0.7, font = 2)
 
 ##Supporting info TO DO----
 
