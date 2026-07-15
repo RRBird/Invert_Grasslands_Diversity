@@ -2149,7 +2149,9 @@ S_S <- TG_E_pred5$X500m.Dominant.Landscape.Class == "NTV_Woody_Open" & TG_E_pred
 SSS <- TG_E_pred5$X500m.Dominant.Landscape.Class == "NTV_Herbaceous_Open" & TG_E_pred5$Day_Sampled == TG_Predictions_Day[17]
 SS_SS <- TG_E_pred5$X500m.Dominant.Landscape.Class == "NTV_Herbaceous_Open" & TG_E_pred5$Cropping_500m == TG_Predictions_Crops[10]
 
-#NOTE FOR THIS ONE -- really the interaction is driven by the fact that NTV_Herbaceous_Open has relationship and the other two don't so in figure do I include it or not? honestly seems like I should exclude it completely or could exclude the other two and just put stuff in the description about why they aren't displayed
+#NOTE FOR THIS ONE -- really the interaction is driven by the fact that NTV_Herbaceous_Open has relationship and the other two don't
+
+#I've decided to not include even in supporting since looking at it visually the model doesn't fit well at all
 
 dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
 par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
@@ -2481,26 +2483,16 @@ points(x = jitter(raw_x4, factor = 1),y = FDModel$TG_F, pch = 16, cex = 0.4, col
 
 #Probability of Occurrence Figures----
 
-##Main TO DO----
+##Main----
 
-#TO DO - Add names of functional groups above models
-
-#TO DO - axis ----
 
 dev.new(height=15,width=15,dpi=80,pointsize=14,noRStudioGD = T)
 par(mar=c(4,4,2,2),mfrow=c(3,3),mgp=c(2.5,1,0),xpd = T)
 
-plot(x = FDModel$Day_Sampled,y = FDModel$TG_F,xlab = expression("Day Sampled"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = -5,'a)',cex=0.9)
-
-polygon(x = c(TG_F_pred2$Day_Sampled[UU],rev(TG_F_pred2$Day_Sampled[UU])), y = c(TG_F_pred2$lci[UU],rev(TG_F_pred2$uci[UU])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_F_pred2$Day_Sampled[UU],y = TG_F_pred2$fit[UU],lwd = 2,col = 'grey30')
-
-
 plot(x = 1:3,y = TG_F_pred2$fit [U_U],xlab = " ",ylab = 'Probability of Occurrence', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(0,1))
 axis(side=1,at=1:3,labels=c(' ',' ', " "))
 arrows(x0=1:3, y0=TG_F_pred2$lci [U_U],x1=1:3, y1=TG_F_pred2$uci[U_U],angle=90,length=0.1, code=3, lwd=2,col = "black")
-mtext(side=3,line=0,at = -0.3,'b)',cex=0.9)
+mtext(side=3,line=0,at = -0.3,'a)',cex=0.7)
 mtext(side=1,line=1,at = 1,'WC',cex=0.7)
 mtext(side=1,line=1,at = 2,'HO',cex=0.7)
 mtext(side=1,line=1,at = 3,"WO",cex=0.7)
@@ -2508,38 +2500,55 @@ mtext(side=1,line=1,at = 3,"WO",cex=0.7)
 points(x = jitter(raw_x3, factor = 1),y = FDModel$TG_F, pch = 16, cex = 0.4, col = "black")
 
 
-#TO DO fitting labels----
 
 plot(x = 1:5,y = TG_F_pred2$fit [UUU],xlab = " ",ylab = 'Probability of Occurrence', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,6),ylim = c(-0.1,1.1))
 axis(side=1,at=1:5,labels=c(' ',' ', " ","",""))
 arrows(x0=1:5, y0=TG_F_pred2$lci [UUU],x1=1:5, y1=TG_F_pred2$uci[UUU],angle=90,length=0.05, code=3, lwd=2,col = "black")
-mtext(side=3,line=0,at = -0.5,'c)',cex=0.9)
-mtext(side=1,line=2.5,at = 3,"Weed Estimate (%)",cex=0.8)
-mtext(side=1,line=0.5,at = 0.6,'0-20',cex=0.7)
-mtext(side=1,line=1,at = 1.8,'20-40',cex=0.7)
-mtext(side=1,line=0.5,at = 3,"40-60",cex=0.7)
-mtext(side=1,line=1,at = 4.2,"60-80",cex=0.7)
-mtext(side=1,line=0.5,at = 5.6,"80-100",cex=0.7)
+mtext(side=3,line=0,at = -0.5,'b)',cex=0.7)
+mtext(side=1,line=2.5,at = 3,"Weed Estimate (%)",cex=0.7)
+mtext(side=1,line=1.5,at = 0.9,'0-\n20',cex=0.6)
+mtext(side=1,line=1.5,at = 2,'20-\n40',cex=0.6)
+mtext(side=1,line=1.5,at = 3.1,"40-\n60",cex=0.6)
+mtext(side=1,line=1.5,at = 4.2,"60-\n80",cex=0.6)
+mtext(side=1,line=1.5,at = 5.4,"80-\n100",cex=0.6)
 
 points(x = jitter(raw_x4, factor = 1),y = FDModel$TG_F, pch = 16, cex = 0.4, col = "black")
 
 
-plot(x = FDModel$Elevation,y = FDModel$TG_D,xlab = expression("Elevation (m)"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = 60,'d)',cex=0.9)
+mtext(side=3,line=1,at = 3,'Small herbivorous beetles, detrivores, moths, ticks and Hymenoptera',cex=0.7, font = 2)
+
+
+plot(x = FDModel$Day_Sampled,y = FDModel$TG_F,xlab = expression("Day Sampled"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,xaxt = 'n')
+axis(side=1, at=seq(from=min(FDModel$Day_Sampled),to=max(FDModel$Day_Sampled),length.out=5),labels=round(seq(from=min(FDModel$Day_Sampled),to=max(FDModel$Day_Sampled),length.out=5),0),cex.axis=1)
+mtext(side=3,line=0,at = -5,'c)',cex=0.7)
+
+polygon(x = c(TG_F_pred2$Day_Sampled[UU],rev(TG_F_pred2$Day_Sampled[UU])), y = c(TG_F_pred2$lci[UU],rev(TG_F_pred2$uci[UU])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_F_pred2$Day_Sampled[UU],y = TG_F_pred2$fit[UU],lwd = 2,col = 'grey30')
+
+
+plot(x = FDModel$Elevation,y = FDModel$TG_D,xlab = expression("Elevation (m)"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,xaxt = 'n')
+axis(side=1, at=seq(from=min(FDModel$Elevation),to=max(FDModel$Elevation),length.out=5),labels=round(seq(from=min(FDModel$Elevation),to=max(FDModel$Elevation),length.out=5),0),cex.axis=0.9)
+mtext(side=3,line=0,at = 30,'d)',cex=0.7)
 
 polygon(x = c(TG_D_pred2$Elevation[PP],rev(TG_D_pred2$Elevation[PP])), y = c(TG_D_pred2$lci[PP],rev(TG_D_pred2$uci[PP])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=TG_D_pred2$Elevation[PP],y = TG_D_pred2$fit[PP],lwd = 2,col = 'grey30')
 
-plot(x = FDModel$X500m.Simspson,y = FDModel$TG_D,xlab = expression("Habitat Diversity within 500m"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = 0,'e)',cex=0.9)
+mtext(side=3,line=0.9,at = 700,'Web building spiders, \nsmall Hemiptera and active hunting lacewings',cex=0.7, font = 2)
+
+plot(x = FDModel$X500m.Simspson,y = FDModel$TG_D,xlab = expression("Habitat Diversity within 500m"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,xaxt = 'n')
+axis(side=1, at=seq(from=min(FDModel$X500m.Simspson),to=max(FDModel$X500m.Simspson),length.out=4),labels=round(seq(from=min(FDModel$X500m.Simspson),to=max(FDModel$X500m.Simspson),length.out=4),1),cex.axis=1)
+mtext(side=3,line=0,at = 0,'e)',cex=0.7)
 
 polygon(x = c(TG_D_pred2$X500m.Simspson[P_P],rev(TG_D_pred2$X500m.Simspson[P_P])), y = c(TG_D_pred2$lci[P_P],rev(TG_D_pred2$uci[P_P])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=TG_D_pred2$X500m.Simspson[P_P],y = TG_D_pred2$fit[P_P],lwd = 2,col = 'grey30')
 
 
 
-plot(x = FDModel$Ground_Cover,y = FDModel$TG_B,xlab = expression("Ground Cover (%)"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = 32,'f)',cex=0.9)
+plot(x = FDModel$Ground_Cover,y = FDModel$TG_B,xlab = expression("Ground Cover (%)"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,xaxt = 'n')
+axis(side=1, at=seq(from=min(FDModel$Ground_Cover),to=max(FDModel$Ground_Cover),length.out=5),labels=round(seq(from=min(FDModel$Ground_Cover),to=max(FDModel$Ground_Cover),length.out=5),0),cex.axis=1)
+mtext(side=3,line=0,at = 32,'f)',cex=0.7)
+
+mtext(side=3,line=0.9,at = 65,'Small flies',cex=0.7, font = 2)
 
 polygon(x = c(TG_B_pred5$Ground_Cover[NN],rev(TG_B_pred5$Ground_Cover[NN])), y = c(TG_B_pred5$lci[NN],rev(TG_B_pred5$uci[NN])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=TG_B_pred5$Ground_Cover[NN],y = TG_B_pred5$fit[NN],lwd = 2,col = 'grey30')
@@ -2551,8 +2560,9 @@ legend('topleft',legend = c("Low Crop", "High Crop"), lty = c(1,2), col = 'grey3
 
 
 
-plot(x = FDModel$Ground_Cover,y = FDModel$TG_E,xlab = expression("Ground Cover"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = 33,'g)',cex=0.9)
+plot(x = FDModel$Ground_Cover,y = FDModel$TG_E,xlab = expression("Ground Cover"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,xaxt = 'n')
+axis(side=1, at=seq(from=min(FDModel$Ground_Cover),to=max(FDModel$Ground_Cover),length.out=5),labels=round(seq(from=min(FDModel$Ground_Cover),to=max(FDModel$Ground_Cover),length.out=5),0),cex.axis=1)
+mtext(side=3,line=0,at = 33,'g)',cex=0.7)
 
 polygon(x = c(TG_E_pred2$Ground_Cover[RR],rev(TG_E_pred2$Ground_Cover[RR])), y = c(TG_E_pred2$lci[RR],rev(TG_E_pred2$uci[RR])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=TG_E_pred2$Ground_Cover[RR],y = TG_E_pred2$fit[RR],lwd = 2,col = 'grey30')
@@ -2562,12 +2572,65 @@ lines(x=TG_E_pred2$Ground_Cover[R_R],y = TG_E_pred2$fit[R_R],lwd = 2,col = 'grey
 
 legend('bottomright',legend = c("Short", "Tall"), lty = c(1,2), col = 'grey30',pt.cex = 1)
 
-plot(x = FDModel$Day_Sampled,y = FDModel$TG_E,xlab = expression("Day Sampled"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = -3,'h)',cex=0.9)
+
+mtext(side=3,line=1,at = 110,'Hymenoptera, moths, fungivore and predatory beetles',cex=0.7, font = 2)
+
+
+plot(x = FDModel$Day_Sampled,y = FDModel$TG_E,xlab = expression("Day Sampled"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,xaxt = 'n')
+axis(side=1, at=seq(from=min(FDModel$Day_Sampled),to=max(FDModel$Day_Sampled),length.out=5),labels=round(seq(from=min(FDModel$Day_Sampled),to=max(FDModel$Day_Sampled),length.out=5),0),cex.axis=1)
+mtext(side=3,line=0,at = -3,'h)',cex=0.7)
 
 polygon(x = c(TG_E_pred2$Day_Sampled[RRR],rev(TG_E_pred2$Day_Sampled[RRR])), y = c(TG_E_pred2$lci[RRR],rev(TG_E_pred2$uci[RRR])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=TG_E_pred2$Day_Sampled[RRR],y = TG_E_pred2$fit[RRR],lwd = 2,col = 'grey30')
 
 
+##Supporting info----
 
-##Supporting info TO DO----
+dev.new(height=10,width=15,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,3,2),mfrow=c(2,3),mgp=c(2.7,1,0),xpd = T)
+
+plot(x = FDModel$Ground_Cover,y = FDModel$TG_E,xlab = expression("Ground Cover (%)"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.axis=1.2,cex.lab=1.2)
+mtext(side=3,line=0,at = 32,'a)',cex=0.9)
+
+mtext(side=3,line=1.3,at = 110,'Hymenoptera, moths, fungivore and predatory beetles',cex=0.7, font = 2)
+
+polygon(x = c(TG_E_pred8$Ground_Cover[TT],rev(TG_E_pred8$Ground_Cover[TT])), y = c(TG_E_pred8$lci[TT],rev(TG_E_pred8$uci[TT])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_E_pred8$Ground_Cover[TT],y = TG_E_pred8$fit[TT],lwd = 2,col = 'grey30')
+
+plot(x = FDModel$Day_Sampled,y = FDModel$TG_E,xlab = expression("Day Sampled"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.axis=1.2,cex.lab=1.2)
+mtext(side=3,line=0,at = -4,'b)',cex=0.9)
+
+polygon(x = c(TG_E_pred8$Day_Sampled[T_T],rev(TG_E_pred8$Day_Sampled[T_T])), y = c(TG_E_pred8$lci[T_T],rev(TG_E_pred8$uci[T_T])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_E_pred8$Day_Sampled[T_T],y = TG_E_pred8$fit[T_T],lwd = 2,col = 'grey30')
+
+
+plot(x = FDModel$X500m.Simspson,y = FDModel$TG_D,xlab = expression("Habitat Diversity within 500m"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.axis=1.2,cex.lab=1.2,xaxt = 'n')
+axis(side=1, at=seq(from=min(FDModel$X500m.Simspson),to=max(FDModel$X500m.Simspson),length.out=5),labels=round(seq(from=min(FDModel$X500m.Simspson),to=max(FDModel$X500m.Simspson),length.out=5),1),cex.axis=1.2)
+mtext(side=3,line=0,at = -0.01,'c)',cex=0.9)
+
+mtext(side=3,line=0.9,at = 0.4,'Web building spiders, small Hemiptera \nand active hunting lacewings',cex=0.7, font = 2)
+
+polygon(x = c(TG_D_pred4$X500m.Simspson[QQ],rev(TG_D_pred4$X500m.Simspson[QQ])), y = c(TG_D_pred4$lci[QQ],rev(TG_D_pred4$uci[QQ])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_D_pred4$X500m.Simspson[QQ],y = TG_D_pred4$fit[QQ],lwd = 2,col = 'grey30')
+
+polygon(x = c(TG_D_pred4$X500m.Simspson[Q_Q],rev(TG_D_pred4$X500m.Simspson[Q_Q])), y = c(TG_D_pred4$lci[Q_Q],rev(TG_D_pred4$uci[Q_Q])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_D_pred4$X500m.Simspson[Q_Q],y = TG_D_pred4$fit[Q_Q],lwd = 2,col = 'grey30',lty = 2)
+
+legend('topleft',legend = c("Low Elevation", "High Elevation"), lty = c(1,2), col = 'grey30',pt.cex = 1)
+
+
+
+plot(x = FDModel$Ground_Cover,y = FDModel$TG_B,xlab = expression("Ground Cover (%)"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.axis=1.2,cex.lab=1.2)
+mtext(side=3,line=0,at = 32,'d)',cex=0.9)
+
+polygon(x = c(TG_B_pred5$Ground_Cover[OO],rev(TG_B_pred5$Ground_Cover[OO])), y = c(TG_B_pred5$lci[OO],rev(TG_B_pred5$uci[OO])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_B_pred5$Ground_Cover[OO],y = TG_B_pred5$fit[OO],lwd = 2,col = 'grey30')
+
+mtext(side=3,line=1.2,at = 110,'----------------------Small Flies----------------------',cex=0.7, font = 2)
+
+
+plot(x = FDModel$Cropping_500m,y = FDModel$TG_B,xlab = expression("Crops within 1km (%)"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.axis=1.2,cex.lab=1.2)
+mtext(side=3,line=0,at = -8,'e)',cex=0.9)
+
+polygon(x = c(TG_B_pred5$Cropping_500m[O_O],rev(TG_B_pred5$Cropping_500m[O_O])), y = c(TG_B_pred5$lci[O_O],rev(TG_B_pred5$uci[O_O])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_B_pred5$Cropping_500m[O_O],y = TG_B_pred5$fit[O_O],lwd = 2,col = 'grey30')
