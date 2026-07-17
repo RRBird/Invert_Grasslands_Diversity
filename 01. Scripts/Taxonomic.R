@@ -10,12 +10,14 @@ options(scipen = 999) #So R doesn't use scientific notation
 library("AICcmodavg")
 library("glmmTMB")
 library('lme4')
+library("openxlsx")
 
 #ALL SPECIES RICHNESS----
 
 head(TaxModel)
 str(TaxModel)
 
+TaxModel$Grass_Status[TaxModel$Grass_Status=="Unknown"] <- NA
 
 #Include Day?----
 
@@ -58,7 +60,9 @@ richmodlist <- list("null" = Rich_null, "Elevation" = Rich_E,
                     "Landscape Class" = Rich_LC)
 
 aictab(richmodlist)
-#Green GC and Elevation
+#Grass Status
+
+
 
 ##Additive----
 
@@ -128,11 +132,11 @@ Modnames <- c("Rich_null","Rich_E_H","Rich_E_GC",
 richmodlist2 <- mget(Modnames)
 
 aictab(richmodlist2)
-#Elevation + Landscape class
-#Elevation + Landscape Simpson
-#Green GC + Grass status
-#Elevation + Green GC
-#Height + Green GC
+#Elevation + Grass Status
+#Green Ground Cover + Grass Status
+#Ground Cover + Grass Status
+
+
 
 
 ##Interactive----
@@ -196,34 +200,30 @@ Modnames2 <- c("Rich_null","Rich_ExH","Rich_ExGC",
               "Rich_GGCxLS","Rich_GGCxLC", "Rich_WExC",
               "Rich_WExLS", "Rich_GSxC","Rich_GSxLS", 
               "Rich_CxLS","Rich_CxLC","Rich_LSxLC")
-richmodlist2 <- mget(Modnames2)
+richmodlist3 <- mget(Modnames2)
 
-aictab(richmodlist2)
-#Elevation X Ground Cover
-#Elevation X Landscape Simpson
-#Height X Green GC
-#Elevation X Green GC
-#Elevation x crops
+aictab(richmodlist3)
+#Elevation X Grass Status
+#Green GC X Grass Status
+#Grass Status X Landscape Simpson
 
 ##Final AICC----
 
-Modnames3<- c("Rich_null", "Rich_E","Rich_GGC", "Rich_E_LC",
-              "Rich_E_LS","Rich_GGC_GS", "Rich_E_GGC", "Rich_H_GGC",
-              "Rich_ExGC","Rich_ExLS","Rich_HxGGC","Rich_ExGGC")
+Modnames3<- c("Rich_null", "Rich_GS", "Rich_E_GS",
+              "Rich_GGC_GS","Rich_GC_GS", 
+              "Rich_ExGS","Rich_GGCxGS","Rich_GSxLS")
 richmodlist_Final <- mget(Modnames3)
 aictab(richmodlist_Final)
 
-#Top model = Elevation + Landscape Class
+
+
+
+#Top model = Elevation + Grass Status
 
 #Equivalent models:
-##Elevation + Landscape Simpson
-##Green Ground Cover + Grass Status
-##Elevation + Green Ground Cover
-##Height + Green Ground Cover
-## Elevation x Ground Cover
-##Green Ground Cover
+##Green GC + Grass Status
 
-
+#TO DO FROM HERE----
 #Predictions----
 
 ##Elevation + Landscape Class
@@ -633,6 +633,9 @@ legend('topleft',legend = c('Low Elevation', "High Elevation"), lty = c(1,2), co
 
 #ALL SPECIES DIVERSITY----
 
+write.xlsx(aictab(richmodlist2), 'TEMPDOC.xlsx')
+
+
 head(TaxModel)
 str(TaxModel)
 
@@ -678,10 +681,80 @@ Div_modnames <- c("Div_null", "Div_E","Div_H", "Div_GC", "Div_GGC",
 
 Divmodlist <- mget(Div_modnames)
 aictab(Divmodlist)
-#Null
+#Grass Status
 
-#Because the top is the null model additive models aren't  going to be any better so skipping straight to interactions
 
+##Additive----
+
+head(TaxModel)
+names(TaxModel)
+
+
+Div_E_H <- glmer(Diversity ~ Elevation + Plant_Height + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_E_GC <- glmer(Diversity ~ Elevation + Ground_Cover + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_E_GGC <- glmer(Diversity ~ Elevation + Prop_Green_GC + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_E_WE <- glmer(Diversity ~ Elevation + Weed_Estimate + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_E_GS <- glmer(Diversity ~ Elevation + Grass_Status + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_E_C <- glmer(Diversity ~ Elevation + Cropping_500m + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_E_LS <- glmer(Diversity ~ Elevation + X500m.Simspson + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_E_LC <- glmer(Diversity ~ Elevation + X500m.Dominant.Landscape.Class + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+
+
+Div_H_GC <- glmer(Diversity ~ Plant_Height + Ground_Cover + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_H_GGC <- glmer(Diversity ~ Plant_Height + Prop_Green_GC + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_H_WE <- glmer(Diversity ~ Plant_Height + Weed_Estimate + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_H_GS <- glmer(Diversity ~ Plant_Height + Grass_Status + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_H_C <- glmer(Diversity ~ Plant_Height + Cropping_500m + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_H_LS <- glmer(Diversity ~ Plant_Height + X500m.Simspson + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_H_LC <- glmer(Diversity ~ Plant_Height + X500m.Dominant.Landscape.Class + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+
+
+Div_GC_GGC <- glmer(Diversity ~ Ground_Cover + Prop_Green_GC + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_GC_WE <- glmer(Diversity ~ Ground_Cover + Weed_Estimate + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_GC_GS <- glmer(Diversity ~ Ground_Cover + Grass_Status + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_GC_C <- glmer(Diversity ~ Ground_Cover + Cropping_500m + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_GC_LS <- glmer(Diversity ~ Ground_Cover + X500m.Simspson + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_GC_LC <- glmer(Diversity ~ Ground_Cover + X500m.Dominant.Landscape.Class + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+
+Div_GGC_WE <- glmer(Diversity ~ Prop_Green_GC + Weed_Estimate + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_GGC_GS <- glmer(Diversity ~ Prop_Green_GC + Grass_Status + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_GGC_C <- glmer(Diversity ~ Prop_Green_GC + Cropping_500m + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_GGC_LS <- glmer(Diversity ~ Prop_Green_GC + X500m.Simspson + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_GGC_LC <- glmer(Diversity ~ Prop_Green_GC + X500m.Dominant.Landscape.Class + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+
+Div_WE_GS <- glmer(Diversity ~ Weed_Estimate + Grass_Status + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_WE_C <- glmer(Diversity ~ Weed_Estimate + Cropping_500m + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_WE_LS <- glmer(Diversity ~ Weed_Estimate + X500m.Simspson + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_WE_LC <- glmer(Diversity ~ Weed_Estimate + X500m.Dominant.Landscape.Class + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+
+Div_GS_C <- glmer(Diversity ~ Grass_Status + Cropping_500m + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_GS_LS <- glmer(Diversity ~ Grass_Status + X500m.Simspson + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_GS_LC <- glmer(Diversity ~ Grass_Status + X500m.Dominant.Landscape.Class + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+
+Div_C_LS <- glmer(Diversity ~ Cropping_500m + X500m.Simspson + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+Div_C_LC <- glmer(Diversity ~ Cropping_500m + X500m.Dominant.Landscape.Class + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+
+Div_LS_LC <- glmer(Diversity ~ X500m.Simspson + X500m.Dominant.Landscape.Class + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
+
+
+DivModnames <- c("Div_null","Div_E_H","Div_E_GC",
+              "Div_E_GGC","Div_E_WE","Div_E_GS",
+              "Div_E_C","Div_E_LS","Div_E_LC","Div_H_GC",
+              "Div_H_GGC","Div_H_WE","Div_H_GS",
+              "Div_H_C","Div_H_LS","Div_H_LC",
+              "Div_GC_GGC","Div_GC_WE","Div_GC_GS",
+              "Div_GC_C","Div_GC_LS","Div_GC_LC",
+              "Div_GGC_WE","Div_GGC_GS","Div_GGC_C",
+              "Div_GGC_LS","Div_GGC_LC","Div_WE_GS", 
+              "Div_WE_C","Div_WE_LS","Div_WE_LC", 
+              "Div_GS_C","Div_GS_LS","Div_GS_LC", 
+              "Div_C_LS","Div_C_LC","Div_LS_LC")
+divmodlist <- mget(DivModnames)
+
+aictab(divmodlist)
+#Elevation + Grass Status
+#Green Ground Cover + Grass Status
+#Ground Cover + Grass Status
 
 
 ##Interactive----
@@ -751,8 +824,25 @@ Divmodnames2 <- c("Div_null","Div_ExH","Div_ExGC",
 Divmodlist2 <- mget(Divmodnames2)
 
 aictab(Divmodlist2)
-#Still the null model at the top so that's as far as we get with that one
+#Elevation x Grass Status
+#Green GC x Grass Status
+#Grasst Status x Landscape simpson
+#GC x Grass Status
 
+##Final AICC----
 
+DivModnames3<- c("Div_null", "Div_GS", "Div_E_GS",
+              "Div_GGC_GS","Div_GC_GS", "Div_ExGS",
+              "Div_GGCxGS","Div_GSxLS","Div_GCxGS")
+divmodlist_Final <- mget(DivModnames3)
+aictab(divmodlist_Final)
+
+#Top model = Grass Status
+
+#Equivalent models:
+##Elevation + Grass Status
+##Green GC + Grass Status
+
+##TO DO FROM HERE----
 
 #END----

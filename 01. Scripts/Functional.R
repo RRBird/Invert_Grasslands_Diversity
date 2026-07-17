@@ -12,6 +12,8 @@ library("AICcmodavg")
 library("glmmTMB")
 library('lme4')
 
+FDModel$Grass_Status[FDModel$Grass_Status=="Unknown"] <- NA
+
 
 #Group A----
 
@@ -74,7 +76,7 @@ TG_A_richmodlist <- list("null" = TG_A_Rich_null3,
                     "Landscape Class" = TG_A_Rich_LC)
 
 aictab(TG_A_richmodlist)
-#GC
+#Grass Status
 
 ####Additive
 
@@ -152,13 +154,7 @@ TG_A_richmodlist2 <- mget(TG_A_Modnames)
 
 aictab(TG_A_richmodlist2)
 
-#Ground Cover + Landscape class
-#Ground Cover+ Simpson
-#Height + Ground Cover
-#Elevation + Ground Cover
-#Ground Cover + Cropping
-#Ground Cover + GGC
-#Ground Cover + Grass status
+#Ground Cover + Grass Status
 
 ####Interaction
 
@@ -220,7 +216,8 @@ TG_A_Modnames2 <- c("TG_A_Rich_null3","TG_A_Rich_ExH",
                "TG_A_Rich_HxC","TG_A_Rich_HxLS","TG_A_Rich_HxLC",
                "TG_A_Rich_GCxGGC","TG_A_Rich_GCxGS",
                "TG_A_Rich_GCxWE",
-               "TG_A_Rich_GCxC","TG_A_Rich_GCxLS","TG_A_Rich_GCxLC",
+               "TG_A_Rich_GCxC","TG_A_Rich_GCxLS",
+               "TG_A_Rich_GCxLC",
                "TG_A_Rich_GGCxWE","TG_A_Rich_GGCxGS",
                "TG_A_Rich_GGCxC",
                "TG_A_Rich_GGCxLS","TG_A_Rich_GGCxLC", 
@@ -232,24 +229,22 @@ TG_A_richmodlist2 <- mget(TG_A_Modnames2)
 
 aictab(TG_A_richmodlist2)
 
-#Height X Ground Cover
-#Ground Cover X Simpson
-#Ground Cover X Cropping
-#Ground Cover X Green Ground Cover
+#Height X Grass Status
+
 
 ####Final models----
 
-TG_A_Modnames3<- c("TG_A_Rich_null3", "TG_A_Rich_GC", "TG_A_Rich_GC_LC","TG_A_Rich_GC_LS","TG_A_Rich_H_GC","TG_A_Rich_E_GC","TG_A_Rich_GC_C","TG_A_Rich_GC_GS","TG_A_Rich_HxGC","TG_A_Rich_GCxLS","TG_A_Rich_GCxC","TG_A_Rich_GCxGGC")
+TG_A_Modnames3<- c("TG_A_Rich_null3", "TG_A_Rich_GS", "TG_A_Rich_GC_GS","TG_A_Rich_HxGS")
 
 
 TG_A_richmodlist_Final <- mget(TG_A_Modnames3)
 aictab(TG_A_richmodlist_Final)
 
-#Top model = Ground Cover
+
+#Top model = Height x Grass Status
 
 #Equivalent models (within 2 AICc):
-##Ground Cover + Landscape Class
-##Ground Cover + Simpson
+##Ground Cover + Grass Status
 
 ###Predictions----
 
@@ -565,7 +560,7 @@ TG_C_richmodlist <- list("null" = TG_C_Rich_null,
                          "Landscape Class" = TG_C_Rich_LC)
 
 aictab(TG_C_richmodlist)
-#Landscape Class
+#Grass Status
 
 ####Additive
 
@@ -639,9 +634,7 @@ TG_C_richmodlist2 <- mget(TG_C_Modnames)
 
 aictab(TG_C_richmodlist2)
 
-#Elevation + Landscape Class
-#Height + Landscape Class
-#Grass Status + Landscape Class
+#Elevation + Grass Status
 
 
 ####Interaction
@@ -713,24 +706,22 @@ TG_C_richmodlist2 <- mget(TG_C_Modnames2)
 aictab(TG_C_richmodlist2)
 
 #Elevation X Grass Status
-#Height X Landscape Class
 
 
 ####Final models----
 
-TG_C_Modnames3<- c("TG_C_Rich_null", "TG_C_Rich_LC", "TG_C_Rich_E_LC","TG_C_Rich_H_LC","TG_C_Rich_GS_LC","TG_C_Rich_ExGS","TG_C_Rich_HxLC")
+TG_C_Modnames3<- c("TG_C_Rich_null", "TG_C_Rich_GS", "TG_C_Rich_E_GS","TG_C_Rich_ExGS")
 
 
 TG_C_richmodlist_Final <- mget(TG_C_Modnames3)
 aictab(TG_C_richmodlist_Final)
 
-#Top model = Elevation + Landscape Class
+
+
+#Top model = Elevation + Grass Status
 
 #Equivalent models (within 2 AICc):
-##Height + Landscape Class
-##Elevation X Landscape Class
-##Grass Status + Landscape Class
-##Height X Landscape Class
+##Elevation X Grass Status
 
 
 ###Predictions----
@@ -1041,9 +1032,84 @@ TG_C_Div_modnames <- c("TG_C_Div_null", "TG_C_Div_E","TG_C_Div_H",
 
 TG_C_Divmodlist <- mget(TG_C_Div_modnames)
 aictab(TG_C_Divmodlist)
-#Null
+#Grass Status
 
-#Because the top is the null model additive models aren't  going to be any better so skipping straight to interactions
+#Additive----
+
+head(FDModel)
+names(FDModel)
+
+
+TG_C_Div_E_H <- glmer(C_Div ~ Elevation + Plant_Height + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_E_GC <- glmer(C_Div ~ Elevation + Ground_Cover + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_E_GGC <- glmer(C_Div ~ Elevation + Prop_Green_GC + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_E_WE <- glmer(C_Div ~ Elevation + Weed_Estimate + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_E_GS <- glmer(C_Div ~ Elevation + Grass_Status + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_E_C <- glmer(C_Div ~ Elevation + Cropping_500m + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_E_LS <- glmer(C_Div ~ Elevation + X500m.Simspson + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_E_LC <- glmer(C_Div ~ Elevation + X500m.Dominant.Landscape.Class + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+
+
+TG_C_Div_H_GC <- glmer(C_Div ~ Plant_Height + Ground_Cover + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_H_GGC <- glmer(C_Div ~ Plant_Height + Prop_Green_GC + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_H_WE <- glmer(C_Div ~ Plant_Height + Weed_Estimate + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_H_GS <- glmer(C_Div ~ Plant_Height + Grass_Status + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_H_C <- glmer(C_Div ~ Plant_Height + Cropping_500m + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_H_LS <- glmer(C_Div ~ Plant_Height + X500m.Simspson + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_H_LC <- glmer(C_Div ~ Plant_Height + X500m.Dominant.Landscape.Class + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+
+
+TG_C_Div_GC_GGC <- glmer(C_Div ~ Ground_Cover + Prop_Green_GC + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_GC_WE <- glmer(C_Div ~ Ground_Cover + Weed_Estimate + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_GC_GS <- glmer(C_Div ~ Ground_Cover + Grass_Status + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_GC_C <- glmer(C_Div ~ Ground_Cover + Cropping_500m + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_GC_LS <- glmer(C_Div ~ Ground_Cover + X500m.Simspson + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_GC_LC <- glmer(C_Div ~ Ground_Cover + X500m.Dominant.Landscape.Class + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+
+TG_C_Div_GGC_WE <- glmer(C_Div ~ Prop_Green_GC + Weed_Estimate + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_GGC_GS <- glmer(C_Div ~ Prop_Green_GC + Grass_Status + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_GGC_C <- glmer(C_Div ~ Prop_Green_GC + Cropping_500m + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_GGC_LS <- glmer(C_Div ~ Prop_Green_GC + X500m.Simspson + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_GGC_LC <- glmer(C_Div ~ Prop_Green_GC + X500m.Dominant.Landscape.Class + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+
+TG_C_Div_WE_GS <- glmer(C_Div ~ Weed_Estimate + Grass_Status + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_WE_C <- glmer(C_Div ~ Weed_Estimate + Cropping_500m + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_WE_LS <- glmer(C_Div ~ Weed_Estimate + X500m.Simspson + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_WE_LC <- glmer(C_Div ~ Weed_Estimate + X500m.Dominant.Landscape.Class + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+
+TG_C_Div_GS_C <- glmer(C_Div ~ Grass_Status + Cropping_500m + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_GS_LS <- glmer(C_Div ~ Grass_Status + X500m.Simspson + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_GS_LC <- glmer(C_Div ~ Grass_Status + X500m.Dominant.Landscape.Class + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+
+TG_C_Div_C_LS <- glmer(C_Div ~ Cropping_500m + X500m.Simspson + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+TG_C_Div_C_LC <- glmer(C_Div ~ Cropping_500m + X500m.Dominant.Landscape.Class + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+
+TG_C_Div_LS_LC <- glmer(C_Div ~ X500m.Simspson + X500m.Dominant.Landscape.Class + (1 | Property), family = Gamma(link = "log"), data = FDModel)
+
+
+TG_C_DivModnames <- c("TG_C_Div_null","TG_C_Div_E_H",
+                      "TG_C_Div_E_GC",
+                 "TG_C_Div_E_GGC","TG_C_Div_E_WE","TG_C_Div_E_GS",
+                 "TG_C_Div_E_C","TG_C_Div_E_LS","TG_C_Div_E_LC",
+                 "TG_C_Div_H_GC",
+                 "TG_C_Div_H_GGC","TG_C_Div_H_WE","TG_C_Div_H_GS",
+                 "TG_C_Div_H_C","TG_C_Div_H_LS","TG_C_Div_H_LC",
+                 "TG_C_Div_GC_GGC","TG_C_Div_GC_WE",
+                 "TG_C_Div_GC_GS",
+                 "TG_C_Div_GC_C","TG_C_Div_GC_LS","TG_C_Div_GC_LC",
+                 "TG_C_Div_GGC_WE","TG_C_Div_GGC_GS",
+                 "TG_C_Div_GGC_C",
+                 "TG_C_Div_GGC_LS","TG_C_Div_GGC_LC",
+                 "TG_C_Div_WE_GS", 
+                 "TG_C_Div_WE_C","TG_C_Div_WE_LS",
+                 "TG_C_Div_WE_LC", 
+                 "TG_C_Div_GS_C","TG_C_Div_GS_LS",
+                 "TG_C_Div_GS_LC", 
+                 "TG_C_Div_C_LS","TG_C_Div_C_LC","TG_C_Div_LS_LC")
+TG_C_divmodlist <- mget(TG_C_DivModnames)
+
+aictab(TG_C_divmodlist)
+#Elevation + Grass Status
 
 
 ####Interaction
@@ -1114,7 +1180,19 @@ TG_C_Divmodnames2 <- c("TG_C_Div_null","TG_C_Div_ExH",
 TG_C_Divmodlist2 <- mget(TG_C_Divmodnames2)
 
 aictab(TG_C_Divmodlist2)
-#Still the null model at the top so no more for group C diversity
+#Elevation x Grass Status
+
+##Final AICC----
+
+TG_C_DivModnames3<- c("TG_C_Div_null", "TG_C_Div_GS",
+                      "TG_C_Div_E_GS","TG_C_Div_ExGS")
+TG_C_divmodlist_Final <- mget(TG_C_DivModnames3)
+aictab(TG_C_divmodlist_Final)
+
+#Top model = Elevation + Grass Status
+
+#Equivalent models:
+##Grass Status
 
 
 #Species Rich Figures
@@ -1293,7 +1371,7 @@ TG_B_modlist <- list("null" = TG_B_null,"Elevation" = TG_B_E,
                      "Landscape Class" = TG_B_LC)
 
 aictab(TG_B_modlist)
-#Ground Cover
+#Grass Status
 
 ####Additive
 
@@ -1367,7 +1445,7 @@ TG_B_modlist2 <- mget(TG_B_Modnames)
 
 aictab(TG_B_modlist2)
 
-#Ground Cover + Crops
+#Ground Cover + Grass Status
 
 ####Interaction
 
@@ -1434,7 +1512,8 @@ TG_B_modlist2 <- mget(TG_B_Modnames2)
 
 aictab(TG_B_modlist2)
 
-#Ground Cover x Simpson
+#Ground Cover x Grass Status
+#Elevation x Grass Status
 
 ####Final models----
 
@@ -1584,7 +1663,7 @@ TG_D_modlist <- list("null" = TG_D_null,"Elevation" = TG_D_E,
                      "Landscape Class" = TG_D_LC)
 
 aictab(TG_D_modlist)
-#Null within 2 AICc
+#Grass Status
 
 ####Additive
 
@@ -1658,7 +1737,9 @@ TG_D_modlist2 <- mget(TG_D_Modnames)
 
 aictab(TG_D_modlist2)
 
-#Elevation + Simpson
+#Height + Grass Status
+#Grass Status + Landscape Class
+#Grass Status + Landscape Simpson
 
 ####Interaction
 
@@ -1724,21 +1805,23 @@ TG_D_Modnames2 <- c("TG_D_null","TG_D_ExH",
 TG_D_modlist2 <- mget(TG_D_Modnames2)
 
 aictab(TG_D_modlist2)
-#Elevation x Simpson
+#Height x Grass Status
+#Grass Status x Landscape Class
 
 
 ####Final models----
 
-TG_D_Modnames3<- c("TG_D_null", "TG_D_E_LS", "TG_D_ExLS")
+TG_D_Modnames3<- c("TG_D_null","TG_D_GS", "TG_D_H_GS", "TG_D_GS_LC", "TG_D_GS_LS", "TG_D_HxGS","TG_D_GSxLS" )
 
 
 TG_D_modlist_Final <- mget(TG_D_Modnames3)
 aictab(TG_D_modlist_Final)
 
-#Top model = Elevation x Simpson
+#Top model = Height + Grass Status
 
 #Equivalent models (within 2 AICc):
-#Elevation + Simpson
+#Grass Status + Landscape Class
+#Grass Status + Landscape Simpson
 
 ###Predictions----
 
@@ -1874,7 +1957,7 @@ TG_E_modlist <- list("null" = TG_E_null,"Elevation" = TG_E_E,
                      "Landscape Class" = TG_E_LC)
 
 aictab(TG_E_modlist)
-#Ground Cover
+#Grass Status
 
 ####Additive
 
@@ -1948,13 +2031,10 @@ TG_E_modlist2 <- mget(TG_E_Modnames)
 
 aictab(TG_E_modlist2)
 
-#Elevation + Ground cover
-#Height + Ground Cover
-#Ground Cover Simpson
-#Ground cover + Crops
-#Ground cover + Green Ground Cover
-#Ground cover + Grass Status
-#Ground cover + Landscape Class
+#Ground Cover + Grass Status
+#Green Ground Cover + Grass Status
+#Height + Grass Status
+#Elevation + Grass Status
 
 
 ####Interaction
@@ -2024,25 +2104,23 @@ TG_E_modlist2 <- mget(TG_E_Modnames2)
 
 aictab(TG_E_modlist2)
 
-#Height x Ground cover
-#Crops x Landscape Class
+#Green GC x Grass Status
 
 ####Final models----
 
-TG_E_Modnames3<- c("TG_E_GC", "TG_E_null","TG_E_E_GC","TG_E_H_GC", 
-                   "TG_E_GC_LS","TG_E_GC_C","TG_E_GC_GGC",
-                   "TG_E_GC_GS", "TG_E_GC_LC", "TG_E_HxGC", 
-                   "TG_E_CxLC")
+TG_E_Modnames3<- c("TG_E_GS", "TG_E_null","TG_E_GC_GS", 
+                   "TG_E_GGC_GS", "TG_E_H_GS","TG_E_E_GS",
+                   "TG_E_GGCxGS")
 
 
 TG_E_modlist_Final <- mget(TG_E_Modnames3)
 aictab(TG_E_modlist_Final)
 
-#Top model = Height x Ground Cover
+#Top model = Green GC x Grass Status   
 
 #Equivalent models (within 2 AICc):
-##Crops x Landscape Class
-##Ground Cover
+##Grass Status
+##Ground Cover + Grass Status
 
 ###Predictions----
 
@@ -2242,8 +2320,8 @@ TG_F_modlist <- list("null" = TG_F_null,"Elevation" = TG_F_E,
                      "Landscape Class" = TG_F_LC)
 
 aictab(TG_F_modlist)
-#Weed Estimate
-#Landscape Class
+#Grass Status
+
 
 ####Additive
 
@@ -2317,7 +2395,8 @@ TG_F_modlist2 <- mget(TG_F_Modnames)
 
 aictab(TG_F_modlist2)
 
-#Weed estimate + Landscape Class
+#Grass Status + Landscape Class
+#Weed Estimate + Grass Status
 
 ####Interaction
 
@@ -2386,21 +2465,25 @@ TG_F_modlist2 <- mget(TG_F_Modnames2)
 
 aictab(TG_F_modlist2)
 
-#Green Ground Cover x Landscape Class
-#Green Ground Cover x Crops
+#Grass Status x Landscape Class
+#Elevation x Grass Status
+#Grass Status x Crops
 
 ####Final models----
 
-TG_F_Modnames3<- c("TG_F_null", "TG_F_WE", "TG_F_LC", "TG_F_WE_LC",
-                   "TG_F_GGCxLC", "TG_F_GGCxC")
+TG_F_Modnames3<- c("TG_F_null", "TG_F_GS", "TG_F_GS_LC", 
+                   "TG_F_WE_GS", "TG_F_GSxLS", "TG_F_ExGS", 
+                   "TG_F_GSxC")
 
 TG_F_modlist_Final <- mget(TG_F_Modnames3)
 aictab(TG_F_modlist_Final)
 
-#Top model = Weed estimate + Landscape Class
+
+
+#Top model = Grass Status + Landscape Class
 
 #Equivalent models (within 2 AICc):
-##None
+##Weed Estimate + Grass Status
 
 ###Predictions----
 
