@@ -1409,8 +1409,11 @@ aictab(TG_B_modlist_Final)
 
 ###Predictions----
 
-#Ground Cover and Simpson
+#Ground Cover x Simpson
 summary(TG_B_GCxLS)
+
+TG_Predictions_GC <- seq(min(FDModel$Ground_Cover),max(FDModel$Ground_Cover),length.out=20)
+
 
 TG_B_pred <- expand.grid(Ground_Cover = TG_Predictions_GC, X500m.Simspson = TG_Predictions_Simspon)
 head(TG_B_pred);dim(TG_B_pred)
@@ -1429,7 +1432,7 @@ TG_B_pred2$uci<-plogis(TG_B_pred2$uci.link)
 
 head(TG_B_pred2);dim(TG_B_pred2)
 
-#Ground Cover and Crops
+#Ground Cover + Crops
 
 summary(TG_B_GC_C)
 
@@ -1453,35 +1456,35 @@ TG_B_pred5$uci<-plogis(TG_B_pred5$uci.link)
 head(TG_B_pred5);dim(TG_B_pred5)
 
 
-###Visualize----
+`###Visualize----
 
 #Ground Cover x Simpson
 summary(TG_B_GCxLS)
 head(TG_B_pred2)
 
-NN <- TG_B_pred5$Cropping_500m == TG_Predictions_Crops[3]
-N_N <- TG_B_pred5$Cropping_500m == TG_Predictions_Crops[17]
+JJ <- TG_B_pred2$Ground_Cover == TG_Predictions_GC[3]
+J_J <- TG_B_pred2$Ground_Cover == TG_Predictions_GC[17]
 
 dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
 par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
 
-plot(x = FDModel$Ground_Cover,y = FDModel$TG_B,xlab = expression("Ground Cover (%)"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
+plot(x = FDModel$X500m.Simspson,y = FDModel$TG_B,xlab = expression("Habitat Diversity within 500m"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
 mtext(side=3,line=0,at = 32,'a)',cex=1)
 
-polygon(x = c(TG_B_pred5$Ground_Cover[NN],rev(TG_B_pred5$Ground_Cover[NN])), y = c(TG_B_pred5$lci[NN],rev(TG_B_pred5$uci[NN])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_B_pred5$Ground_Cover[NN],y = TG_B_pred5$fit[NN],lwd = 2,col = 'grey30')
+polygon(x = c(TG_B_pred2$X500m.Simspson[JJ],rev(TG_B_pred2$X500m.Simspson[JJ])), y = c(TG_B_pred2$lci[JJ],rev(TG_B_pred2$uci[JJ])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_B_pred2$X500m.Simspson[JJ],y = TG_B_pred2$fit[JJ],lwd = 2,col = 'grey30')
 
-polygon(x = c(TG_B_pred5$Ground_Cover[N_N],rev(TG_B_pred5$Ground_Cover[N_N])), y = c(TG_B_pred5$lci[N_N],rev(TG_B_pred5$uci[N_N])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_B_pred5$Ground_Cover[N_N],y = TG_B_pred5$fit[N_N],lwd = 2,col = 'grey30',lty=2)
+polygon(x = c(TG_B_pred2$X500m.Simspson[J_J],rev(TG_B_pred2$X500m.Simspson[J_J])), y = c(TG_B_pred2$lci[J_J],rev(TG_B_pred2$uci[J_J])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_B_pred2$X500m.Simspson[J_J],y = TG_B_pred2$fit[J_J],lwd = 2,col = 'grey30',lty=2)
 
-legend('topleft',legend = c("Low Cropping", "High Cropping"), lty = c(1,2), col = 'grey30',pt.cex = 1)
+legend('left',legend = c("40% GC", "80% GC"), lty = c(1,2), col = 'grey30',pt.cex = 1)
 
 #Ground Cover + Crops
 summary(TG_B_GC_C)
 head(TG_B_pred5)
 
-OO <- TG_B_pred5$Cropping_500m == TG_Predictions_Crops[10]
-O_O <- TG_B_pred5$Ground_Cover == TG_Predictions_GC[10]
+KK <- TG_B_pred5$Cropping_500m == TG_Predictions_Crops[10]
+K_K <- TG_B_pred5$Ground_Cover == TG_Predictions_GC[10]
 
 dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
 par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
@@ -1489,14 +1492,14 @@ par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
 plot(x = FDModel$Ground_Cover,y = FDModel$TG_B,xlab = expression("Ground Cover (%)"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
 mtext(side=3,line=0,at = 32,'a)',cex=1)
 
-polygon(x = c(TG_B_pred5$Ground_Cover[OO],rev(TG_B_pred5$Ground_Cover[OO])), y = c(TG_B_pred5$lci[OO],rev(TG_B_pred5$uci[OO])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_B_pred5$Ground_Cover[OO],y = TG_B_pred5$fit[OO],lwd = 2,col = 'grey30')
+polygon(x = c(TG_B_pred5$Ground_Cover[KK],rev(TG_B_pred5$Ground_Cover[KK])), y = c(TG_B_pred5$lci[KK],rev(TG_B_pred5$uci[KK])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_B_pred5$Ground_Cover[KK],y = TG_B_pred5$fit[KK],lwd = 2,col = 'grey30')
 
 plot(x = FDModel$Cropping_500m,y = FDModel$TG_B,xlab = expression("Crops within 1km (%)"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
 mtext(side=3,line=0,at = -8,'b)',cex=1)
 
-polygon(x = c(TG_B_pred5$Cropping_500m[O_O],rev(TG_B_pred5$Cropping_500m[O_O])), y = c(TG_B_pred5$lci[O_O],rev(TG_B_pred5$uci[O_O])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_B_pred5$Cropping_500m[O_O],y = TG_B_pred5$fit[O_O],lwd = 2,col = 'grey30')
+polygon(x = c(TG_B_pred5$Cropping_500m[K_K],rev(TG_B_pred5$Cropping_500m[K_K])), y = c(TG_B_pred5$lci[K_K],rev(TG_B_pred5$uci[K_K])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_B_pred5$Cropping_500m[K_K],y = TG_B_pred5$fit[K_K],lwd = 2,col = 'grey30')
 
 #Group D----
 
@@ -1704,16 +1707,15 @@ aictab(TG_D_modlist_Final)
 
 ###Predictions----
 
-#Elevation + Simpson
-summary(TG_D_E_LS)
+#Height + Grass Status
+summary(TG_D_H_GS)
 
-TG_Predictions_Elevation <- seq(min(FDModel$Elevation),max(FDModel$Elevation),length.out=20)
+TG_Predictions_Height <- seq(min(FDModel$Plant_Height),max(FDModel$Plant_Height),length.out=20)
 
-
-TG_D_pred <- expand.grid(Elevation  = TG_Predictions_Elevation, X500m.Simspson = TG_Predictions_Simspon)
+TG_D_pred <- expand.grid(Plant_Height = TG_Predictions_Height, Grass_Status = c("Native","Introduced"))
 head(TG_D_pred);dim(TG_D_pred)
 
-TG_D_pred1 <- predict(object = TG_D_E_LS,newdata= TG_D_pred,se.fit = T, type = "link",re.form = ~0)
+TG_D_pred1 <- predict(object = TG_D_H_GS,newdata= TG_D_pred,se.fit = T, type = "link",re.form = ~0)
 
 TG_D_pred2<-data.frame(TG_D_pred,fit.link=TG_D_pred1$fit,se.link=TG_D_pred1$se.fit)
 
@@ -1727,70 +1729,137 @@ TG_D_pred2$uci<-plogis(TG_D_pred2$uci.link)
 
 head(TG_D_pred2);dim(TG_D_pred2)
 
-#Elevation x Simpson
-summary(TG_D_ExLS)
+#Grass Status + Landscape Class
+summary(TG_D_GS_LC)
 
-TG_D_pred3 <- predict(object = TG_D_ExLS,newdata= TG_D_pred,se.fit = T, type = "link",re.form = ~0)
 
-TG_D_pred4<-data.frame(TG_D_pred,fit.link=TG_D_pred3$fit,se.link=TG_D_pred3$se.fit)
+TG_D_pred3 <- expand.grid(Grass_Status = c("Native","Introduced"),X500m.Dominant.Landscape.Class = unique(FDModel$X500m.Dominant.Landscape.Class))
+head(TG_D_pred3);dim(TG_D_pred3)
 
-TG_D_pred4$lci.link<-TG_D_pred4$fit.link-(1.96*TG_D_pred4$se.link)
-TG_D_pred4$uci.link<-TG_D_pred4$fit.link+(1.96*TG_D_pred4$se.link)
+TG_D_pred4 <- predict(object = TG_D_GS_LC,newdata= TG_D_pred3,se.fit = T, type = "link",re.form = ~0)
 
-TG_D_pred4$fit<-plogis(TG_D_pred4$fit.link)
-TG_D_pred4$se<-plogis(TG_D_pred4$se.link)
-TG_D_pred4$lci<-plogis(TG_D_pred4$lci.link)
-TG_D_pred4$uci<-plogis(TG_D_pred4$uci.link)
+TG_D_pred5<-data.frame(TG_D_pred3,fit.link=TG_D_pred4$fit,se.link=TG_D_pred4$se.fit)
 
-head(TG_D_pred4);dim(TG_D_pred4)
+TG_D_pred5$lci.link<-TG_D_pred5$fit.link-(1.96*TG_D_pred5$se.link)
+TG_D_pred5$uci.link<-TG_D_pred5$fit.link+(1.96*TG_D_pred5$se.link)
+
+TG_D_pred5$fit<-plogis(TG_D_pred5$fit.link)
+TG_D_pred5$se<-plogis(TG_D_pred5$se.link)
+TG_D_pred5$lci<-plogis(TG_D_pred5$lci.link)
+TG_D_pred5$uci<-plogis(TG_D_pred5$uci.link)
+
+head(TG_D_pred5);dim(TG_D_pred5)
+
+#Grass Status + Landscape Simpson
+summary(TG_D_GS_LS)
+
+TG_D_pred6 <- expand.grid(Grass_Status = c("Native","Introduced"),X500m.Simspson = TG_Predictions_Simspon)
+head(TG_D_pred6);dim(TG_D_pred6)
+
+TG_D_pred7 <- predict(object = TG_D_GS_LS,newdata= TG_D_pred6,se.fit = T, type = "link",re.form = ~0)
+
+TG_D_pred8<-data.frame(TG_D_pred6,fit.link=TG_D_pred7$fit,se.link=TG_D_pred7$se.fit)
+
+TG_D_pred8$lci.link<-TG_D_pred8$fit.link-(1.96*TG_D_pred8$se.link)
+TG_D_pred8$uci.link<-TG_D_pred8$fit.link+(1.96*TG_D_pred8$se.link)
+
+TG_D_pred8$fit<-plogis(TG_D_pred8$fit.link)
+TG_D_pred8$se<-plogis(TG_D_pred8$se.link)
+TG_D_pred8$lci<-plogis(TG_D_pred8$lci.link)
+TG_D_pred8$uci<-plogis(TG_D_pred8$uci.link)
+
+head(TG_D_pred8);dim(TG_D_pred8)
+
 
 ###Visualize----
 
-#Elevation + Simpson
-summary(TG_D_E_LS)
+#Height + Grass Status
+summary(TG_D_H_GS)
 head(TG_D_pred2)
 
-PP <- TG_D_pred2$X500m.Simspson == TG_Predictions_Simspon[10]
-P_P <- TG_D_pred2$Elevation == TG_Predictions_Elevation[10]
+LL <- TG_D_pred2$Grass_Status == "Introduced"
+L_L <- TG_D_pred2$Plant_Height == TG_Predictions_Height[10]
 
 dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
 par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
 
-plot(x = FDModel$Elevation,y = FDModel$TG_D,xlab = expression("Elevation (m)"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = 60,'a)',cex=1)
+plot(x = FDModel$Plant_Height,y = FDModel$TG_D,xlab = expression("Grass Height (cm)"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
+mtext(side=3,line=0,at = -2,'a)',cex=1)
 
-polygon(x = c(TG_D_pred2$Elevation[PP],rev(TG_D_pred2$Elevation[PP])), y = c(TG_D_pred2$lci[PP],rev(TG_D_pred2$uci[PP])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_D_pred2$Elevation[PP],y = TG_D_pred2$fit[PP],lwd = 2,col = 'grey30')
+polygon(x = c(TG_D_pred2$Plant_Height[LL],rev(TG_D_pred2$Plant_Height[LL])), y = c(TG_D_pred2$lci[LL],rev(TG_D_pred2$uci[LL])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_D_pred2$Plant_Height[LL],y = TG_D_pred2$fit[LL],lwd = 2,col = 'grey30')
 
-plot(x = FDModel$X500m.Simspson,y = FDModel$TG_D,xlab = expression("Landscape Diversity (Simspson)"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = 0,'b)',cex=1)
+plot(x = 1:2,y = TG_D_pred2$fit[L_L],xlab = " ",ylab = 'Probability of Occurrence', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,1))
+axis(side=1,at=1:2,labels=c(' ',' '))
+arrows(x0=1:2, y0=TG_D_pred2$lci[L_L],x1=1:2, y1=TG_D_pred2$uci[L_L],angle=90,length=0.2, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.25,'b)',cex=1.1)
+mtext(side=1,line=1.5,at = 0.9,'Native\n Grass',cex=1.1)
+mtext(side=1,line=1.5,at = 2.1,'Introduced\n Grass',cex=1.1)
 
-polygon(x = c(TG_D_pred2$X500m.Simspson[P_P],rev(TG_D_pred2$X500m.Simspson[P_P])), y = c(TG_D_pred2$lci[P_P],rev(TG_D_pred2$uci[P_P])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_D_pred2$X500m.Simspson[P_P],y = TG_D_pred2$fit[P_P],lwd = 2,col = 'grey30')
+points(x = jitter(raw_x1, factor = 1),y = FDModel$TG_D, pch = 16, cex = 0.4, col = "black")
 
+#Grass Status + Landscape Class
+summary(TG_D_GS_LC)
+head(TG_D_pred5)
 
+MM <- TG_D_pred5$Grass_Status == "Introduced"
+M_M <- TG_D_pred5$X500m.Dominant.Landscape.Class == "NTV_Herbaceous_Open"
 
-#Elevation x Simpson
-summary(TG_D_ExLS)
-head(TG_D_pred4)
-
-QQ <- TG_D_pred4$Elevation == TG_Predictions_Elevation[5]
-Q_Q <- TG_D_pred4$Elevation == TG_Predictions_Elevation[15]
+raw_x2 <- ifelse(FDModel$X500m.Dominant.Landscape.Class ==
+                   "NTV_Woody_Closed", 1, 
+                 ifelse(FDModel$X500m.Dominant.Landscape.Class ==
+                          "NTV_Woody_Open", 2, 
+                        ifelse(FDModel$X500m.Dominant.Landscape.Class ==
+                                 "NTV_Herbaceous_Open", 3, NA)))
 
 dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
 par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
 
-plot(x = FDModel$X500m.Simspson,y = FDModel$TG_D,xlab = expression("Landscape Diversity (Simpson)"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
+plot(x = 1:3,y = TG_D_pred5$fit [MM],xlab = " ",ylab = 'Probability of Occurrence', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(0,1))
+axis(side=1,at=1:3,labels=c(' ',' ', " "))
+arrows(x0=1:3, y0=TG_D_pred5$lci [MM],x1=1:3, y1=TG_D_pred5$uci[MM],angle=90,length=0.1, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.3,'a)',cex=1)
+mtext(side=1,line=1.5,at = 0.9,'Woody\nClosed',cex=1)
+mtext(side=1,line=1.5,at = 2,'Herbaceous\nOpen',cex=1)
+mtext(side=1,line=1.5,at = 3.1,"Woody\nOpen",cex=1)
+
+points(x = jitter(raw_x2, factor = 1),y = FDModel$TG_D, pch = 16, cex = 0.4, col = "black")
+
+
+plot(x = 1:2,y = TG_D_pred5$fit[M_M],xlab = " ",ylab = 'Probability of Occurrence', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,1))
+axis(side=1,at=1:2,labels=c(' ',' '))
+arrows(x0=1:2, y0=TG_D_pred5$lci[M_M],x1=1:2, y1=TG_D_pred5$uci[M_M],angle=90,length=0.2, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.25,'b)',cex=1.1)
+mtext(side=1,line=1.5,at = 0.9,'Native\n Grass',cex=1.1)
+mtext(side=1,line=1.5,at = 2.1,'Introduced\n Grass',cex=1.1)
+
+points(x = jitter(raw_x1, factor = 1),y = FDModel$TG_D, pch = 16, cex = 0.4, col = "black")
+
+
+#Grass Status + Simpson
+summary(TG_D_GS_LS)
+head(TG_D_pred8)
+
+NN <- TG_D_pred8$Grass_Status == "Introduced"
+N_N <- TG_D_pred8$X500m.Simspson == TG_Predictions_Simspon[10]
+
+dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
+
+plot(x = FDModel$X500m.Simspson,y = FDModel$TG_D,xlab = expression("Habitat Diversity within 500m"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
 mtext(side=3,line=0,at = 0,'a)',cex=1)
 
-polygon(x = c(TG_D_pred4$X500m.Simspson[QQ],rev(TG_D_pred4$X500m.Simspson[QQ])), y = c(TG_D_pred4$lci[QQ],rev(TG_D_pred4$uci[QQ])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_D_pred4$X500m.Simspson[QQ],y = TG_D_pred4$fit[QQ],lwd = 2,col = 'grey30')
+polygon(x = c(TG_D_pred8$X500m.Simspson[NN],rev(TG_D_pred8$X500m.Simspson[NN])), y = c(TG_D_pred8$lci[NN],rev(TG_D_pred8$uci[NN])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_D_pred8$X500m.Simspson[NN],y = TG_D_pred8$fit[NN],lwd = 2,col = 'grey30')
 
-polygon(x = c(TG_D_pred4$X500m.Simspson[Q_Q],rev(TG_D_pred4$X500m.Simspson[Q_Q])), y = c(TG_D_pred4$lci[Q_Q],rev(TG_D_pred4$uci[Q_Q])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_D_pred4$X500m.Simspson[Q_Q],y = TG_D_pred4$fit[Q_Q],lwd = 2,col = 'grey30',lty = 2)
+plot(x = 1:2,y = TG_D_pred8$fit[N_N],xlab = " ",ylab = 'Probability of Occurrence', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,1))
+axis(side=1,at=1:2,labels=c(' ',' '))
+arrows(x0=1:2, y0=TG_D_pred8$lci[N_N],x1=1:2, y1=TG_D_pred8$uci[N_N],angle=90,length=0.2, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.25,'b)',cex=1.1)
+mtext(side=1,line=1.5,at = 0.9,'Native\n Grass',cex=1.1)
+mtext(side=1,line=1.5,at = 2.1,'Introduced\n Grass',cex=1.1)
 
-legend('topleft',legend = c("Low Elevation", "High Elevation"), lty = c(1,2), col = 'grey30',pt.cex = 1)
-
+points(x = jitter(raw_x1, factor = 1),y = FDModel$TG_D, pch = 16, cex = 0.4, col = "black")
 
 #Group E----
 
@@ -2003,16 +2072,17 @@ aictab(TG_E_modlist_Final)
 
 ###Predictions----
 
-#Height x Ground Cover
-summary(TG_E_HxGC)
+#Green GC x Grass Status
+summary(TG_E_GGCxGS)
 
 TG_Predictions_Day <- seq(min(FDModel$Day_Sampled),max(FDModel$Day_Sampled),length.out=20)
 
+TG_Predictions_GreenGC <- seq(min(FDModel$Prop_Green_GC),max(FDModel$Prop_Green_GC),length.out=20)
 
-TG_E_pred <- expand.grid(Day_Sampled = TG_Predictions_Day, Plant_Height  = TG_Predictions_Height, Ground_Cover = TG_Predictions_GC)
+TG_E_pred <- expand.grid(Day_Sampled = TG_Predictions_Day, Prop_Green_GC = TG_Predictions_GreenGC, Grass_Status  = c("Native","Introduced") )
 head(TG_E_pred);dim(TG_E_pred)
 
-TG_E_pred1 <- predict(object = TG_E_HxGC,newdata= TG_E_pred,se.fit = T, type = "link",re.form = ~0)
+TG_E_pred1 <- predict(object = TG_E_GGCxGS,newdata= TG_E_pred,se.fit = T, type = "link",re.form = ~0)
 
 TG_E_pred2<-data.frame(TG_E_pred,fit.link=TG_E_pred1$fit,se.link=TG_E_pred1$se.fit)
 
@@ -2027,13 +2097,13 @@ TG_E_pred2$uci<-plogis(TG_E_pred2$uci.link)
 head(TG_E_pred2);dim(TG_E_pred2)
 
 
-#Crops x Landscape Class
-summary(TG_E_CxLC)
+##Grass Status
+summary(TG_E_GS)
 
-TG_E_pred3 <- expand.grid(Day_Sampled = TG_Predictions_Day, Cropping_500m = TG_Predictions_Crops, X500m.Dominant.Landscape.Class = unique(FDModel$X500m.Dominant.Landscape.Class))
+TG_E_pred3 <- expand.grid(Day_Sampled = TG_Predictions_Day, Grass_Status = c("Native","Introduced"))
 head(TG_E_pred3);dim(TG_E_pred3)
 
-TG_E_pred4 <- predict(object = TG_E_CxLC,newdata= TG_E_pred3,se.fit = T, type = "link",re.form = ~0)
+TG_E_pred4 <- predict(object = TG_E_GS,newdata= TG_E_pred3,se.fit = T, type = "link",re.form = ~0)
 
 TG_E_pred5<-data.frame(TG_E_pred3,fit.link=TG_E_pred4$fit,se.link=TG_E_pred4$se.fit)
 
@@ -2047,13 +2117,13 @@ TG_E_pred5$uci<-plogis(TG_E_pred5$uci.link)
 
 head(TG_E_pred5);dim(TG_E_pred5)
 
-#Ground Cover
-summary(TG_E_GC)
+##Ground Cover + Grass Status
+summary(TG_E_GC_GS)
 
-TG_E_pred6 <- expand.grid(Day_Sampled = TG_Predictions_Day, Ground_Cover  = TG_Predictions_GC)
+TG_E_pred6 <- expand.grid(Day_Sampled = TG_Predictions_Day, Ground_Cover  = TG_Predictions_GC,Grass_Status = c("Native","Introduced"))
 head(TG_E_pred6);dim(TG_E_pred6)
 
-TG_E_pred7 <- predict(object = TG_E_GC,newdata= TG_E_pred6,se.fit = T, type = "link",re.form = ~0)
+TG_E_pred7 <- predict(object = TG_E_GC_GS,newdata= TG_E_pred6,se.fit = T, type = "link",re.form = ~0)
 
 TG_E_pred8<-data.frame(TG_E_pred6,fit.link=TG_E_pred7$fit,se.link=TG_E_pred7$se.fit)
 
@@ -2069,91 +2139,91 @@ head(TG_E_pred8);dim(TG_E_pred8)
 
 ###Visualize----
 
-#Height x Ground Cover
-summary(TG_E_HxGC)
+#Green GC x Grass Status + Day
+summary(TG_E_GGCxGS)
 head(TG_E_pred2)
 
-RR <- TG_E_pred2$Plant_Height == TG_Predictions_Height[3] & TG_E_pred2$Day_Sampled == TG_Predictions_Day[10]
-R_R <- TG_E_pred2$Plant_Height == TG_Predictions_Height[16] & TG_E_pred2$Day_Sampled == TG_Predictions_Day[10]
-RRR <- TG_E_pred2$Plant_Height == TG_Predictions_Height[10] & TG_E_pred2$Ground_Cover == TG_Predictions_GC[10]
+OO <- TG_E_pred2$Grass_Status == "Native" & TG_E_pred2$Day_Sampled == TG_Predictions_Day[10]
+O_O <- TG_E_pred2$Grass_Status == "Introduced" & TG_E_pred2$Day_Sampled == TG_Predictions_Day[10]
+OOO <- TG_E_pred2$Grass_Status == "Introduced" & TG_E_pred2$Prop_Green_GC == TG_Predictions_GreenGC[10]
 
 dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
 par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
 
-plot(x = FDModel$Ground_Cover,y = FDModel$TG_E,xlab = expression("Ground Cover"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = 33,'a)',cex=1)
+plot(x = FDModel$Prop_Green_GC,y = FDModel$TG_E,xlab = expression("Green Ground Cover (%)"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
+mtext(side=3,line=0,at = 1.5,'a)',cex=1)
 
-polygon(x = c(TG_E_pred2$Ground_Cover[RR],rev(TG_E_pred2$Ground_Cover[RR])), y = c(TG_E_pred2$lci[RR],rev(TG_E_pred2$uci[RR])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_E_pred2$Ground_Cover[RR],y = TG_E_pred2$fit[RR],lwd = 2,col = 'grey30')
+polygon(x = c(TG_E_pred2$Prop_Green_GC[OO],rev(TG_E_pred2$Prop_Green_GC[OO])), y = c(TG_E_pred2$lci[OO],rev(TG_E_pred2$uci[OO])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_E_pred2$Prop_Green_GC[OO],y = TG_E_pred2$fit[OO],lwd = 2,col = 'grey30')
 
-polygon(x = c(TG_E_pred2$Ground_Cover[R_R],rev(TG_E_pred2$Ground_Cover[R_R])), y = c(TG_E_pred2$lci[R_R],rev(TG_E_pred2$uci[R_R])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_E_pred2$Ground_Cover[R_R],y = TG_E_pred2$fit[R_R],lwd = 2,col = 'grey30',lty = 2)
+polygon(x = c(TG_E_pred2$Prop_Green_GC[O_O],rev(TG_E_pred2$Prop_Green_GC[O_O])), y = c(TG_E_pred2$lci[O_O],rev(TG_E_pred2$uci[O_O])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_E_pred2$Prop_Green_GC[O_O],y = TG_E_pred2$fit[O_O],lwd = 2,col = 'grey30',lty = 2)
 
-legend('topleft',legend = c("Short Grass", "High Grass"), lty = c(1,2), col = 'grey30',pt.cex = 1)
+legend('bottomleft',legend = c("Native", "Introduced"), lty = c(1,2), col = 'grey30',pt.cex = 1)
 
 plot(x = FDModel$Day_Sampled,y = FDModel$TG_E,xlab = expression("Day Sampled"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
 mtext(side=3,line=0,at = -3,'b)',cex=1)
 
-polygon(x = c(TG_E_pred2$Day_Sampled[RRR],rev(TG_E_pred2$Day_Sampled[RRR])), y = c(TG_E_pred2$lci[RRR],rev(TG_E_pred2$uci[RRR])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_E_pred2$Day_Sampled[RRR],y = TG_E_pred2$fit[RRR],lwd = 2,col = 'grey30')
+polygon(x = c(TG_E_pred2$Day_Sampled[OOO],rev(TG_E_pred2$Day_Sampled[OOO])), y = c(TG_E_pred2$lci[OOO],rev(TG_E_pred2$uci[OOO])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_E_pred2$Day_Sampled[OOO],y = TG_E_pred2$fit[OOO],lwd = 2,col = 'grey30')
 
-#Crops x Landscape Class
-summary(TG_E_CxLC)
+#Grass Status + Day
+summary(TG_E_GS)
 head(TG_E_pred5)
 
-SS <- TG_E_pred5$X500m.Dominant.Landscape.Class == "NTV_Woody_Closed" & TG_E_pred5$Day_Sampled == TG_Predictions_Day[17]
-S_S <- TG_E_pred5$X500m.Dominant.Landscape.Class == "NTV_Woody_Open" & TG_E_pred5$Day_Sampled == TG_Predictions_Day[5]
-SSS <- TG_E_pred5$X500m.Dominant.Landscape.Class == "NTV_Herbaceous_Open" & TG_E_pred5$Day_Sampled == TG_Predictions_Day[17]
-SS_SS <- TG_E_pred5$X500m.Dominant.Landscape.Class == "NTV_Herbaceous_Open" & TG_E_pred5$Cropping_500m == TG_Predictions_Crops[10]
-
-#NOTE FOR THIS ONE -- really the interaction is driven by the fact that NTV_Herbaceous_Open has relationship and the other two don't
-
-#I've decided to not include even in supporting since looking at it visually the model doesn't fit well at all
+PP <- TG_E_pred5$Day_Sampled == TG_Predictions_Day[10]
+P_P <- TG_E_pred5$Grass_Status == "Introduced"
 
 dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
 par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
 
-plot(x = FDModel$Cropping_500m,y = FDModel$TG_E,xlab = expression("Cropping within 500m (%)"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = -7,'a)',cex=1)
+plot(x = 1:2,y = TG_E_pred5$fit[PP],xlab = " ",ylab = 'Probability of Occurrence', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,1))
+axis(side=1,at=1:2,labels=c(' ',' '))
+arrows(x0=1:2, y0=TG_E_pred5$lci[PP],x1=1:2, y1=TG_E_pred5$uci[PP],angle=90,length=0.2, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.25,'a)',cex=1.1)
+mtext(side=1,line=1.5,at = 0.9,'Native\n Grass',cex=1.1)
+mtext(side=1,line=1.5,at = 2.1,'Introduced\n Grass',cex=1.1)
 
-polygon(x = c(TG_E_pred5$Cropping_500m[SS],rev(TG_E_pred5$Cropping_500m[SS])), y = c(TG_E_pred5$lci[SS],rev(TG_E_pred5$uci[SS])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_E_pred5$Cropping_500m[SS],y = TG_E_pred5$fit[SS],lwd = 2,col = 'grey30')
+points(x = jitter(raw_x1, factor = 1),y = FDModel$TG_E, pch = 16, cex = 0.4, col = "black")
 
-polygon(x = c(TG_E_pred5$Cropping_500m [S_S],rev(TG_E_pred5$Cropping_500m [S_S])), y = c(TG_E_pred5$lci[S_S],rev(TG_E_pred5$uci[S_S])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_E_pred5$Cropping_500m [S_S],y = TG_E_pred5$fit[S_S],lwd = 2,col = 'grey30',lty=2)
-
-polygon(x = c(TG_E_pred5$Cropping_500m[SSS],rev(TG_E_pred5$Cropping_500m[SSS])), y = c(TG_E_pred5$lci[SSS],rev(TG_E_pred5$uci[SSS])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_E_pred5$Cropping_500m [SSS],y = TG_E_pred5$fit[SSS],lwd = 2,col = 'grey30',lty=3)
-
-legend('topleft',legend = c("Woody Closed", "Woody Open", "Herbaceous Open"), lty = c(1,2,3), col = 'grey30',pt.cex = 1)
 
 plot(x = FDModel$Day_Sampled,y = FDModel$TG_E,xlab = expression("Day Sampled"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
 mtext(side=3,line=0,at = -3,'b)',cex=1)
 
-polygon(x = c(TG_E_pred5$Day_Sampled[SS_SS],rev(TG_E_pred5$Day_Sampled[SS_SS])), y = c(TG_E_pred5$lci[SS_SS],rev(TG_E_pred5$uci[SS_SS])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_E_pred5$Day_Sampled[SS_SS],y = TG_E_pred5$fit[SS_SS],lwd = 2,col = 'grey30')
+polygon(x = c(TG_E_pred5$Day_Sampled[P_P],rev(TG_E_pred5$Day_Sampled[P_P])), y = c(TG_E_pred5$lci[P_P],rev(TG_E_pred5$uci[P_P])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_E_pred5$Day_Sampled[P_P],y = TG_E_pred5$fit[P_P],lwd = 2,col = 'grey30')
 
-#Ground Cover
-summary(TG_E_GC)
+##Ground Cover + Grass Status + Day
+summary(TG_E_GC_GS)
 head(TG_E_pred8)
 
-TT <- TG_E_pred8$Day_Sampled == TG_Predictions_Day[10]
-T_T <- TG_E_pred8$Ground_Cover == TG_Predictions_GC[10]
+QQ <- TG_E_pred8$Grass_Status == "Introduced" & TG_E_pred8$Day_Sampled == TG_Predictions_Day[10]
+Q_Q <- TG_E_pred8$Ground_Cover == TG_Predictions_GC[10] & TG_E_pred8$Day_Sampled == TG_Predictions_Day[10]
+QQQ <- TG_E_pred8$Grass_Status == "Introduced" & TG_E_pred8$Ground_Cover == TG_Predictions_GC[14]
 
-dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
-par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
+dev.new(height=10,width=10,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,2,2),mfrow=c(2,2),mgp=c(2.5,1,0),xpd = T)
 
-plot(x = FDModel$Ground_Cover,y = FDModel$TG_E,xlab = expression("Ground Cover"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = 33,'a)',cex=1)
+plot(x = FDModel$Ground_Cover,y = FDModel$TG_E,xlab = expression("Ground Cover (%)"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
+mtext(side=3,line=0,at = 33,'a)',cex=0.9)
 
-polygon(x = c(TG_E_pred8$Ground_Cover[TT],rev(TG_E_pred8$Ground_Cover[TT])), y = c(TG_E_pred8$lci[TT],rev(TG_E_pred8$uci[TT])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_E_pred8$Ground_Cover[TT],y = TG_E_pred8$fit[TT],lwd = 2,col = 'grey30')
+polygon(x = c(TG_E_pred8$Ground_Cover[QQ],rev(TG_E_pred8$Ground_Cover[QQ])), y = c(TG_E_pred8$lci[QQ],rev(TG_E_pred8$uci[QQ])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_E_pred8$Ground_Cover[QQ],y = TG_E_pred8$fit[QQ],lwd = 2,col = 'grey30')
+
+plot(x = 1:2,y = TG_E_pred8$fit[Q_Q],xlab = " ",ylab = 'Probability of Occurrence', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,1))
+axis(side=1,at=1:2,labels=c(' ',' '))
+arrows(x0=1:2, y0=TG_E_pred8$lci[Q_Q],x1=1:2, y1=TG_E_pred8$uci[Q_Q],angle=90,length=0.2, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.25,'b)',cex=0.9)
+mtext(side=1,line=1.5,at = 0.9,'Native\n Grass',cex=0.9)
+mtext(side=1,line=1.5,at = 2.1,'Introduced\n Grass',cex=0.9)
+
+points(x = jitter(raw_x1, factor = 1),y = FDModel$TG_E, pch = 16, cex = 0.4, col = "black")
 
 plot(x = FDModel$Day_Sampled,y = FDModel$TG_E,xlab = expression("Day Sampled"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = -3,'b)',cex=1)
+mtext(side=3,line=0,at = -3,'c)',cex=1)
 
-polygon(x = c(TG_E_pred8$Day_Sampled[T_T],rev(TG_E_pred8$Day_Sampled[T_T])), y = c(TG_E_pred8$lci[T_T],rev(TG_E_pred8$uci[T_T])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_E_pred8$Day_Sampled[T_T],y = TG_E_pred8$fit[T_T],lwd = 2,col = 'grey30')
+polygon(x = c(TG_E_pred8$Day_Sampled[QQQ],rev(TG_E_pred8$Day_Sampled[QQQ])), y = c(TG_E_pred8$lci[QQQ],rev(TG_E_pred8$uci[QQQ])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_E_pred8$Day_Sampled[QQQ],y = TG_E_pred8$fit[QQQ],lwd = 2,col = 'grey30')
 
 #Group F----
 
@@ -2366,17 +2436,14 @@ aictab(TG_F_modlist_Final)
 
 ###Predictions----
 
-summary(TG_F_WE_LC)
-#no standard error calculated
-#random effect seems to not be doing much so I'm going to try it without the random effect
-TG_F_WE_LC <- glmmTMB(TG_F ~ Day_Sampled + Weed_Estimate + X500m.Dominant.Landscape.Class, family = binomial, data = FDModel)
 
-summary(TG_F_WE_LC) #standard error works now
+##Grass Status + Landscape Class
+summary(TG_F_GS_LC)
 
-TG_F_pred <- expand.grid(Day_Sampled = TG_Predictions_Day, Weed_Estimate = unique(FDModel$Weed_Estimate), X500m.Dominant.Landscape.Class = unique(FDModel$X500m.Dominant.Landscape.Class))
+TG_F_pred <- expand.grid(Day_Sampled = TG_Predictions_Day, Grass_Status = c("Native","Introduced"), X500m.Dominant.Landscape.Class = unique(FDModel$X500m.Dominant.Landscape.Class))
 head(TG_F_pred);dim(TG_F_pred)
 
-TG_F_pred1 <- predict(object = TG_F_WE_LC,newdata= TG_F_pred,se.fit = T, type = "link",re.form = ~0)
+TG_F_pred1 <- predict(object = TG_F_GS_LC,newdata= TG_F_pred,se.fit = T, type = "link",re.form = ~0)
 
 TG_F_pred2<-data.frame(TG_F_pred,fit.link=TG_F_pred1$fit,se.link=TG_F_pred1$se.fit)
 
@@ -2390,16 +2457,75 @@ TG_F_pred2$uci<-plogis(TG_F_pred2$uci.link)
 
 head(TG_F_pred2);dim(TG_F_pred2)
 
+
+##Weed Estimate + Grass Status
+summary(TG_F_WE_GS)
+
+TG_F_pred3 <- expand.grid(Day_Sampled = TG_Predictions_Day, Grass_Status = c("Native","Introduced"), Weed_Estimate = unique(FDModel$Weed_Estimate))
+head(TG_F_pred3);dim(TG_F_pred3)
+
+TG_F_pred4 <- predict(object = TG_F_WE_GS,newdata= TG_F_pred3,se.fit = T, type = "link",re.form = ~0)
+
+TG_F_pred5<-data.frame(TG_F_pred3,fit.link=TG_F_pred4$fit,se.link=TG_F_pred4$se.fit)
+
+TG_F_pred5$lci.link<-TG_F_pred5$fit.link-(1.96*TG_F_pred5$se.link)
+TG_F_pred5$uci.link<-TG_F_pred5$fit.link+(1.96*TG_F_pred5$se.link)
+
+TG_F_pred5$fit<-plogis(TG_F_pred5$fit.link)
+TG_F_pred5$se<-plogis(TG_F_pred5$se.link)
+TG_F_pred5$lci<-plogis(TG_F_pred5$lci.link)
+TG_F_pred5$uci<-plogis(TG_F_pred5$uci.link)
+
+head(TG_F_pred5);dim(TG_F_pred5)
+
 ###Visualize----
 
-summary(TG_F_WE_LC)
+#Grass Status + Landscape Class + Day
+summary(TG_F_GS_LC)
 head(TG_F_pred2)
 
-UU <- TG_F_pred2$X500m.Dominant.Landscape.Class == "NTV_Woody_Open" & TG_F_pred2$Weed_Estimate == "20-40%"
-U_U <- TG_F_pred2$Weed_Estimate == "20-40%" & TG_F_pred2$Day_Sampled == TG_Predictions_Day[10]
-UUU <- TG_F_pred2$X500m.Dominant.Landscape.Class == "NTV_Woody_Open" & TG_F_pred2$Day_Sampled == TG_Predictions_Day[10]
+RR <- TG_F_pred2$X500m.Dominant.Landscape.Class == "NTV_Herbaceous_Open" & TG_F_pred2$Day_Sampled == TG_Predictions_Day[10]
+R_R <- TG_F_pred2$Grass_Status == "Introduced" & TG_F_pred2$Day_Sampled == TG_Predictions_Day[10]
+RRR <- TG_F_pred2$X500m.Dominant.Landscape.Class == "NTV_Woody_Open" & TG_F_pred2$Grass_Status == "Introduced"
 
-raw_x4 <- ifelse(FDModel$Weed_Estimate == "0-20%", 1, 
+dev.new(height=10,width=10,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,2,2),mfrow=c(2,2),mgp=c(2.5,1,0),xpd = T)
+
+plot(x = 1:2,y = TG_F_pred2$fit[RR],xlab = " ",ylab = 'Probability of Occurrence', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,1))
+axis(side=1,at=1:2,labels=c(' ',' '))
+arrows(x0=1:2, y0=TG_F_pred2$lci[RR],x1=1:2, y1=TG_F_pred2$uci[RR],angle=90,length=0.1, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.25,'a)',cex=0.9)
+mtext(side=1,line=1.5,at = 0.9,'Native\n Grass',cex=0.9)
+mtext(side=1,line=1.5,at = 2.1,'Introduced\n Grass',cex=0.9)
+
+points(x = jitter(raw_x1, factor = 1),y = FDModel$TG_F, pch = 16, cex = 0.4, col = "black")
+
+
+plot(x = 1:3,y = TG_F_pred2$fit [R_R],xlab = " ",ylab = 'Probability of Occurrence', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(0,1))
+axis(side=1,at=1:3,labels=c(' ',' ', " "))
+arrows(x0=1:3, y0=TG_F_pred2$lci [R_R],x1=1:3, y1=TG_F_pred2$uci[R_R],angle=90,length=0.1, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.3,'b)',cex=1)
+mtext(side=1,line=1.5,at = 0.7,'Woody\nClosed',cex=0.7)
+mtext(side=1,line=1.5,at = 2,'Herbaceous\nOpen',cex=0.7)
+mtext(side=1,line=1.5,at = 3.3,"Woody\nOpen",cex=0.7)
+
+points(x = jitter(raw_x2, factor = 1),y = FDModel$TG_F, pch = 16, cex = 0.4, col = "black")
+
+plot(x = FDModel$Day_Sampled,y = FDModel$TG_F,xlab = expression("Day Sampled"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
+mtext(side=3,line=0,at = -5,'a)',cex=1)
+
+polygon(x = c(TG_F_pred2$Day_Sampled[RRR],rev(TG_F_pred2$Day_Sampled[RRR])), y = c(TG_F_pred2$lci[RRR],rev(TG_F_pred2$uci[RRR])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_F_pred2$Day_Sampled[RRR],y = TG_F_pred2$fit[RRR],lwd = 2,col = 'grey30')
+
+##Grass Status + Weed Estimate + Day
+summary(TG_F_WE_GS)
+head(TG_F_pred5)
+
+SS <- TG_F_pred5$Weed_Estimate == "20-40%" & TG_F_pred5$Day_Sampled == TG_Predictions_Day[15]
+S_S <- TG_F_pred5$Grass_Status == "Introduced" & TG_F_pred5$Day_Sampled == TG_Predictions_Day[10]
+SSS <- TG_F_pred5$Grass_Status == "Introduced" & TG_F_pred5$Weed_Estimate == "20-40%"
+
+raw_x3 <- ifelse(FDModel$Weed_Estimate == "0-20%", 1, 
                  ifelse(FDModel$Weed_Estimate =="20-40%", 2,
                         ifelse(FDModel$Weed_Estimate ==
                             "40-60%", 3, 
@@ -2412,27 +2538,18 @@ raw_x4 <- ifelse(FDModel$Weed_Estimate == "0-20%", 1,
 dev.new(height=10,width=10,dpi=80,pointsize=14,noRStudioGD = T)
 par(mar=c(4,4,2,2),mfrow=c(2,2),mgp=c(2.5,1,0),xpd = T)
 
-plot(x = FDModel$Day_Sampled,y = FDModel$TG_F,xlab = expression("Day Sampled"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = -5,'a)',cex=1)
+plot(x = 1:2,y = TG_F_pred5$fit[SS],xlab = " ",ylab = 'Probability of Occurrence', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,1))
+axis(side=1,at=1:2,labels=c(' ',' '))
+arrows(x0=1:2, y0=TG_F_pred5$lci[SS],x1=1:2, y1=TG_F_pred5$uci[SS],angle=90,length=0.1, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.25,'a)',cex=0.9)
+mtext(side=1,line=1.5,at = 0.9,'Native\n Grass',cex=0.9)
+mtext(side=1,line=1.5,at = 2.1,'Introduced\n Grass',cex=0.9)
 
-polygon(x = c(TG_F_pred2$Day_Sampled[UU],rev(TG_F_pred2$Day_Sampled[UU])), y = c(TG_F_pred2$lci[UU],rev(TG_F_pred2$uci[UU])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_F_pred2$Day_Sampled[UU],y = TG_F_pred2$fit[UU],lwd = 2,col = 'grey30')
-
-
-plot(x = 1:3,y = TG_F_pred2$fit [U_U],xlab = " ",ylab = 'Probability of Occurrence', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(0,1))
-axis(side=1,at=1:3,labels=c(' ',' ', " "))
-arrows(x0=1:3, y0=TG_F_pred2$lci [U_U],x1=1:3, y1=TG_F_pred2$uci[U_U],angle=90,length=0.1, code=3, lwd=2,col = "black")
-mtext(side=3,line=0,at = -0.3,'b)',cex=1)
-mtext(side=1,line=1.5,at = 0.7,'Woody\nClosed',cex=0.7)
-mtext(side=1,line=1.5,at = 2,'Herbaceous\nOpen',cex=0.7)
-mtext(side=1,line=1.5,at = 3.3,"Woody\nOpen",cex=0.7)
-
-points(x = jitter(raw_x3, factor = 1),y = FDModel$TG_F, pch = 16, cex = 0.4, col = "black")
-
-plot(x = 1:5,y = TG_F_pred2$fit [UUU],xlab = " ",ylab = 'Probability of Occurrence', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,6),ylim = c(-0.1,1.1))
+points(x = jitter(raw_x1, factor = 1),y = FDModel$TG_F, pch = 16, cex = 0.4, col = "black")
+plot(x = 1:5,y = TG_F_pred5$fit [S_S],xlab = " ",ylab = 'Probability of Occurrence', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,6),ylim = c(-0.1,1.1))
 axis(side=1,at=1:5,labels=c(' ',' ', " ","",""))
-arrows(x0=1:5, y0=TG_F_pred2$lci [UUU],x1=1:5, y1=TG_F_pred2$uci[UUU],angle=90,length=0.1, code=3, lwd=2,col = "black")
-mtext(side=3,line=0,at = -0.5,'c)',cex=1)
+arrows(x0=1:5, y0=TG_F_pred5$lci [S_S],x1=1:5, y1=TG_F_pred5$uci[S_S],angle=90,length=0.1, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.5,'b)',cex=1)
 mtext(side=1,line=2,at = 3,"Weed Estimate (%)",cex=0.9)
 mtext(side=1,line=0.5,at = 0.6,'0-20',cex=0.7)
 mtext(side=1,line=0.5,at = 1.8,'20-40',cex=0.7)
@@ -2440,11 +2557,17 @@ mtext(side=1,line=0.5,at = 3,"40-60",cex=0.7)
 mtext(side=1,line=0.5,at = 4.2,"60-80",cex=0.7)
 mtext(side=1,line=0.5,at = 5.6,"80-100",cex=0.7)
 
-points(x = jitter(raw_x4, factor = 1),y = FDModel$TG_F, pch = 16, cex = 0.4, col = "black")
+points(x = jitter(raw_x3, factor = 1),y = FDModel$TG_F, pch = 16, cex = 0.4, col = "black")
 
+
+plot(x = FDModel$Day_Sampled,y = FDModel$TG_F,xlab = expression("Day Sampled"),ylab = 'Probability of Occurrence', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
+mtext(side=3,line=0,at = -5,'c)',cex=1)
+
+polygon(x = c(TG_F_pred5$Day_Sampled[SSS],rev(TG_F_pred5$Day_Sampled[SSS])), y = c(TG_F_pred5$lci[SSS],rev(TG_F_pred5$uci[SSS])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_F_pred5$Day_Sampled[SSS],y = TG_F_pred5$fit[SSS],lwd = 2,col = 'grey30')
 
 #Probability of Occurrence Figures----
-
+#TODO----
 ##Main----
 
 

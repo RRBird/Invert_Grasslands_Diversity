@@ -368,3 +368,4 @@ levels(Q_matrix$Size)
 
 
 #END----
+TG_Predictions_Elevation <- seq(min(FDModel$Elevation),max(FDModel$Elevation),length.out=20)
