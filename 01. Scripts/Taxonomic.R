@@ -19,7 +19,9 @@ str(TaxModel)
 
 TaxModel$Grass_Status[TaxModel$Grass_Status=="Unknown"] <- NA
 
-#Include Day?----
+##Modelling----
+
+#Include Day?
 
 Rich_null <- glmmTMB(Species_Rich ~ 1 + (1 | Property), family = nbinom2, data = TaxModel)
 Rich_Day <- glmmTMB(Species_Rich ~ Day_Sampled + (1 | Property), family = nbinom2, data = TaxModel)
@@ -28,9 +30,8 @@ Rich_Day <- glmmTMB(Species_Rich ~ Day_Sampled + (1 | Property), family = nbinom
 aictab(list("Null" = Rich_null,"Day" = Rich_null))
 #no need to include day in next step
 
-#Environmental Models ----
 
-##Single----
+##Single
 
 head(TaxModel)
 
@@ -64,7 +65,7 @@ aictab(richmodlist)
 
 
 
-##Additive----
+##Additive
 
 head(TaxModel)
 names(TaxModel)
@@ -139,7 +140,7 @@ aictab(richmodlist2)
 
 
 
-##Interactive----
+##Interactive
 
 head(TaxModel)
 names(TaxModel)
@@ -223,18 +224,17 @@ aictab(richmodlist_Final)
 #Equivalent models:
 ##Green GC + Grass Status
 
-#TO DO FROM HERE----
-#Predictions----
+##Predictions----
 
-##Elevation + Landscape Class
-summary(Rich_E_LC)
+##Elevation + Grass Status
+summary(Rich_E_GS)
 
 Predictions_Elevation <- seq(min(TaxModel$Elevation),max(TaxModel$Elevation),length.out=20)
 
-toprichpred <- expand.grid(Elevation = Predictions_Elevation, X500m.Dominant.Landscape.Class = unique(TaxModel$X500m.Dominant.Landscape.Class))
+toprichpred <- expand.grid(Elevation = Predictions_Elevation, Grass_Status = c("Native","Introduced"))
 head(toprichpred);dim(toprichpred)
 
-toprichpred1 <- predict(object = Rich_E_LC,newdata= toprichpred,se.fit = T, type = "link",re.form = NA)
+toprichpred1 <- predict(object = Rich_E_GS,newdata= toprichpred,se.fit = T, type = "link",re.form = NA)
 
 toprichpred2<-data.frame(toprichpred,fit.link=toprichpred1$fit,se.link=toprichpred1$se.fit)
 
@@ -251,15 +251,15 @@ toprichpred2$uci<-exp(toprichpred2$uci.link)
 head(toprichpred2);dim(toprichpred2)
 
 
-#Elevation + Landscape Simpson
-summary(Rich_E_LS)
+##Green GC + Grass Status
+summary(Rich_GGCxGS)
 
-Predictions_LS <- seq(min(TaxModel$X500m.Simspson),max(TaxModel$X500m.Simspson),length.out=20)
+Predictions_GGC <- seq(min(TaxModel$Prop_Green_GC),max(TaxModel$Prop_Green_GC),length.out=20)
 
-second_richpred <- expand.grid(Elevation = Predictions_Elevation, X500m.Simspson = Predictions_LS)
+second_richpred <- expand.grid(Prop_Green_GC = Predictions_GGC, Grass_Status = c("Native","Introduced"))
 head(second_richpred);dim(second_richpred)
 
-second_richpred1 <- predict(object = Rich_E_LS,newdata= second_richpred,se.fit = T, type = "link",re.form = NA)
+second_richpred1 <- predict(object = Rich_GGCxGS,newdata= second_richpred,se.fit = T, type = "link",re.form = NA)
 
 second_richpred2<-data.frame(second_richpred,fit.link=second_richpred1$fit,se.link=second_richpred1$se.fit)
 
@@ -275,139 +275,19 @@ second_richpred2$uci<-exp(second_richpred2$uci.link)
 
 head(second_richpred2);dim(second_richpred2)
 
-#Green GC + Grass Status
-summary(Rich_GGC_GS)
+##Visual----
 
-Predictions_GGC <- seq(min(TaxModel$Prop_Green_GC),max(TaxModel$Prop_Green_GC),length.out=20)
-
-Third_richpred <- expand.grid(Prop_Green_GC = Predictions_GGC, Grass_Status  = unique(TaxModel$Grass_Status))
-head(Third_richpred);dim(Third_richpred)
-
-Third_richpred1 <- predict(object = Rich_GGC_GS,newdata= Third_richpred,se.fit = T, type = "link",re.form = NA)
-
-Third_richpred2<-data.frame(Third_richpred,fit.link=Third_richpred1$fit,se.link=Third_richpred1$se.fit)
-
-Third_richpred2$lci.link<-Third_richpred2$fit.link-
-  (1.96*Third_richpred2$se.link)
-Third_richpred2$uci.link<-Third_richpred2$fit.link+
-  (1.96*Third_richpred2$se.link)
-
-Third_richpred2$fit<-exp(Third_richpred2$fit.link)
-Third_richpred2$se<-exp(Third_richpred2$se.link)
-Third_richpred2$lci<-exp(Third_richpred2$lci.link)
-Third_richpred2$uci<-exp(Third_richpred2$uci.link)
-
-head(Third_richpred2);dim(Third_richpred2)
-
-#Elevation + Green GC
-summary(Rich_E_GGC)
-
-Fourth_richpred <- expand.grid(Elevation  = Predictions_Elevation, Prop_Green_GC = Predictions_GGC)
-head(Fourth_richpred);dim(Fourth_richpred)
-
-Fourth_richpred1 <- predict(object = Rich_E_GGC,newdata= Fourth_richpred,se.fit = T, type = "link",re.form = NA)
-
-Fourth_richpred2<-data.frame(Fourth_richpred,fit.link=Fourth_richpred1$fit,se.link=Fourth_richpred1$se.fit)
-
-Fourth_richpred2$lci.link<-Fourth_richpred2$fit.link-
-  (1.96*Fourth_richpred2$se.link)
-Fourth_richpred2$uci.link<-Fourth_richpred2$fit.link+
-  (1.96*Fourth_richpred2$se.link)
-
-Fourth_richpred2$fit<-exp(Fourth_richpred2$fit.link)
-Fourth_richpred2$se<-exp(Fourth_richpred2$se.link)
-Fourth_richpred2$lci<-exp(Fourth_richpred2$lci.link)
-Fourth_richpred2$uci<-exp(Fourth_richpred2$uci.link)
-
-head(Fourth_richpred2);dim(Fourth_richpred2)
-
-#Height + Green GC
-summary(Rich_H_GGC)
-
-Predictions_Height <- seq(min(TaxModel$Plant_Height),max(TaxModel$Plant_Height),length.out=20)
-
-Fifth_richpred <- expand.grid(Plant_Height  = Predictions_Height, Prop_Green_GC = Predictions_GGC)
-head(Fifth_richpred);dim(Fifth_richpred)
-
-Fifth_richpred1 <- predict(object = Rich_H_GGC,newdata= Fifth_richpred,se.fit = T, type = "link",re.form = NA)
-
-Fifth_richpred2<-data.frame(Fifth_richpred,fit.link=Fifth_richpred1$fit,se.link=Fifth_richpred1$se.fit)
-
-Fifth_richpred2$lci.link<-Fifth_richpred2$fit.link-
-  (1.96*Fifth_richpred2$se.link)
-Fifth_richpred2$uci.link<-Fifth_richpred2$fit.link+
-  (1.96*Fifth_richpred2$se.link)
-
-Fifth_richpred2$fit<-exp(Fifth_richpred2$fit.link)
-Fifth_richpred2$se<-exp(Fifth_richpred2$se.link)
-Fifth_richpred2$lci<-exp(Fifth_richpred2$lci.link)
-Fifth_richpred2$uci<-exp(Fifth_richpred2$uci.link)
-
-head(Fifth_richpred2);dim(Fifth_richpred2)
-
-#Elevation + GC
-summary(Rich_E_GC)
-
-Predictions_GC <- seq(min(TaxModel$Ground_Cover),max(TaxModel$Ground_Cover),length.out=20)
-
-Sixth_richpred <- expand.grid(Elevation  = Predictions_Elevation, Ground_Cover = Predictions_GC)
-head(Sixth_richpred);dim(Sixth_richpred)
-
-Sixth_richpred1 <- predict(object = Rich_E_GC,newdata= Sixth_richpred,se.fit = T, type = "link",re.form = NA)
-
-Sixth_richpred2<-data.frame(Sixth_richpred,fit.link=Sixth_richpred1$fit,se.link=Sixth_richpred1$se.fit)
-
-Sixth_richpred2$lci.link<-Sixth_richpred2$fit.link-
-  (1.96*Sixth_richpred2$se.link)
-Sixth_richpred2$uci.link<-Sixth_richpred2$fit.link+
-  (1.96*Sixth_richpred2$se.link)
-
-Sixth_richpred2$fit<-exp(Sixth_richpred2$fit.link)
-Sixth_richpred2$se<-exp(Sixth_richpred2$se.link)
-Sixth_richpred2$lci<-exp(Sixth_richpred2$lci.link)
-Sixth_richpred2$uci<-exp(Sixth_richpred2$uci.link)
-
-head(Sixth_richpred2);dim(Sixth_richpred2)
-
-#Green Ground Cover
-summary(Rich_GGC)
-
-Seventh_richpred <- data.frame(Prop_Green_GC  = Predictions_GGC)
-head(Seventh_richpred);dim(Seventh_richpred)
-
-Seventh_richpred1 <- predict(object = Rich_GGC,newdata= Seventh_richpred,se.fit = T, type = "link",re.form = NA)
-
-Seventh_richpred2<-data.frame(Seventh_richpred,fit.link=Seventh_richpred1$fit,se.link=Seventh_richpred1$se.fit)
-
-Seventh_richpred2$lci.link<-Seventh_richpred2$fit.link-
-  (1.96*Seventh_richpred2$se.link)
-Seventh_richpred2$uci.link<-Seventh_richpred2$fit.link+
-  (1.96*Seventh_richpred2$se.link)
-
-Seventh_richpred2$fit<-exp(Seventh_richpred2$fit.link)
-Seventh_richpred2$se<-exp(Seventh_richpred2$se.link)
-Seventh_richpred2$lci<-exp(Seventh_richpred2$lci.link)
-Seventh_richpred2$uci<-exp(Seventh_richpred2$uci.link)
-
-head(Seventh_richpred2);dim(Seventh_richpred2)
-
-
-#Main Figure----
-
-#Elevation + Landscape Class
-summary(Rich_E_LC)
+#Elevation + Grass Status
+summary(Rich_E_GS)
 head(toprichpred2);dim(toprichpred2)
 
-AA <- toprichpred2$X500m.Dominant.Landscape.Class == "NTV_Woody_Closed"
+AA <- toprichpred2$Grass_Status == "Introduced"
 A_A <- toprichpred2$Elevation == Predictions_Elevation[10]
 
-raw_x <- ifelse(TaxModel$X500m.Dominant.Landscape.Class ==
-                  "NTV_Woody_Closed", 1, 
-                ifelse(TaxModel$X500m.Dominant.Landscape.Class ==
-                         "NTV_Herbaceous_Open", 2, 
-                       ifelse(
-                         TaxModel$X500m.Dominant.Landscape.Class ==
-                                "NTV_Woody_Open", 3, NA)))
+raw_x <- ifelse(TaxModel$Grass_Status ==
+                  "Native", 1, 
+                ifelse(TaxModel$Grass_Status ==
+                         "Introduced", 2, NA))
 
 
 dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
@@ -420,52 +300,20 @@ polygon(x = c(toprichpred2$Elevation[AA],rev(toprichpred2$Elevation[AA])), y = c
 lines(x=toprichpred2$Elevation[AA],y = toprichpred2$fit[AA],lwd = 2,col = 'grey30')
 
 
-plot(x = 1:3,y = toprichpred2$fit [A_A],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(0,16))
-axis(side=1,at=1:3,labels=c(' ',' ', " "))
-arrows(x0=1:3, y0=toprichpred2$lci [A_A],x1=1:3, y1=toprichpred2$uci[A_A],angle=90,length=0.2, code=3, lwd=2,col = "black")
-mtext(side=3,line=0,at = -0.3,'b)',cex=1.1)
-mtext(side=1,line=1.5,at = 0.8,'Woody\nClosed',cex=1.1)
-mtext(side=1,line=1.5,at = 2,'Herbaceous\nOpen',cex=1.1)
-mtext(side=1,line=1.5,at = 3.2,"Woody\nOpen",cex=1.1)
+plot(x = 1:2,y = toprichpred2$fit [A_A],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,16))
+axis(side=1,at=1:2,labels=c('Native','Introduced'))
+arrows(x0=1:2, y0=toprichpred2$lci [A_A],x1=1:2, y1=toprichpred2$uci[A_A],angle=90,length=0.2, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.2,'b)',cex=1.1)
 
 points(x = jitter(raw_x, factor = 1),y = TaxModel$Species_Rich, pch = 16, cex = 0.4, col = "black")
 
+#GGC + Grass Status
 
-#Supporting plots----
-
-#Elevation + Landscape Simpson
-summary(Rich_E_LS)
+summary(Rich_GGC_GS)
 head(second_richpred2)
 
-BB <- second_richpred2$X500m.Simspson == Predictions_LS[10]
-B_B <- second_richpred2$Elevation == Predictions_Elevation[10]
-
-dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
-par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
-
-plot(x = TaxModel$Elevation,y = TaxModel$Species_Rich,xlab = expression("Elevation (m)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = 60,'a)',cex=1.1)
-
-polygon(x = c(second_richpred2$Elevation[BB],rev(second_richpred2$Elevation[BB])), y = c(second_richpred2$lci[BB],rev(second_richpred2$uci[BB])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=second_richpred2$Elevation[BB],y = second_richpred2$fit[BB],lwd = 2,col = 'grey30')
-
-
-plot(x = TaxModel$X500m.Simspson,y = TaxModel$Species_Rich,xlab = expression("Landscape Diversity within 500m"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = 0,'b)',cex=1.1)
-
-polygon(x = c(second_richpred2$X500m.Simspson[B_B],rev(second_richpred2$X500m.Simspson[B_B])), y = c(second_richpred2$lci[B_B],rev(second_richpred2$uci[B_B])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=second_richpred2$X500m.Simspson[B_B],y = second_richpred2$fit[B_B],lwd = 2,col = 'grey30')
-
-
-#Green GC + Grass Status
-summary(Rich_GGC_GS)
-head(Third_richpred2)
-
-CC <- Third_richpred2$Grass_Status == "Native"
-C_C <- Third_richpred2$Prop_Green_GC == Predictions_GGC[10]
-
-raw_x1 <- ifelse(TaxModel$Grass_Status =="Native", 1, 
-                ifelse(TaxModel$Grass_Status =="Introduced", 2, NA))
+BB <- second_richpred2$Grass_Status == "Introduced"
+B_B <- second_richpred2$Prop_Green_GC == Predictions_GGC[10]
 
 
 dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
@@ -474,161 +322,16 @@ par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
 plot(x = TaxModel$Prop_Green_GC,y = TaxModel$Species_Rich,xlab = expression("Green Ground Cover (%)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
 mtext(side=3,line=0,at = 0,'a)',cex=1.1)
 
-polygon(x = c(Third_richpred2$Prop_Green_GC[CC],rev(Third_richpred2$Prop_Green_GC[CC])), y = c(Third_richpred2$lci[CC],rev(Third_richpred2$uci[CC])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=Third_richpred2$Prop_Green_GC[CC],y = Third_richpred2$fit[CC],lwd = 2,col = 'grey30')
+polygon(x = c(second_richpred2$Prop_Green_GC[BB],rev(second_richpred2$Prop_Green_GC[BB])), y = c(second_richpred2$lci[BB],rev(second_richpred2$uci[BB])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=second_richpred2$Prop_Green_GC[BB],y = second_richpred2$fit[BB],lwd = 2,col = 'grey30')
 
 
-plot(x = 1:2,y = Third_richpred2$fit[C_C][c(1,3)],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,20))
-axis(side=1,at=1:2,labels=c('Introduced','Native'))
-arrows(x0=1:2, y0=Third_richpred2$lci [C_C][c(1,3)],x1=1:2, y1=Third_richpred2$uci[C_C][c(1,3)],angle=90,length=0.1, code=3, lwd=2,col = "black")
+plot(x = 1:2,y = second_richpred2$fit[B_B],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,15))
+axis(side=1,at=1:2,labels=c('Native','Introduced'))
+arrows(x0=1:2, y0=second_richpred2$lci [B_B],x1=1:2, y1=second_richpred2$uci[B_B],angle=90,length=0.1, code=3, lwd=2,col = "black")
 mtext(side=3,line=0,at = -0.2,'b)',cex=1.1)
 
-points(x = jitter(raw_x1, factor = 1),y = TaxModel$Species_Rich, pch = 16, cex = 0.4, col = "black")
-
-
-#Elevation + Green GC
-summary(Rich_E_GGC)
-head(Fourth_richpred2)
-
-DD <- Fourth_richpred2$Prop_Green_GC == Predictions_GGC[10]
-D_D <- Fourth_richpred2$Elevation == Predictions_Elevation[10]
-
-dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
-par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
-
-plot(x = TaxModel$Elevation,y = TaxModel$Species_Rich,xlab = expression("Elevation (m)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = 60,'a)',cex=1.1)
-
-polygon(x = c(Fourth_richpred2$Elevation[DD],rev(Fourth_richpred2$Elevation[DD])), y = c(Fourth_richpred2$lci[DD],rev(Fourth_richpred2$uci[DD])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=Fourth_richpred2$Elevation[DD],y = Fourth_richpred2$fit[DD],lwd = 2,col = 'grey30')
-
-
-plot(x = TaxModel$Prop_Green_GC,y = TaxModel$Species_Rich,xlab = expression("Green Ground Cover (%)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = 0,'b)',cex=1.1)
-
-polygon(x = c(Fourth_richpred2$Prop_Green_GC[D_D],rev(Fourth_richpred2$Prop_Green_GC[D_D])), y = c(Fourth_richpred2$lci[D_D],rev(Fourth_richpred2$uci[D_D])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=Fourth_richpred2$Prop_Green_GC[D_D],y = Fourth_richpred2$fit[D_D],lwd = 2,col = 'grey30')
-
-#Height + Green GC
-summary(Rich_H_GGC)
-head(Fifth_richpred2)
-
-EE <- Fifth_richpred2$Prop_Green_GC == Predictions_GGC[10]
-E_E <- Fifth_richpred2$Plant_Height == Predictions_Height[10]
-
-dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
-par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
-
-plot(x = TaxModel$Plant_Height,y = TaxModel$Species_Rich,xlab = expression("Grass Height (cm)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = -2,'a)',cex=1.1)
-
-polygon(x = c(Fifth_richpred2$Plant_Height[EE],rev(Fifth_richpred2$Plant_Height[EE])), y = c(Fifth_richpred2$lci[EE],rev(Fifth_richpred2$uci[EE])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=Fifth_richpred2$Plant_Height[EE],y = Fifth_richpred2$fit[EE],lwd = 2,col = 'grey30')
-
-
-plot(x = TaxModel$Prop_Green_GC,y = TaxModel$Species_Rich,xlab = expression("Green Ground Cover (%)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = 0,'b)',cex=1.1)
-
-polygon(x = c(Fifth_richpred2$Prop_Green_GC[E_E],rev(Fifth_richpred2$Prop_Green_GC[E_E])), y = c(Fifth_richpred2$lci[E_E],rev(Fifth_richpred2$uci[E_E])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=Fifth_richpred2$Prop_Green_GC[E_E],y = Fifth_richpred2$fit[E_E],lwd = 2,col = 'grey30')
-
-#Elevation X Ground Cover
-summary(Rich_E_GC)
-head(Sixth_richpred2)
-
-FF <- Sixth_richpred2$Elevation == Predictions_Elevation[1]
-F_F <- Sixth_richpred2$Elevation == Predictions_Elevation[20]
-
-dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
-par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
-
-plot(x = TaxModel$Ground_Cover,y = TaxModel$Species_Rich,xlab = expression("Ground Cover (%)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-
-polygon(x = c(Sixth_richpred2$Ground_Cover[FF],rev(Sixth_richpred2$Ground_Cover[FF])), y = c(Sixth_richpred2$lci[FF],rev(Sixth_richpred2$uci[FF])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=Sixth_richpred2$Ground_Cover[FF],y = Sixth_richpred2$fit[FF],lwd = 2,col = 'grey30')
-
-
-polygon(x = c(Sixth_richpred2$Ground_Cover[F_F],rev(Sixth_richpred2$Ground_Cover[F_F])), y = c(Sixth_richpred2$lci[F_F],rev(Sixth_richpred2$uci[F_F])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=Sixth_richpred2$Ground_Cover[F_F],y = Sixth_richpred2$fit[F_F],lwd = 2,lty = 3,col = 'grey30')
-
-legend('topleft',legend = c('Low Elevation', "High Elevation"), lty = c(1,2), col = 'grey30',pt.cex = 1)
-
-
-#Green GC
-summary(Rich_GGC)
-head(Seventh_richpred2)
-
-dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
-par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
-
-plot(x = TaxModel$Prop_Green_GC,y = TaxModel$Species_Rich,xlab = expression("Green Ground Cover (%)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = 1,'a)',cex=1.1)
-
-polygon(x = c(Seventh_richpred2$Prop_Green_GC,rev(Seventh_richpred2$Prop_Green_GC)), y = c(Seventh_richpred2$lci,rev(Seventh_richpred2$uci)),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=Seventh_richpred2$Prop_Green_GC,y = Seventh_richpred2$fit,lwd = 2,col = 'grey30')
-
-#Supporting Figure----
-
-##Elevation + Landscape Simpson
-##Green Ground Cover + Grass Status
-##Elevation + Green Ground Cover
-##Height + Green Ground Cover
-## Elevation X Ground Cover
-##Green Ground Cover
-
-#so needed in figure: Elevation - Landscape Simpson - GGC - Grass Status - Height - ElevationxGC 
-
-
-dev.new(height=10,width=15,dpi=80,pointsize=14,noRStudioGD = T)
-par(mar=c(4,4,2,2),mfrow=c(2,3),mgp=c(2.5,1,0),xpd = T)
-
-plot(x = TaxModel$Elevation,y = TaxModel$Species_Rich,xlab = expression("Elevation (m)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.axis = 1.2, cex.lab=1.3)
-mtext(side=3,line=0,at = 60,'a)',cex=0.8)
-
-polygon(x = c(second_richpred2$Elevation[BB],rev(second_richpred2$Elevation[BB])), y = c(second_richpred2$lci[BB],rev(second_richpred2$uci[BB])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=second_richpred2$Elevation[BB],y = second_richpred2$fit[BB],lwd = 2,col = 'grey30')
-
-
-plot(x = TaxModel$X500m.Simspson,y = TaxModel$Species_Rich,xlab = expression("Habitat Diversity within 500m"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.axis = 1.2, cex.lab=1.3)
-mtext(side=3,line=0,at = 0,'b)',cex=0.8)
-
-polygon(x = c(second_richpred2$X500m.Simspson[B_B],rev(second_richpred2$X500m.Simspson[B_B])), y = c(second_richpred2$lci[B_B],rev(second_richpred2$uci[B_B])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=second_richpred2$X500m.Simspson[B_B],y = second_richpred2$fit[B_B],lwd = 2,col = 'grey30')
-
-
-plot(x = TaxModel$Prop_Green_GC,y = TaxModel$Species_Rich,xlab = expression("Green Ground Cover (%)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.axis = 1.2, cex.lab=1.3)
-mtext(side=3,line=0,at = 0,'c)',cex=0.8)
-
-polygon(x = c(Third_richpred2$Prop_Green_GC[CC],rev(Third_richpred2$Prop_Green_GC[CC])), y = c(Third_richpred2$lci[CC],rev(Third_richpred2$uci[CC])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=Third_richpred2$Prop_Green_GC[CC],y = Third_richpred2$fit[CC],lwd = 2,col = 'grey30')
-
-
-plot(x = 1:2,y = Third_richpred2$fit[C_C][c(1,3)],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,20),cex.axis = 1.2, cex.lab=1.3)
-axis(side=1,at=c(0.8,2.2),labels=c('Introduced','Native'),cex.axis=1.4)
-arrows(x0=1:2, y0=Third_richpred2$lci [C_C][c(1,3)],x1=1:2, y1=Third_richpred2$uci[C_C][c(1,3)],angle=90,length=0.1, code=3, lwd=2,col = "black")
-mtext(side=3,line=0,at = -0.2,'d)',cex=0.8)
-
-points(x = jitter(raw_x1, factor = 1),y = TaxModel$Species_Rich, pch = 16, cex = 0.5, col = "black")
-
-
-plot(x = TaxModel$Plant_Height,y = TaxModel$Species_Rich,xlab = expression("Grass Height (cm)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.axis = 1.2, cex.lab=1.3)
-mtext(side=3,line=0,at = -2,'e)',cex=0.8)
-
-polygon(x = c(Fifth_richpred2$Plant_Height[EE],rev(Fifth_richpred2$Plant_Height[EE])), y = c(Fifth_richpred2$lci[EE],rev(Fifth_richpred2$uci[EE])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=Fifth_richpred2$Plant_Height[EE],y = Fifth_richpred2$fit[EE],lwd = 2,col = 'grey30')
-
-
-plot(x = TaxModel$Ground_Cover,y = TaxModel$Species_Rich,xlab = expression("Ground Cover (%)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.axis = 1.2, cex.lab=1.3)
-mtext(side=3,line=0,at = 33,'f)',cex=0.8)
-
-polygon(x = c(Sixth_richpred2$Ground_Cover[FF],rev(Sixth_richpred2$Ground_Cover[FF])), y = c(Sixth_richpred2$lci[FF],rev(Sixth_richpred2$uci[FF])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=Sixth_richpred2$Ground_Cover[FF],y = Sixth_richpred2$fit[FF],lwd = 2,col = 'grey30')
-
-polygon(x = c(Sixth_richpred2$Ground_Cover[F_F],rev(Sixth_richpred2$Ground_Cover[F_F])), y = c(Sixth_richpred2$lci[F_F],rev(Sixth_richpred2$uci[F_F])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=Sixth_richpred2$Ground_Cover[F_F],y = Sixth_richpred2$fit[F_F],lwd = 2,lty = 3,col = 'grey30')
-
-legend('topleft',legend = c('Low Elevation', "High Elevation"), lty = c(1,2), col = 'grey30',pt.cex = 1)
-
+points(x = jitter(raw_x, factor = 1),y = TaxModel$Species_Rich, pch = 16, cex = 0.4, col = "black")
 
 
 #ALL SPECIES DIVERSITY----
@@ -642,8 +345,9 @@ str(TaxModel)
 #update all 0 to be 0.000001 for model fitting
 TaxModel$Diversity[TaxModel$Diversity==0] <- 0.000001
 
+##Modelling----
 
-#Include Day?----
+#Include Day?
 
 Div_null <- glmer(Diversity ~ 1 + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
 Div_Day <- glmer(Diversity ~ Day_Sampled + (1 | Property), family = Gamma(link = "log"), data = TaxModel)
@@ -652,9 +356,8 @@ Div_Day <- glmer(Diversity ~ Day_Sampled + (1 | Property), family = Gamma(link =
 aictab(list("Null" = Div_null,"Day" = Div_null))
 #no need to include day in next step
 
-#Environmental Models ----
 
-##Single----
+##Single
 
 head(TaxModel)
 
@@ -684,7 +387,7 @@ aictab(Divmodlist)
 #Grass Status
 
 
-##Additive----
+##Additive
 
 head(TaxModel)
 names(TaxModel)
@@ -757,7 +460,7 @@ aictab(divmodlist)
 #Ground Cover + Grass Status
 
 
-##Interactive----
+##Interactive
 
 head(TaxModel)
 names(TaxModel)
@@ -843,6 +546,241 @@ aictab(divmodlist_Final)
 ##Elevation + Grass Status
 ##Green GC + Grass Status
 
-##TO DO FROM HERE----
+
+##Predictions----
+
+##Grass Status
+summary(Div_GS)
+
+topdivpred <- data.frame(Grass_Status = c("Native","Introduced"))
+head(topdivpred);dim(topdivpred)
+
+topdivpred1 <- predict(object = Div_GS,newdata= topdivpred,se.fit = T, type = "link",re.form = NA)
+
+topdivpred2<-data.frame(topdivpred,fit.link=topdivpred1$fit,se.link=topdivpred1$se.fit)
+
+topdivpred2$lci.link<-topdivpred2$fit.link-
+  (1.96*topdivpred2$se.link)
+topdivpred2$uci.link<-topdivpred2$fit.link+ 
+  (1.96*topdivpred2$se.link)
+
+topdivpred2$fit<-exp(topdivpred2$fit.link)
+topdivpred2$se<-exp(topdivpred2$se.link)
+topdivpred2$lci<-exp(topdivpred2$lci.link)
+topdivpred2$uci<-exp(topdivpred2$uci.link)
+
+head(topdivpred2);dim(topdivpred2)
+
+
+
+##Elevation + Grass Status
+summary(Div_E_GS)
+
+seconddivpred <- expand.grid(Elevation = Predictions_Elevation, Grass_Status = c("Native","Introduced"))
+head(seconddivpred);dim(seconddivpred)
+
+seconddivpred1 <- predict(object = Div_E_GS,newdata= seconddivpred,se.fit = T, type = "link",re.form = NA)
+
+seconddivpred2<-data.frame(seconddivpred,fit.link=seconddivpred1$fit,se.link=seconddivpred1$se.fit)
+
+seconddivpred2$lci.link<-seconddivpred2$fit.link-
+  (1.96*seconddivpred2$se.link)
+seconddivpred2$uci.link<-seconddivpred2$fit.link+
+  (1.96*seconddivpred2$se.link)
+
+seconddivpred2$fit<-exp(seconddivpred2$fit.link)
+seconddivpred2$se<-exp(seconddivpred2$se.link)
+seconddivpred2$lci<-exp(seconddivpred2$lci.link)
+seconddivpred2$uci<-exp(seconddivpred2$uci.link)
+
+head(seconddivpred2);dim(seconddivpred2)
+
+##Green GC + Grass Status
+summary(Div_GGC_GS)
+
+thirddivpred <- expand.grid(Prop_Green_GC = Predictions_GGC, Grass_Status = c("Native","Introduced"))
+head(thirddivpred);dim(thirddivpred)
+
+thirddivpred1 <- predict(object = Div_GGC_GS,newdata= thirddivpred,se.fit = T, type = "link",re.form = NA)
+
+thirddivpred2<-data.frame(thirddivpred,fit.link=thirddivpred1$fit,se.link=thirddivpred1$se.fit)
+
+thirddivpred2$lci.link<-thirddivpred2$fit.link-
+  (1.96*thirddivpred2$se.link)
+thirddivpred2$uci.link<-thirddivpred2$fit.link+
+  (1.96*thirddivpred2$se.link)
+
+thirddivpred2$fit<-exp(thirddivpred2$fit.link)
+thirddivpred2$se<-exp(thirddivpred2$se.link)
+thirddivpred2$lci<-exp(thirddivpred2$lci.link)
+thirddivpred2$uci<-exp(thirddivpred2$uci.link)
+
+head(thirddivpred2);dim(thirddivpred2)
+
+
+##Visual----
+
+#Grass Status
+summary(Div_GS)
+head(topdivpred2);dim(topdivpred2)
+
+dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
+
+plot(x = 1:2,y = topdivpred2$fit,xlab = " ",ylab = 'Diversity', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,14))
+axis(side=1,at=1:2,labels=c('Native','Introduced'))
+arrows(x0=1:2, y0=topdivpred2$lci,x1=1:2, y1=topdivpred2$uci,angle=90,length=0.2, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.2,'b)',cex=1.1)
+
+points(x = jitter(raw_x, factor = 1),y = TaxModel$Diversity, pch = 16, cex = 0.4, col = "black")
+
+#Elevation + Grass Status
+summary(Div_E_GS)
+head(seconddivpred2);dim(seconddivpred2)
+
+CC <- seconddivpred2$Grass_Status == "Introduced"
+C_C <- seconddivpred2$Elevation == Predictions_Elevation[10]
+
+dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
+
+plot(x = TaxModel$Elevation,y = TaxModel$Diversity,xlab = expression("Elevation (m)"),ylab = 'Diversity', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
+mtext(side=3,line=0,at = 60,'a)',cex=1.1)
+
+polygon(x = c(seconddivpred2$Elevation[CC],rev(seconddivpred2$Elevation[CC])), y = c(seconddivpred2$lci[CC],rev(seconddivpred2$uci[CC])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=seconddivpred2$Elevation[CC],y = seconddivpred2$fit[CC],lwd = 2,col = 'grey30')
+
+
+plot(x = 1:2,y = seconddivpred2$fit [C_C],xlab = " ",ylab = 'Diversity', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,14))
+axis(side=1,at=1:2,labels=c('Native','Introduced'))
+arrows(x0=1:2, y0=seconddivpred2$lci [C_C],x1=1:2, y1=seconddivpred2$uci[C_C],angle=90,length=0.2, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.2,'b)',cex=1.1)
+
+points(x = jitter(raw_x, factor = 1),y = TaxModel$Diversity, pch = 16, cex = 0.4, col = "black")
+
+#GGC + Grass Status
+
+summary(Rich_GGC_GS)
+head(thirddivpred2)
+
+DD <- thirddivpred2$Grass_Status == "Introduced"
+D_D <- thirddivpred2$Prop_Green_GC == Predictions_GGC[10]
+
+
+dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
+
+plot(x = TaxModel$Prop_Green_GC,y = TaxModel$Diversity,xlab = expression("Green Ground Cover (%)"),ylab = 'Diversity', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
+mtext(side=3,line=0,at = 0,'a)',cex=1.1)
+
+polygon(x = c(thirddivpred2$Prop_Green_GC[DD],rev(thirddivpred2$Prop_Green_GC[DD])), y = c(thirddivpred2$lci[DD],rev(thirddivpred2$uci[DD])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=thirddivpred2$Prop_Green_GC[DD],y = thirddivpred2$fit[DD],lwd = 2,col = 'grey30')
+
+
+plot(x = 1:2,y = thirddivpred2$fit[D_D],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,14))
+axis(side=1,at=1:2,labels=c('Native','Introduced'))
+arrows(x0=1:2, y0=thirddivpred2$lci [D_D],x1=1:2, y1=thirddivpred2$uci[D_D],angle=90,length=0.1, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.2,'b)',cex=1.1)
+
+points(x = jitter(raw_x, factor = 1),y = TaxModel$Diversity, pch = 16, cex = 0.4, col = "black")
+
+
+
+#Main Figure----
+
+
+dev.new(height=10,width=10,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,2,2),mfrow=c(2,2),mgp=c(2.5,1,0),xpd = T)
+
+plot(x = TaxModel$Elevation,y = TaxModel$Species_Rich,xlab = expression("Elevation (m)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,xaxt = "n")
+mtext(side=3,line=0,at = 60,'a)',cex=0.9)
+axis(side=1, at=seq(from=min(toprichpred2$Elevation),to=max(toprichpred2$Elevation),length.out=4),labels=round(seq(from=min(TaxModel$Elevation),to=max(TaxModel$Elevation),length.out=4),0),cex.axis=1)
+
+polygon(x = c(toprichpred2$Elevation[AA],rev(toprichpred2$Elevation[AA])), y = c(toprichpred2$lci[AA],rev(toprichpred2$uci[AA])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=toprichpred2$Elevation[AA],y = toprichpred2$fit[AA],lwd = 2,col = 'grey30')
+
+
+plot(x = 1:2,y = toprichpred2$fit [A_A],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,16))
+axis(side=1,at=1:2,labels=c('',''))
+mtext(side=1,line=1.5,at = 0.8,'Native\n Grass',cex=0.9)
+mtext(side=1,line=1.5,at = 2.2,'Introduced\n Grass',cex=0.9)
+arrows(x0=1:2, y0=toprichpred2$lci [A_A],x1=1:2, y1=toprichpred2$uci[A_A],angle=90,length=0.1, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.2,'b)',cex=0.9)
+
+points(x = jitter(raw_x, factor = 1),y = TaxModel$Species_Rich, pch = 16, cex = 0.4, col = "black")
+
+
+
+plot(x = 1:2,y = topdivpred2$fit,xlab = " ",ylab = 'Diversity', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,14))
+axis(side=1,at=1:2,labels=c('',''))
+mtext(side=1,line=1.5,at = 0.8,'Native\n Grass',cex=0.9)
+mtext(side=1,line=1.5,at = 2.2,'Introduced\n Grass',cex=0.9)
+arrows(x0=1:2, y0=topdivpred2$lci,x1=1:2, y1=topdivpred2$uci,angle=90,length=0.1, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.2,'c)',cex=0.9)
+
+points(x = jitter(raw_x, factor = 1),y = TaxModel$Diversity, pch = 16, cex = 0.4, col = "black")
+
+
+#Supporting Figure----
+
+dev.new(height=15,width=10,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,2,2),mfrow=c(3,2),mgp=c(2.5,1,0),xpd = T)
+
+plot(x = TaxModel$Prop_Green_GC,y = TaxModel$Species_Rich,xlab = expression("Green Ground Cover (%)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,xaxt = "n")
+axis(side=1, at=seq(from=min(second_richpred2$Prop_Green_GC),to=max(second_richpred2$Prop_Green_GC),length.out=4),labels=round(seq(from=min(TaxModel$Prop_Green_GC),to=max(TaxModel$Prop_Green_GC),length.out=4),0),cex.axis=1)
+mtext(side=3,line=0,at = 0,'a)',cex=0.8)
+
+polygon(x = c(second_richpred2$Prop_Green_GC[BB],rev(second_richpred2$Prop_Green_GC[BB])), y = c(second_richpred2$lci[BB],rev(second_richpred2$uci[BB])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=second_richpred2$Prop_Green_GC[BB],y = second_richpred2$fit[BB],lwd = 2,col = 'grey30')
+
+
+plot(x = 1:2,y = second_richpred2$fit[B_B],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =1.7,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,15))
+axis(side=1,at=1:2,labels=c('',''))
+mtext(side=1,line=1.5,at = 0.8,'Native\n Grass',cex=0.7)
+mtext(side=1,line=1.5,at = 2.3,'Introduced\n Grass',cex=0.7)
+arrows(x0=1:2, y0=second_richpred2$lci [B_B],x1=1:2, y1=second_richpred2$uci[B_B],angle=90,length=0.05, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.2,'b)',cex=0.8)
+
+points(x = jitter(raw_x, factor = 1),y = TaxModel$Species_Rich, pch = 16, cex = 0.3, col = "black")
+
+
+
+plot(x = TaxModel$Elevation,y = TaxModel$Diversity,xlab = expression("Elevation (m)"),ylab = 'Diversity', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,xaxt = "n")
+axis(side=1, at=seq(from=min(seconddivpred2$Elevation),to=max(seconddivpred2$Elevation),length.out=4),labels=round(seq(from=min(TaxModel$Elevation),to=max(TaxModel$Elevation),length.out=4),0),cex.axis=1)
+mtext(side=3,line=0,at = 60,'c)',cex=0.8)
+
+polygon(x = c(seconddivpred2$Elevation[CC],rev(seconddivpred2$Elevation[CC])), y = c(seconddivpred2$lci[CC],rev(seconddivpred2$uci[CC])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=seconddivpred2$Elevation[CC],y = seconddivpred2$fit[CC],lwd = 2,col = 'grey30')
+
+
+plot(x = 1:2,y = seconddivpred2$fit [C_C],xlab = " ",ylab = 'Diversity', type = 'p',pch = 16,cex =1.7,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,14))
+axis(side=1,at=1:2,labels=c('',''))
+mtext(side=1,line=1.5,at = 0.8,'Native\n Grass',cex=0.7)
+mtext(side=1,line=1.5,at = 2.3,'Introduced\n Grass',cex=0.7)
+arrows(x0=1:2, y0=seconddivpred2$lci [C_C],x1=1:2, y1=seconddivpred2$uci[C_C],angle=90,length=0.05, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.2,'d)',cex=0.8)
+
+points(x = jitter(raw_x, factor = 1),y = TaxModel$Diversity, pch = 16, cex = 0.4, col = "black")
+
+
+
+plot(x = TaxModel$Prop_Green_GC,y = TaxModel$Diversity,xlab = expression("Green Ground Cover (%)"),ylab = 'Diversity', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,xaxt = "n")
+axis(side=1, at=seq(from=min(thirddivpred2$Prop_Green_GC),to=max(thirddivpred2$Prop_Green_GC),length.out=4),labels=round(seq(from=min(TaxModel$Prop_Green_GC),to=max(TaxModel$Prop_Green_GC),length.out=4),0),cex.axis=1)
+mtext(side=3,line=0,at = 0,'e)',cex=0.8)
+
+polygon(x = c(thirddivpred2$Prop_Green_GC[DD],rev(thirddivpred2$Prop_Green_GC[DD])), y = c(thirddivpred2$lci[DD],rev(thirddivpred2$uci[DD])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=thirddivpred2$Prop_Green_GC[DD],y = thirddivpred2$fit[DD],lwd = 2,col = 'grey30')
+
+
+plot(x = 1:2,y = thirddivpred2$fit[D_D],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =1.7,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,14))
+axis(side=1,at=1:2,labels=c('',''))
+mtext(side=1,line=1.5,at = 0.8,'Native\n Grass',cex=0.7)
+mtext(side=1,line=1.5,at = 2.3,'Introduced\n Grass',cex=0.7)
+arrows(x0=1:2, y0=thirddivpred2$lci [D_D],x1=1:2, y1=thirddivpred2$uci[D_D],angle=90,length=0.05, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.2,'f)',cex=0.8)
+
+points(x = jitter(raw_x, factor = 1),y = TaxModel$Diversity, pch = 16, cex = 0.4, col = "black")
+
+
 
 #END----
