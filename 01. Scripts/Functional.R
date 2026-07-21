@@ -248,15 +248,15 @@ aictab(TG_A_richmodlist_Final)
 
 ###Predictions----
 
-#Ground Cover
-summary(TG_A_Rich_GC)
+#Height x Grass Status
+summary(TG_A_Rich_HxGS)
 
-TG_Predictions_GC <- seq(min(FDModel$Ground_Cover),max(FDModel$Ground_Cover),length.out=20)
+TG_Predictions_Height <- seq(min(FDModel$Plant_Height),max(FDModel$Plant_Height),length.out=20)
 
-TG_A_toprichpred <- data.frame("Ground_Cover" = TG_Predictions_GC)
+TG_A_toprichpred <- expand.grid("Plant_Height" = TG_Predictions_Height,Grass_Status=c("Native","Introduced"))
 head(TG_A_toprichpred);dim(TG_A_toprichpred)
 
-TG_A_toprichpred1 <- predict(object = TG_A_Rich_GC,newdata= TG_A_toprichpred,se.fit = T, type = "link",re.form = NA)
+TG_A_toprichpred1 <- predict(object = TG_A_Rich_HxGS,newdata= TG_A_toprichpred,se.fit = T, type = "link",re.form = NA)
 
 TG_A_toprichpred2<-data.frame(TG_A_toprichpred,fit.link=TG_A_toprichpred1$fit,se.link=TG_A_toprichpred1$se.fit)
 
@@ -272,13 +272,16 @@ TG_A_toprichpred2$uci<-exp(TG_A_toprichpred2$uci.link)
 
 head(TG_A_toprichpred2);dim(TG_A_toprichpred2)
 
-#Ground Cover + Landscape Class
-summary(TG_A_Rich_GC_LC)
+#Ground Cover + Grass Status
+summary(TG_A_Rich_GC_GS)
 
-TG_A_toprichpred3 <- expand.grid(Ground_Cover = TG_Predictions_GC, X500m.Dominant.Landscape.Class = unique(FDModel$X500m.Dominant.Landscape.Class))
+TG_Predictions_GC <- seq(min(FDModel$Ground_Cover),max(FDModel$Ground_Cover),length.out=20)
+
+
+TG_A_toprichpred3 <- expand.grid(Ground_Cover = TG_Predictions_GC, Grass_Status = c("Native","Introduced"))
 head(TG_A_toprichpred3);dim(TG_A_toprichpred3)
 
-TG_A_toprichpred4 <- predict(object = TG_A_Rich_GC_LC,newdata= TG_A_toprichpred3,se.fit = T, type = "link",re.form = NA)
+TG_A_toprichpred4 <- predict(object = TG_A_Rich_GC_GS,newdata= TG_A_toprichpred3,se.fit = T, type = "link",re.form = NA)
 
 TG_A_toprichpred5<-data.frame(TG_A_toprichpred3,fit.link=TG_A_toprichpred4$fit,se.link=TG_A_toprichpred4$se.fit)
 
@@ -294,58 +297,41 @@ TG_A_toprichpred5$uci<-exp(TG_A_toprichpred5$uci.link)
 
 head(TG_A_toprichpred5);dim(TG_A_toprichpred5)
 
-#Ground Cover + Simpson
-summary(TG_A_Rich_GC_LS)
-
-TG_Predictions_Simspon <- seq(min(FDModel$X500m.Simspson),max(FDModel$X500m.Simspson),length.out=20)
-
-TG_A_toprichpred6 <- expand.grid(Ground_Cover = TG_Predictions_GC, X500m.Simspson = TG_Predictions_Simspon)
-head(TG_A_toprichpred6);dim(TG_A_toprichpred6)
-
-TG_A_toprichpred7 <- predict(object = TG_A_Rich_GC_LS,newdata= TG_A_toprichpred6,se.fit = T, type = "link",re.form = NA)
-
-TG_A_toprichpred8<-data.frame(TG_A_toprichpred6,fit.link=TG_A_toprichpred7$fit,se.link=TG_A_toprichpred7$se.fit)
-
-TG_A_toprichpred8$lci.link<-TG_A_toprichpred8$fit.link-
-  (1.96*TG_A_toprichpred8$se.link)
-TG_A_toprichpred8$uci.link<-TG_A_toprichpred8$fit.link+
-  (1.96*TG_A_toprichpred8$se.link)
-
-TG_A_toprichpred8$fit<-exp(TG_A_toprichpred8$fit.link)
-TG_A_toprichpred8$se<-exp(TG_A_toprichpred8$se.link)
-TG_A_toprichpred8$lci<-exp(TG_A_toprichpred8$lci.link)
-TG_A_toprichpred8$uci<-exp(TG_A_toprichpred8$uci.link)
-
-head(TG_A_toprichpred8);dim(TG_A_toprichpred8)
 
 ###Visualize----
 
-#Ground Cover
+#Height x Grass Status
 summary(TG_A_Rich_GC)
 summary(TG_A_toprichpred2)
+
+EE <- TG_A_toprichpred2$Grass_Status == "Introduced"
+E_E <- TG_A_toprichpred2$Grass_Status == "Native"
 
 dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
 par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
 
-plot(x = FDModel$Ground_Cover,y = FDModel$A_Rich,xlab = expression("Ground Cover (%)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
+plot(x = FDModel$Plant_Height,y = FDModel$A_Rich,xlab = expression("Grass Height (cm)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,ylim=c(0,5.5))
+mtext(side=3,line=0,at = -2,'a)',cex=1.1)
 
-polygon(x = c(TG_A_toprichpred2$Ground_Cover,rev(TG_A_toprichpred2$Ground_Cover)), y = c(TG_A_toprichpred2$lci,rev(TG_A_toprichpred2$uci)),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_A_toprichpred2$Ground_Cover,y = TG_A_toprichpred2$fit,lwd = 2,col = 'grey30')
+polygon(x = c(TG_A_toprichpred2$Plant_Height[EE],rev(TG_A_toprichpred2$Plant_Height[EE])), y = c(TG_A_toprichpred2$lci[EE],rev(TG_A_toprichpred2$uci[EE])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_A_toprichpred2$Plant_Height[EE],y = TG_A_toprichpred2$fit[EE],lwd = 2,lty=1,col = 'grey30')
 
-#Ground Cover + Landscape Class
-summary(TG_A_Rich_GC_LC)
+polygon(x = c(TG_A_toprichpred2$Plant_Height[E_E],rev(TG_A_toprichpred2$Plant_Height[E_E])), y = c(TG_A_toprichpred2$lci[E_E],rev(TG_A_toprichpred2$uci[E_E])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_A_toprichpred2$Plant_Height[E_E],y = TG_A_toprichpred2$fit[E_E],lwd = 2,lty =2,col = 'grey30')
+
+legend('topright',legend = c("Native", "Introduced"), lty = c(2,1), col = 'grey30',pt.cex = 1)
+
+#Ground Cover + Grass Status
+summary(TG_A_Rich_GC_GS)
 sumamry(TG_A_toprichpred5)
 
-GG <- TG_A_toprichpred5$X500m.Dominant.Landscape.Class == "NTV_Herbaceous_Open"
-G_G <- TG_A_toprichpred5$Ground_Cover == TG_Predictions_GC[10]
+FF <- TG_A_toprichpred5$Grass_Status == "Introduced"
+F_F <- TG_A_toprichpred5$Ground_Cover == TG_Predictions_GC[10]
 
-raw_x3 <- ifelse(FDModel$X500m.Dominant.Landscape.Class ==
-                  "NTV_Woody_Closed", 1, 
-                ifelse(FDModel$X500m.Dominant.Landscape.Class ==
-                         "NTV_Herbaceous_Open", 2, 
-                       ifelse(
-                         FDModel$X500m.Dominant.Landscape.Class ==
-                           "NTV_Woody_Open", 3, NA)))
+raw_x1 <- ifelse(FDModel$Grass_Status ==
+                  "Native", 1, 
+                ifelse(FDModel$Grass_Status ==
+                         "Introduced", 2, NA))
 
 
 dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
@@ -354,42 +340,18 @@ par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
 plot(x = FDModel$Ground_Cover,y = FDModel$A_Rich,xlab = expression("Ground Cover (%)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,ylim = c(0,5))
 mtext(side=3,line=0,at = -5,'a)',cex=1.1)
 
-polygon(x = c(TG_A_toprichpred5$Ground_Cover[GG],rev(TG_A_toprichpred5$Ground_Cover[GG])), y = c(TG_A_toprichpred5$lci[GG],rev(TG_A_toprichpred5$uci[GG])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_A_toprichpred5$Ground_Cover[GG],y = TG_A_toprichpred5$fit[GG],lwd = 2,col = 'grey30')
+polygon(x = c(TG_A_toprichpred5$Ground_Cover[FF],rev(TG_A_toprichpred5$Ground_Cover[FF])), y = c(TG_A_toprichpred5$lci[FF],rev(TG_A_toprichpred5$uci[FF])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_A_toprichpred5$Ground_Cover[FF],y = TG_A_toprichpred5$fit[FF],lwd = 2,col = 'grey30')
 
 
-plot(x = 1:3,y = TG_A_toprichpred5$fit [G_G],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(0,5))
-axis(side=1,at=1:3,labels=c(' ',' ', " "))
-arrows(x0=1:3, y0=TG_A_toprichpred5$lci [G_G],x1=1:3, y1=TG_A_toprichpred5$uci[G_G],angle=90,length=0.2, code=3, lwd=2,col = "black")
+plot(x = 1:2,y = TG_A_toprichpred5$fit [F_F],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,5))
+axis(side=1,at=1:2,labels=c(' ',' '))
+arrows(x0=1:2, y0=TG_A_toprichpred5$lci [F_F],x1=1:2, y1=TG_A_toprichpred5$uci[F_F],angle=90,length=0.2, code=3, lwd=2,col = "black")
 mtext(side=3,line=0,at = -0.3,'b)',cex=1.1)
-mtext(side=1,line=1.5,at = 0.8,'Woody\nClosed',cex=1.1)
-mtext(side=1,line=1.5,at = 2,'Herbaceous\nOpen',cex=1.1)
-mtext(side=1,line=1.5,at = 3.2,"Woody\nOpen",cex=1.1)
+mtext(side=1,line=1.5,at = 0.9,'Native\n Grass',cex=1.1)
+mtext(side=1,line=1.5,at = 2.1,'Introduced\n Grass',cex=1.1)
 
-points(x = jitter(raw_x3, factor = 1),y = FDModel$A_Rich, pch = 16, cex = 0.4, col = "black")
-
-#Ground Cover + Simpson
-summary(TG_A_Rich_GC_LS)
-sumamry(TG_A_toprichpred8)
-
-HH <- TG_A_toprichpred8$X500m.Simspson == TG_Predictions_Simspon[10]
-H_H <- TG_A_toprichpred8$Ground_Cover == TG_Predictions_GC[10]
-
-
-dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
-par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
-
-plot(x = FDModel$Ground_Cover,y = FDModel$A_Rich,xlab = expression("Ground Cover (%)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,ylim = c(0,5))
-mtext(side=3,line=0,at = 33,'a)',cex=1.1)
-
-polygon(x = c(TG_A_toprichpred8$Ground_Cover[HH],rev(TG_A_toprichpred8$Ground_Cover[HH])), y = c(TG_A_toprichpred8$lci[HH],rev(TG_A_toprichpred8$uci[HH])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_A_toprichpred8$Ground_Cover[HH],y = TG_A_toprichpred8$fit[HH],lwd = 2,col = 'grey30')
-
-plot(x = FDModel$X500m.Simspson,y = FDModel$A_Rich,xlab = expression("Landscape Diversity (Simpson)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = 0,'b)',cex=1.1)
-
-polygon(x = c(TG_A_toprichpred8$X500m.Simspson[H_H],rev(TG_A_toprichpred8$X500m.Simspson[H_H])), y = c(TG_A_toprichpred8$lci[H_H],rev(TG_A_toprichpred8$uci[H_H])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_A_toprichpred8$X500m.Simspson[H_H],y = TG_A_toprichpred8$fit[H_H],lwd = 2,col = 'grey30')
+points(x = jitter(raw_x1, factor = 1),y = FDModel$A_Rich, pch = 16, cex = 0.4, col = "black")
 
 ##Diversity----
 
@@ -726,16 +688,16 @@ aictab(TG_C_richmodlist_Final)
 
 ###Predictions----
 
-#Elevation + Landscape Class
-summary(TG_C_Rich_E_LC)
+#Elevation + Grass Status
+summary(TG_C_Rich_E_GS)
 
 TG_Predictions_Elevation_Scaled <- seq(min(FDModel$Elevation_Scaled),max(FDModel$Elevation_Scaled),length.out=20)
 
 
-TG_C_toprichpred <- expand.grid(Elevation_Scaled = TG_Predictions_Elevation_Scaled, X500m.Dominant.Landscape.Class = unique(FDModel$X500m.Dominant.Landscape.Class))
+TG_C_toprichpred <- expand.grid(Elevation_Scaled = TG_Predictions_Elevation_Scaled, Grass_Status = c("Native","Introduced"))
 head(TG_C_toprichpred);dim(TG_C_toprichpred)
 
-TG_C_toprichpred1 <- predict(object = TG_C_Rich_E_LC,newdata= TG_C_toprichpred,se.fit = T, type = "link",re.form = NA)
+TG_C_toprichpred1 <- predict(object = TG_C_Rich_E_GS,newdata= TG_C_toprichpred,se.fit = T, type = "link",re.form = NA)
 
 TG_C_toprichpred2<-data.frame(TG_C_toprichpred,fit.link=TG_C_toprichpred1$fit,se.link=TG_C_toprichpred1$se.fit)
 
@@ -751,16 +713,13 @@ TG_C_toprichpred2$uci<-exp(TG_C_toprichpred2$uci.link)
 
 head(TG_C_toprichpred2);dim(TG_C_toprichpred2)
 
-##Height + Landscape Class
-summary(TG_C_Rich_H_LC)
+##Elevation X Grass Status
+summary(TG_C_Rich_ExGS)
 
-TG_Predictions_Height <- seq(min(FDModel$Plant_Height),max(FDModel$Plant_Height),length.out=20)
-
-
-TG_C_toprichpred3 <- expand.grid(Plant_Height = TG_Predictions_Height, X500m.Dominant.Landscape.Class = unique(FDModel$X500m.Dominant.Landscape.Class))
+TG_C_toprichpred3 <- expand.grid(Elevation_Scaled = TG_Predictions_Elevation_Scaled, Grass_Status = c("Native","Introduced"))
 head(TG_C_toprichpred3);dim(TG_C_toprichpred3)
 
-TG_C_toprichpred4 <- predict(object = TG_C_Rich_H_LC,newdata= TG_C_toprichpred3,se.fit = T, type = "link",re.form = NA)
+TG_C_toprichpred4 <- predict(object = TG_C_Rich_ExGS,newdata= TG_C_toprichpred3,se.fit = T, type = "link",re.form = NA)
 
 TG_C_toprichpred5<-data.frame(TG_C_toprichpred3,fit.link=TG_C_toprichpred4$fit,se.link=TG_C_toprichpred4$se.fit)
 
@@ -776,218 +735,60 @@ TG_C_toprichpred5$uci<-exp(TG_C_toprichpred5$uci.link)
 
 head(TG_C_toprichpred5);dim(TG_C_toprichpred5)
 
-##Elevation X Landscape Class
-summary(TG_C_Rich_ExLC)
 
-TG_C_toprichpred6 <- expand.grid(Elevation_Scaled = TG_Predictions_Elevation_Scaled, X500m.Dominant.Landscape.Class = unique(FDModel$X500m.Dominant.Landscape.Class))
-head(TG_C_toprichpred6);dim(TG_C_toprichpred6)
-
-TG_C_toprichpred7 <- predict(object = TG_C_Rich_ExLC,newdata= TG_C_toprichpred6,se.fit = T, type = "link",re.form = NA)
-
-TG_C_toprichpred8<-data.frame(TG_C_toprichpred6,fit.link=TG_C_toprichpred7$fit,se.link=TG_C_toprichpred7$se.fit)
-
-TG_C_toprichpred8$lci.link<-TG_C_toprichpred8$fit.link-
-  (1.96*TG_C_toprichpred8$se.link)
-TG_C_toprichpred8$uci.link<-TG_C_toprichpred8$fit.link+
-  (1.96*TG_C_toprichpred8$se.link)
-
-TG_C_toprichpred8$fit<-exp(TG_C_toprichpred8$fit.link)
-TG_C_toprichpred8$se<-exp(TG_C_toprichpred8$se.link)
-TG_C_toprichpred8$lci<-exp(TG_C_toprichpred8$lci.link)
-TG_C_toprichpred8$uci<-exp(TG_C_toprichpred8$uci.link)
-
-head(TG_C_toprichpred8);dim(TG_C_toprichpred8)
-
-##Grass Status + Landscape Class
-summary(TG_C_Rich_GS_LC)
-
-TG_C_toprichpred9 <- expand.grid(Grass_Status = unique(FDModel$Grass_Status), X500m.Dominant.Landscape.Class = unique(FDModel$X500m.Dominant.Landscape.Class))
-head(TG_C_toprichpred9);dim(TG_C_toprichpred9)
-
-TG_C_toprichpred10<- predict(object = TG_C_Rich_GS_LC,newdata= TG_C_toprichpred9,se.fit = T, type = "link",re.form = NA)
-
-TG_C_toprichpred11<-data.frame(TG_C_toprichpred9,fit.link=TG_C_toprichpred10$fit,se.link=TG_C_toprichpred10$se.fit)
-
-TG_C_toprichpred11$lci.link<-TG_C_toprichpred11$fit.link-
-  (1.96*TG_C_toprichpred11$se.link)
-TG_C_toprichpred11$uci.link<-TG_C_toprichpred11$fit.link+
-  (1.96*TG_C_toprichpred11$se.link)
-
-TG_C_toprichpred11$fit<-exp(TG_C_toprichpred11$fit.link)
-TG_C_toprichpred11$se<-exp(TG_C_toprichpred11$se.link)
-TG_C_toprichpred11$lci<-exp(TG_C_toprichpred11$lci.link)
-TG_C_toprichpred11$uci<-exp(TG_C_toprichpred11$uci.link)
-
-head(TG_C_toprichpred11);dim(TG_C_toprichpred11)
-
-##Height X Landscape Class
-summary(TG_C_Rich_HxLC)
-
-TG_C_toprichpred12 <- expand.grid(Plant_Height = Predictions_Height, X500m.Dominant.Landscape.Class = unique(FDModel$X500m.Dominant.Landscape.Class))
-head(TG_C_toprichpred12);dim(TG_C_toprichpred12)
-
-TG_C_toprichpred13<- predict(object = TG_C_Rich_HxLC,newdata= TG_C_toprichpred12,se.fit = T, type = "link",re.form = NA)
-
-TG_C_toprichpred14<-data.frame(TG_C_toprichpred12,fit.link=TG_C_toprichpred13$fit,se.link=TG_C_toprichpred13$se.fit)
-
-TG_C_toprichpred14$lci.link<-TG_C_toprichpred14$fit.link-
-  (1.96*TG_C_toprichpred14$se.link)
-TG_C_toprichpred14$uci.link<-TG_C_toprichpred14$fit.link+
-  (1.96*TG_C_toprichpred14$se.link)
-
-TG_C_toprichpred14$fit<-exp(TG_C_toprichpred14$fit.link)
-TG_C_toprichpred14$se<-exp(TG_C_toprichpred14$se.link)
-TG_C_toprichpred14$lci<-exp(TG_C_toprichpred14$lci.link)
-TG_C_toprichpred14$uci<-exp(TG_C_toprichpred14$uci.link)
-
-head(TG_C_toprichpred14);dim(TG_C_toprichpred14)
 
 ###Visualize----
 
-#Elevation + Landscape Class
-summary(TG_C_Rich_E_LC)
-sumamry(TG_C_toprichpred2)
+##Elevation + Grass Status
+summary(TG_C_Rich_E_GS)
+head(TG_C_toprichpred2)
 
-II <- TG_C_toprichpred2$X500m.Dominant.Landscape.Class == "NTV_Woody_Open"
-I_I <- TG_C_toprichpred2$Elevation_Scaled == TG_Predictions_Elevation_Scaled[10]
+GG <- TG_C_toprichpred2$Grass_Status == "Introduced"
+G_G <- TG_C_toprichpred2$Elevation_Scaled == TG_Predictions_Elevation_Scaled[10]
 
 
 dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
 par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
 
-plot(x = FDModel$Elevation_Scaled,y = FDModel$C_Rich,xlab = expression("Elevation (m)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,ylim = c(0,5),xaxt = 'n')
+plot(x = FDModel$Elevation_Scaled,y = FDModel$C_Rich,xlab = expression("Elevation (m)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,ylim = c(0,11),xaxt = 'n')
 axis(side=1, at=seq(from=min(TG_C_toprichpred2$Elevation_Scaled),to=max(TG_C_toprichpred2$Elevation_Scaled),length.out=5),labels=round(seq(from=min(FDModel$Elevation),to=max(FDModel$Elevation),length.out=5),0),cex.axis=1)
 mtext(side=3,line=0,at = -2.05,'a)',cex=1.1)
 
-polygon(x = c(TG_C_toprichpred2$Elevation_Scaled[II],rev(TG_C_toprichpred2$Elevation_Scaled[II])), y = c(TG_C_toprichpred2$lci[II],rev(TG_C_toprichpred2$uci[II])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_C_toprichpred2$Elevation_Scaled[II],y = TG_C_toprichpred2$fit[II],lwd = 2,col = 'grey30')
+polygon(x = c(TG_C_toprichpred2$Elevation_Scaled[GG],rev(TG_C_toprichpred2$Elevation_Scaled[GG])), y = c(TG_C_toprichpred2$lci[GG],rev(TG_C_toprichpred2$uci[GG])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_C_toprichpred2$Elevation_Scaled[GG],y = TG_C_toprichpred2$fit[GG],lwd = 2,col = 'grey30')
 
 
-plot(x = 1:3,y = TG_C_toprichpred2$fit [I_I],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(0,7))
-axis(side=1,at=1:3,labels=c(' ',' ', " "))
-arrows(x0=1:3, y0=TG_C_toprichpred2$lci [I_I],x1=1:3, y1=TG_C_toprichpred2$uci[I_I],angle=90,length=0.2, code=3, lwd=2,col = "black")
+plot(x = 1:2,y = TG_C_toprichpred2$fit [G_G],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,11))
+axis(side=1,at=1:2,labels=c(' ',' '))
+arrows(x0=1:2, y0=TG_C_toprichpred2$lci [G_G],x1=1:2, y1=TG_C_toprichpred2$uci[G_G],angle=90,length=0.2, code=3, lwd=2,col = "black")
 mtext(side=3,line=0,at = -0.3,'b)',cex=1.1)
-mtext(side=1,line=1.5,at = 0.8,'Woody\nClosed',cex=1.1)
-mtext(side=1,line=1.5,at = 2,'Herbaceous\nOpen',cex=1.1)
-mtext(side=1,line=1.5,at = 3.2,"Woody\nOpen",cex=1.1)
+mtext(side=1,line=1.5,at = 0.9,'Native\n Grass',cex=1.1)
+mtext(side=1,line=1.5,at = 2.1,'Introduced\n Grass',cex=1.1)
 
-points(x = jitter(raw_x3, factor = 1),y = FDModel$C_Rich, pch = 16, cex = 0.4, col = "black")
+points(x = jitter(raw_x1, factor = 1),y = FDModel$C_Rich, pch = 16, cex = 0.4, col = "black")
 
-##Height + Landscape Class
-summary(TG_C_Rich_H_LC)
+###Elevation X Grass Status
+summary(TG_C_Rich_ExGS)
 head(TG_C_toprichpred5)
 
-JJ <- TG_C_toprichpred5$X500m.Dominant.Landscape.Class == "NTV_Woody_Open"
-J_J <- TG_C_toprichpred5$Plant_Height == TG_Predictions_Height[10]
+HH <- TG_C_toprichpred5$Grass_Status == "Introduced"
+H_H <- TG_C_toprichpred5$Grass_Status == "Native"
 
 
 dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
 par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
 
-plot(x = FDModel$Plant_Height,y = FDModel$C_Rich,xlab = expression("Grass Height (cm)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = -2.05,'a)',cex=1)
+plot(x = FDModel$Elevation_Scaled,y = FDModel$C_Rich,xlab = expression("Elevation (m)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,ylim = c(0,13),xaxt = 'n')
+axis(side=1, at=seq(from=min(TG_C_toprichpred5$Elevation_Scaled),to=max(TG_C_toprichpred5$Elevation_Scaled),length.out=5),labels=round(seq(from=min(FDModel$Elevation),to=max(FDModel$Elevation),length.out=5),0),cex.axis=1)
+mtext(side=3,line=0,at = -2,'a)',cex=1)
 
-polygon(x = c(TG_C_toprichpred5$Plant_Height[JJ],rev(TG_C_toprichpred5$Plant_Height[JJ])), y = c(TG_C_toprichpred5$lci[JJ],rev(TG_C_toprichpred5$uci[JJ])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_C_toprichpred5$Plant_Height[JJ],y = TG_C_toprichpred5$fit[JJ],lwd = 2,col = 'grey30')
+polygon(x = c(TG_C_toprichpred5$Elevation_Scaled[HH],rev(TG_C_toprichpred5$Elevation_Scaled[HH])), y = c(TG_C_toprichpred5$lci[HH],rev(TG_C_toprichpred5$uci[HH])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_C_toprichpred5$Elevation_Scaled[HH],y = TG_C_toprichpred5$fit[HH],lwd = 2,lty=1,col = 'grey30')
 
+polygon(x = c(TG_C_toprichpred5$Elevation_Scaled[H_H],rev(TG_C_toprichpred5$Elevation_Scaled[H_H])), y = c(TG_C_toprichpred5$lci[H_H],rev(TG_C_toprichpred5$uci[H_H])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_C_toprichpred5$Elevation_Scaled[H_H],y = TG_C_toprichpred5$fit[H_H],lwd = 2,lty=2,col = 'grey30')
 
-plot(x = 1:3,y = TG_C_toprichpred5$fit [J_J],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(0,10))
-axis(side=1,at=1:3,labels=c(' ',' ', " "))
-arrows(x0=1:3, y0=TG_C_toprichpred5$lci [J_J],x1=1:3, y1=TG_C_toprichpred5$uci[J_J],angle=90,length=0.2, code=3, lwd=2,col = "black")
-mtext(side=3,line=0,at = -0.3,'b)',cex=1)
-mtext(side=1,line=1.5,at = 0.8,'Woody\nClosed',cex=1.1)
-mtext(side=1,line=1.5,at = 2,'Herbaceous\nOpen',cex=1.1)
-mtext(side=1,line=1.5,at = 3.2,"Woody\nOpen",cex=1.1)
-
-points(x = jitter(raw_x3, factor = 1),y = FDModel$C_Rich, pch = 16, cex = 0.4, col = "black")
-
-
-##Elevation X Landscape Class
-summary(TG_C_Rich_ExLC)
-head(TG_C_toprichpred8)
-
-
-KK <- TG_C_toprichpred2$X500m.Dominant.Landscape.Class == "NTV_Woody_Closed"
-K_K <- TG_C_toprichpred2$X500m.Dominant.Landscape.Class == "NTV_Herbaceous_Open"
-K_K_K <- TG_C_toprichpred2$X500m.Dominant.Landscape.Class == "NTV_Woody_Open"
-
-
-dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
-par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
-
-plot(x = FDModel$Elevation_Scaled,y = FDModel$C_Rich,xlab = expression("Elevation (m)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,xaxt = 'n')
-axis(side=1, at=seq(from=min(TG_C_toprichpred8$Elevation_Scaled),to=max(TG_C_toprichpred8$Elevation_Scaled),length.out=5),labels=round(seq(from=min(FDModel$Elevation),to=max(FDModel$Elevation),length.out=5),0),cex.axis=1)
-mtext(side=3,line=0,at = -2.05,'a)',cex=1)
-
-polygon(x = c(TG_C_toprichpred8$Elevation_Scaled[KK],rev(TG_C_toprichpred8$Elevation_Scaled[KK])), y = c(TG_C_toprichpred8$lci[KK],rev(TG_C_toprichpred8$uci[KK])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_C_toprichpred8$Elevation_Scaled[KK],y = TG_C_toprichpred8$fit[KK],lwd = 2,lty = 1, col = 'grey30')
-
-polygon(x = c(TG_C_toprichpred8$Elevation_Scaled[K_K],rev(TG_C_toprichpred8$Elevation_Scaled[K_K])), y = c(TG_C_toprichpred8$lci[K_K],rev(TG_C_toprichpred8$uci[K_K])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_C_toprichpred8$Elevation_Scaled[K_K],y = TG_C_toprichpred8$fit[K_K],lwd = 2,lty = 2, col = 'grey30')
-
-polygon(x = c(TG_C_toprichpred8$Elevation_Scaled[K_K_K],rev(TG_C_toprichpred8$Elevation_Scaled[K_K_K])), y = c(TG_C_toprichpred8$lci[K_K_K],rev(TG_C_toprichpred8$uci[K_K_K])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_C_toprichpred8$Elevation_Scaled[K_K_K],y = TG_C_toprichpred8$fit[K_K_K],lwd = 2,lty = 3, col = 'grey30')
-
-legend('topleft',legend = c("Woody Closed", "Herbaceous Open", "Woody Open"), lty = c(1,2,3), col = 'grey30',pt.cex = 1)
-
-
-##Grass Status + Landscape Class
-summary(TG_C_Rich_GS_LC)
-head(TG_C_toprichpred11)
-
-LL <- TG_C_toprichpred11$X500m.Dominant.Landscape.Class == "NTV_Woody_Open"
-L_L <- TG_C_toprichpred11$Grass_Status == "Native"
-
-
-dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
-par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
-
-plot(x = 1:3,y = TG_C_toprichpred11$fit [LL],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(0,10))
-axis(side=1,at=1:3,labels=c(' ',' ', " "))
-arrows(x0=1:3, y0=TG_C_toprichpred11$lci [LL],x1=1:3, y1=TG_C_toprichpred11$uci[LL],angle=90,length=0.2, code=3, lwd=2,col = "black")
-mtext(side=3,line=0,at = -0.3,'a)',cex=1)
-mtext(side=1,line=1.5,at = 0.8,'Introduced',cex=1.1)
-mtext(side=1,line=1.5,at = 2,'Unknown',cex=1.1)
-mtext(side=1,line=1.5,at = 3.2,"Native",cex=1.1)
-
-points(x = jitter(raw_x3, factor = 1),y = FDModel$C_Rich, pch = 16, cex = 0.4, col = "black")
-
-
-plot(x = 1:3,y = TG_C_toprichpred11$fit [L_L],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(0,10))
-axis(side=1,at=1:3,labels=c(' ',' ', " "))
-arrows(x0=1:3, y0=TG_C_toprichpred11$lci [L_L],x1=1:3, y1=TG_C_toprichpred11$uci[L_L],angle=90,length=0.2, code=3, lwd=2,col = "black")
-mtext(side=3,line=0,at = -0.3,'b)',cex=1)
-mtext(side=1,line=1.5,at = 0.8,'Woody\nClosed',cex=1.1)
-mtext(side=1,line=1.5,at = 2,'Herbaceous\nOpen',cex=1.1)
-mtext(side=1,line=1.5,at = 3.2,"Woody\nOpen",cex=1.1)
-
-points(x = jitter(raw_x3, factor = 1),y = FDModel$C_Rich, pch = 16, cex = 0.4, col = "black")
-
-##Height X Landscape Class
-summary(TG_C_Rich_HxLC)
-head(TG_C_toprichpred14)
-
-MM <- TG_C_toprichpred14$X500m.Dominant.Landscape.Class == "NTV_Woody_Closed"
-M_M <- TG_C_toprichpred14$X500m.Dominant.Landscape.Class == "NTV_Herbaceous_Open"
-M_M_M <- TG_C_toprichpred14$X500m.Dominant.Landscape.Class == "NTV_Woody_Open"
-
-dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
-par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
-
-plot(x = FDModel$Plant_Height,y = FDModel$C_Rich,xlab = expression("Grass Height (cm)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = -2.05,'a)',cex=1)
-
-polygon(x = c(TG_C_toprichpred14$Plant_Height[MM],rev(TG_C_toprichpred14$Plant_Height[MM])), y = c(TG_C_toprichpred14$lci[MM],rev(TG_C_toprichpred14$uci[MM])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_C_toprichpred14$Plant_Height[MM],y = TG_C_toprichpred14$fit[MM],lwd = 2, lty = 1, col = 'grey30')
-
-polygon(x = c(TG_C_toprichpred14$Plant_Height[M_M],rev(TG_C_toprichpred14$Plant_Height[M_M])), y = c(TG_C_toprichpred14$lci[M_M],rev(TG_C_toprichpred14$uci[M_M])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_C_toprichpred14$Plant_Height[M_M],y = TG_C_toprichpred14$fit[M_M],lwd = 2, lty = 2, col = 'grey30')
-
-polygon(x = c(TG_C_toprichpred14$Plant_Height[M_M_M],rev(TG_C_toprichpred14$Plant_Height[M_M_M])), y = c(TG_C_toprichpred14$lci[M_M_M],rev(TG_C_toprichpred14$uci[M_M_M])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_C_toprichpred14$Plant_Height[M_M_M],y = TG_C_toprichpred14$fit[M_M_M],lwd = 2, lty = 3, col = 'grey30')
-
-legend('topright',legend = c("Woody Closed", "Herbaceous Open", "Woody Open"), lty = c(1,2,3), col = 'grey30',pt.cex = 1)
-
+legend('top',legend = c("Native", "Introduced"), lty = c(2,1), col = 'grey30',pt.cex = 1)
 
 ##Diversity----
 
@@ -1034,7 +835,7 @@ TG_C_Divmodlist <- mget(TG_C_Div_modnames)
 aictab(TG_C_Divmodlist)
 #Grass Status
 
-#Additive----
+##Additive
 
 head(FDModel)
 names(FDModel)
@@ -1182,7 +983,7 @@ TG_C_Divmodlist2 <- mget(TG_C_Divmodnames2)
 aictab(TG_C_Divmodlist2)
 #Elevation x Grass Status
 
-##Final AICC----
+###Final AICC----
 
 TG_C_DivModnames3<- c("TG_C_Div_null", "TG_C_Div_GS",
                       "TG_C_Div_E_GS","TG_C_Div_ExGS")
@@ -1194,136 +995,214 @@ aictab(TG_C_divmodlist_Final)
 #Equivalent models:
 ##Grass Status
 
+###Predictions----
 
-#Species Rich Figures
+#Elevation + Grass Status
+summary(TG_C_Div_E_GS)
+
+TG_Predictions_Elevation <- seq(min(FDModel$Elevation),max(FDModel$Elevation),length.out=20)
+
+TG_C_topdivpred <- expand.grid(Elevation = TG_Predictions_Elevation, Grass_Status = c("Native","Introduced"))
+head(TG_C_topdivpred);dim(TG_C_topdivpred)
+
+TG_C_topdivpred1 <- predict(object = TG_C_Div_E_GS,newdata= TG_C_topdivpred,se.fit = T, type = "link",re.form = NA)
+
+TG_C_topdivpred2<-data.frame(TG_C_topdivpred,fit.link=TG_C_topdivpred1$fit,se.link=TG_C_topdivpred1$se.fit)
+
+TG_C_topdivpred2$lci.link<-TG_C_topdivpred2$fit.link-
+  (1.96*TG_C_topdivpred2$se.link)
+TG_C_topdivpred2$uci.link<-TG_C_topdivpred2$fit.link+
+  (1.96*TG_C_topdivpred2$se.link)
+
+TG_C_topdivpred2$fit<-exp(TG_C_topdivpred2$fit.link)
+TG_C_topdivpred2$se<-exp(TG_C_topdivpred2$se.link)
+TG_C_topdivpred2$lci<-exp(TG_C_topdivpred2$lci.link)
+TG_C_topdivpred2$uci<-exp(TG_C_topdivpred2$uci.link)
+
+head(TG_C_topdivpred2);dim(TG_C_topdivpred2)
+
+##Grass Status
+summary(TG_C_Div_GS)
+
+TG_C_topdivpred3 <- data.frame(Grass_Status = c("Native","Introduced"))
+head(TG_C_topdivpred3);dim(TG_C_topdivpred3)
+
+TG_C_topdivpred4 <- predict(object = TG_C_Div_GS,newdata= TG_C_topdivpred3,se.fit = T, type = "link",re.form = NA)
+
+TG_C_topdivpred5<-data.frame(TG_C_topdivpred3,fit.link=TG_C_topdivpred4$fit,se.link=TG_C_topdivpred4$se.fit)
+
+TG_C_topdivpred5$lci.link<-TG_C_topdivpred5$fit.link-
+  (1.96*TG_C_topdivpred5$se.link)
+TG_C_topdivpred5$uci.link<-TG_C_topdivpred5$fit.link+
+  (1.96*TG_C_topdivpred5$se.link)
+
+TG_C_topdivpred5$fit<-exp(TG_C_topdivpred5$fit.link)
+TG_C_topdivpred5$se<-exp(TG_C_topdivpred5$se.link)
+TG_C_topdivpred5$lci<-exp(TG_C_topdivpred5$lci.link)
+TG_C_topdivpred5$uci<-exp(TG_C_topdivpred5$uci.link)
+
+head(TG_C_topdivpred5);dim(TG_C_topdivpred5)
+
+###Visualize----
+
+##Elevation + Grass Status
+summary(TG_C_Div_E_GS)
+head(TG_C_topdivpred2)
+
+II <- TG_C_topdivpred2$Grass_Status == "Introduced"
+I_I <- TG_C_topdivpred2$Elevation == TG_Predictions_Elevation[10]
+
+
+dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
+
+plot(x = FDModel$Elevation,y = FDModel$C_Div,xlab = expression("Elevation (m)"),ylab = 'Diversity', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,ylim = c(0,6))
+mtext(side=3,line=0,at = 60,'a)',cex=1.1)
+
+polygon(x = c(TG_C_topdivpred2$Elevation[II],rev(TG_C_topdivpred2$Elevation[II])), y = c(TG_C_topdivpred2$lci[II],rev(TG_C_topdivpred2$uci[II])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_C_topdivpred2$Elevation[II],y = TG_C_topdivpred2$fit[II],lwd = 2,col = 'grey30')
+
+
+plot(x = 1:2,y = TG_C_topdivpred2$fit[I_I],xlab = " ",ylab = 'Diversity', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,6))
+axis(side=1,at=1:2,labels=c(' ',' '))
+arrows(x0=1:2, y0=TG_C_topdivpred2$lci[I_I],x1=1:2, y1=TG_C_topdivpred2$uci[I_I],angle=90,length=0.2, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.25,'b)',cex=1.1)
+mtext(side=1,line=1.5,at = 0.9,'Native\n Grass',cex=1.1)
+mtext(side=1,line=1.5,at = 2.1,'Introduced\n Grass',cex=1.1)
+
+points(x = jitter(raw_x1, factor = 1),y = FDModel$C_Div, pch = 16, cex = 0.4, col = "black")
+
+##Grass Status
+
+summary(TG_C_Div_GS)
+head(TG_C_topdivpred5)
+
+dev.new(height=5,width=10,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,2,2),mfrow=c(1,2),mgp=c(2.5,1,0),xpd = T)
+
+plot(x = 1:2,y = TG_C_topdivpred5$fit,xlab = " ",ylab = 'Diversity', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,6))
+axis(side=1,at=1:2,labels=c(' ',' '))
+arrows(x0=1:2, y0=TG_C_topdivpred5$lci,x1=1:2, y1=TG_C_topdivpred5$uci,angle=90,length=0.2, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.25,'a)',cex=1.1)
+mtext(side=1,line=1.5,at = 0.9,'Native\n Grass',cex=1.1)
+mtext(side=1,line=1.5,at = 2.1,'Introduced\n Grass',cex=1.1)
+
+points(x = jitter(raw_x1, factor = 1),y = FDModel$C_Div, pch = 16, cex = 0.4, col = "black")
+
+
+
+#Species Rich/Diversity Figures----
 
 ##Main----
 
-dev.new(height=10,width=10,dpi=80,pointsize=14,noRStudioGD = T)
-par(mar=c(4,4,2,2),mfrow=c(2,2),mgp=c(2.5,1,0),xpd = T)
+dev.new(height=10,width=15,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,3,2),mfrow=c(2,3),mgp=c(2.5,1,0),xpd = T)
 
-plot(x = FDModel$Elevation_Scaled,y = FDModel$C_Rich,xlab = expression("Elevation (m)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,ylim = c(0,6),xaxt = 'n')
-axis(side=1, at=seq(from=min(TG_C_toprichpred2$Elevation_Scaled),to=max(TG_C_toprichpred2$Elevation_Scaled),length.out=5),labels=round(seq(from=min(FDModel$Elevation),to=max(FDModel$Elevation),length.out=5),0),cex.axis=1)
-mtext(side=3,line=0,at = -2.05,'a)',cex=0.9)
+plot(x = FDModel$Plant_Height,y = FDModel$A_Rich,xlab = expression("Grass Height (cm)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,ylim=c(0,5.5),cex.axis=1.3,cex.lab=1.4)
+mtext(side=3,line=0,at = -2,'a)',cex=0.9)
 
-polygon(x = c(TG_C_toprichpred2$Elevation_Scaled[II],rev(TG_C_toprichpred2$Elevation_Scaled[II])), y = c(TG_C_toprichpred2$lci[II],rev(TG_C_toprichpred2$uci[II])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_C_toprichpred2$Elevation_Scaled[II],y = TG_C_toprichpred2$fit[II],lwd = 2,col = 'grey30')
+polygon(x = c(TG_A_toprichpred2$Plant_Height[EE],rev(TG_A_toprichpred2$Plant_Height[EE])), y = c(TG_A_toprichpred2$lci[EE],rev(TG_A_toprichpred2$uci[EE])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_A_toprichpred2$Plant_Height[EE],y = TG_A_toprichpred2$fit[EE],lwd = 2,lty=1,col = 'grey30')
 
+polygon(x = c(TG_A_toprichpred2$Plant_Height[E_E],rev(TG_A_toprichpred2$Plant_Height[E_E])), y = c(TG_A_toprichpred2$lci[E_E],rev(TG_A_toprichpred2$uci[E_E])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_A_toprichpred2$Plant_Height[E_E],y = TG_A_toprichpred2$fit[E_E],lwd = 2,lty =2,col = 'grey30')
 
-plot(x = 1:3,y = TG_C_toprichpred2$fit [I_I],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(0,7))
-axis(side=1,at=1:3,labels=c(' ',' ', " "))
-arrows(x0=1:3, y0=TG_C_toprichpred2$lci [I_I],x1=1:3, y1=TG_C_toprichpred2$uci[I_I],angle=90,length=0.1, code=3, lwd=2,col = "black")
-mtext(side=3,line=0,at = -0.3,'b)',cex=0.9)
-mtext(side=1,line=1.5,at = 0.6,'Woody\nClosed',cex=0.7)
-mtext(side=1,line=1.5,at = 2,'Herbaceous\nOpen',cex=0.7)
-mtext(side=1,line=1.5,at = 3.3,"Woody\nOpen",cex=0.7)
+legend('topright',legend = c("Native", "Introduced"), lty = c(2,1), col = 'grey30',pt.cex = 1,cex = 1.2)
 
-points(x = jitter(raw_x3, factor = 1),y = FDModel$C_Rich, pch = 16, cex = 0.4, col = "black")
-
-mtext(side=3,line=1,at = -2,'Non-web building spiders, herbivorous Hemiptera and medium/large grasshoppers',cex=0.7, font = 2)
+mtext(side=3,line=0.5,at = 43,'Flies, small herbivorous \nHemiptera and small Orthoptera',cex=0.7, font = 2)
 
 
+plot(x = FDModel$Elevation_Scaled,y = FDModel$C_Rich,xlab = expression("Elevation (m)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,ylim = c(0,11),xaxt = 'n',cex.lab=1.4,cex.axis=1.3)
+axis(side=1, at=seq(from=min(TG_C_toprichpred2$Elevation_Scaled),to=max(TG_C_toprichpred2$Elevation_Scaled),length.out=5),labels=round(seq(from=min(FDModel$Elevation),to=max(FDModel$Elevation),length.out=5),0),cex.axis=1.3)
+mtext(side=3,line=0,at = -2.05,'b)',cex=0.9)
 
-plot(x = FDModel$Ground_Cover,y = FDModel$A_Rich,xlab = expression("Ground Cover (%)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,xaxt = 'n')
-axis(side=1, at=seq(from=min(FDModel$Ground_Cover),to=max(FDModel$Ground_Cover),length.out=5),labels=round(seq(from=min(FDModel$Ground_Cover),to=max(FDModel$Ground_Cover),length.out=5),0),cex.axis=1)
-mtext(side=3,line=0,at = 30,'c)',cex=0.9)
+polygon(x = c(TG_C_toprichpred2$Elevation_Scaled[GG],rev(TG_C_toprichpred2$Elevation_Scaled[GG])), y = c(TG_C_toprichpred2$lci[GG],rev(TG_C_toprichpred2$uci[GG])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_C_toprichpred2$Elevation_Scaled[GG],y = TG_C_toprichpred2$fit[GG],lwd = 2,col = 'grey30')
 
-polygon(x = c(TG_A_toprichpred2$Ground_Cover,rev(TG_A_toprichpred2$Ground_Cover)), y = c(TG_A_toprichpred2$lci,rev(TG_A_toprichpred2$uci)),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_A_toprichpred2$Ground_Cover,y = TG_A_toprichpred2$fit,lwd = 2,col = 'grey30')
-mtext(side=3,line=,at = 70,'Flies, small herbivorous \nHemiptera and small Orthoptera',cex=0.7, font = 2)
+mtext(side=3,line=1.2,at = 2,'Non-web building spiders, herbivorous Hemiptera and medium/large grasshoppers',cex=0.7, font = 2)
+
+
+plot(x = 1:2,y = TG_C_toprichpred2$fit [G_G],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,11),cex.axis=1.3,cex.lab=1.4)
+axis(side=1,at=1:2,labels=c(' ',' '))
+arrows(x0=1:2, y0=TG_C_toprichpred2$lci [G_G],x1=1:2, y1=TG_C_toprichpred2$uci[G_G],angle=90,length=0.1, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.3,'c)',cex=0.9)
+mtext(side=1,line=2,at = 0.9,'Native\n Grass',cex=0.9)
+mtext(side=1,line=2,at = 2.1,'Introduced\n Grass',cex=0.9)
+
+points(x = jitter(raw_x1, factor = 1),y = FDModel$C_Rich, pch = 16, cex = 0.4, col = "black")
+
+
+plot(x = FDModel$Elevation,y = FDModel$C_Div,xlab = expression("Elevation (m)"),ylab = 'Diversity', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,ylim = c(0,6),cex.lab=1.4,cex.axis=1.3,xaxt = 'n')
+axis(side=1, at=seq(from=min(TG_C_topdivpred2$Elevation),to=max(TG_C_topdivpred2$Elevation),length.out=5),labels=round(seq(from=min(FDModel$Elevation),to=max(FDModel$Elevation),length.out=5),0),cex.axis=1.3)
+mtext(side=3,line=0,at = 60,'d)',cex=0.9)
+
+polygon(x = c(TG_C_topdivpred2$Elevation[II],rev(TG_C_topdivpred2$Elevation[II])), y = c(TG_C_topdivpred2$lci[II],rev(TG_C_topdivpred2$uci[II])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_C_topdivpred2$Elevation[II],y = TG_C_topdivpred2$fit[II],lwd = 2,col = 'grey30')
+
+mtext(side=3,line=1.2,at = 740,'Non-web building spiders, herbivorous Hemiptera and medium/large grasshoppers',cex=0.7, font = 2)
+
+
+plot(x = 1:2,y = TG_C_topdivpred2$fit[I_I],xlab = " ",ylab = 'Diversity', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,6),cex.lab=1.4,cex.axis=1.3)
+axis(side=1,at=1:2,labels=c(' ',' '))
+arrows(x0=1:2, y0=TG_C_topdivpred2$lci[I_I],x1=1:2, y1=TG_C_topdivpred2$uci[I_I],angle=90,length=0.1, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.25,'e)',cex=0.9)
+mtext(side=1,line=2,at = 0.9,'Native\n Grass',cex=0.9)
+mtext(side=1,line=2,at = 2.1,'Introduced\n Grass',cex=0.9)
+
+points(x = jitter(raw_x1, factor = 1),y = FDModel$C_Div, pch = 16, cex = 0.4, col = "black")
+
+
 
 ##Supporting info----
 
 dev.new(height=10,width=10,dpi=80,pointsize=14,noRStudioGD = T)
-par(mar=c(4,4,2,2),mfrow=c(2,2),mgp=c(2.5,1,0),xpd = T)
+par(mar=c(4,4,3,2),mfrow=c(2,2),mgp=c(2.5,1,0),xpd = T)
 
-plot(x = FDModel$Ground_Cover,y = FDModel$A_Rich,xlab = expression("Ground Cover (%)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,ylim = c(0,5),cex.axis = 0.9)
-mtext(side=3,line=0,at = 32,'a)',cex=0.9)
+plot(x = FDModel$Ground_Cover,y = FDModel$A_Rich,xlab = expression("Ground Cover (%)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,ylim = c(0,5),xaxt = 'n')
+axis(side=1, at=seq(from=min(TG_A_toprichpred5$Ground_Cover),to=max(TG_A_toprichpred5$Ground_Cover),length.out=5),labels=round(seq(from=min(FDModel$Ground_Cover),to=max(FDModel$Ground_Cover),length.out=5),0),cex.axis=1)
+mtext(side=3,line=0,at = 33,'a)',cex=0.9)
 
-polygon(x = c(TG_A_toprichpred5$Ground_Cover[GG],rev(TG_A_toprichpred5$Ground_Cover[GG])), y = c(TG_A_toprichpred5$lci[GG],rev(TG_A_toprichpred5$uci[GG])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_A_toprichpred5$Ground_Cover[GG],y = TG_A_toprichpred5$fit[GG],lwd = 2,col = 'grey30')
+polygon(x = c(TG_A_toprichpred5$Ground_Cover[FF],rev(TG_A_toprichpred5$Ground_Cover[FF])), y = c(TG_A_toprichpred5$lci[FF],rev(TG_A_toprichpred5$uci[FF])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_A_toprichpred5$Ground_Cover[FF],y = TG_A_toprichpred5$fit[FF],lwd = 2,col = 'grey30')
+
+mtext(side=3,line=1.2,at = 110,'----------Flies, small herbivorous Hemiptera and small Orthoptera---------',cex=0.7, font = 2)
 
 
-plot(x = 1:3,y = TG_A_toprichpred5$fit [G_G],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(0,5))
-axis(side=1,at=1:3,labels=c(' ',' ', " "))
-arrows(x0=1:3, y0=TG_A_toprichpred5$lci [G_G],x1=1:3, y1=TG_A_toprichpred5$uci[G_G],angle=90,length=0.1, code=3, lwd=2,col = "black")
+plot(x = 1:2,y = TG_A_toprichpred5$fit [F_F],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,5))
+axis(side=1,at=1:2,labels=c(' ',' '))
+arrows(x0=1:2, y0=TG_A_toprichpred5$lci [F_F],x1=1:2, y1=TG_A_toprichpred5$uci[F_F],angle=90,length=0.1, code=3, lwd=2,col = "black")
 mtext(side=3,line=0,at = -0.3,'b)',cex=0.9)
-mtext(side=1,line=1.5,at = 0.7,'Woody\nClosed',cex=0.7)
-mtext(side=1,line=1.5,at = 2,'Herbaceous\nOpen',cex=0.7)
-mtext(side=1,line=1.5,at = 3.3,"Woody\nOpen",cex=0.7)
+mtext(side=1,line=1.5,at = 0.9,'Native\n Grass',cex=0.9)
+mtext(side=1,line=1.5,at = 2.1,'Introduced\n Grass',cex=0.9)
 
-points(x = jitter(raw_x3, factor = 1),y = FDModel$A_Rich, pch = 16, cex = 0.4, col = "black")
-
-
-plot(x = FDModel$X500m.Simspson,y = FDModel$A_Rich,xlab = expression("Habitat Diversity within 500m"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
-mtext(side=3,line=0,at = 0,'c)',cex=0.9)
-
-polygon(x = c(TG_A_toprichpred8$X500m.Simspson[H_H],rev(TG_A_toprichpred8$X500m.Simspson[H_H])), y = c(TG_A_toprichpred8$lci[H_H],rev(TG_A_toprichpred8$uci[H_H])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_A_toprichpred8$X500m.Simspson[H_H],y = TG_A_toprichpred8$fit[H_H],lwd = 2,col = 'grey30')
+points(x = jitter(raw_x1, factor = 1),y = FDModel$A_Rich, pch = 16, cex = 0.4, col = "black")
 
 
 
+plot(x = FDModel$Elevation_Scaled,y = FDModel$C_Rich,xlab = expression("Elevation (m)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,ylim = c(0,13),xaxt = 'n')
+axis(side=1, at=seq(from=min(TG_C_toprichpred5$Elevation_Scaled),to=max(TG_C_toprichpred5$Elevation_Scaled),length.out=5),labels=round(seq(from=min(FDModel$Elevation),to=max(FDModel$Elevation),length.out=5),0),cex.axis=1)
+mtext(side=3,line=0,at = -2,'c)',cex=0.9)
 
-dev.new(height=10,width=15,dpi=80,pointsize=14,noRStudioGD = T)
-par(mar=c(4,4,2,2),mfrow=c(2,3),mgp=c(2.5,1,0),xpd = T)
+polygon(x = c(TG_C_toprichpred5$Elevation_Scaled[HH],rev(TG_C_toprichpred5$Elevation_Scaled[HH])), y = c(TG_C_toprichpred5$lci[HH],rev(TG_C_toprichpred5$uci[HH])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_C_toprichpred5$Elevation_Scaled[HH],y = TG_C_toprichpred5$fit[HH],lwd = 2,lty=1,col = 'grey30')
 
-plot(x = FDModel$Plant_Height,y = FDModel$C_Rich,xlab = expression("Grass Height (cm)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.axis=1.2,cex.lab=1.2)
-mtext(side=3,line=0,at = -2.05,'a)',cex=0.9)
+polygon(x = c(TG_C_toprichpred5$Elevation_Scaled[H_H],rev(TG_C_toprichpred5$Elevation_Scaled[H_H])), y = c(TG_C_toprichpred5$lci[H_H],rev(TG_C_toprichpred5$uci[H_H])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=TG_C_toprichpred5$Elevation_Scaled[H_H],y = TG_C_toprichpred5$fit[H_H],lwd = 2,lty=2,col = 'grey30')
 
-polygon(x = c(TG_C_toprichpred5$Plant_Height[JJ],rev(TG_C_toprichpred5$Plant_Height[JJ])), y = c(TG_C_toprichpred5$lci[JJ],rev(TG_C_toprichpred5$uci[JJ])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_C_toprichpred5$Plant_Height[JJ],y = TG_C_toprichpred5$fit[JJ],lwd = 2,col = 'grey30')
-
-
-plot(x = 1:3,y = TG_C_toprichpred5$fit [J_J],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(0,10),cex.axis=1.2,cex.lab=1.2)
-axis(side=1,at=1:3,labels=c(' ',' ', " "))
-arrows(x0=1:3, y0=TG_C_toprichpred5$lci [J_J],x1=1:3, y1=TG_C_toprichpred5$uci[J_J],angle=90,length=0.1, code=3, lwd=2,col = "black")
-mtext(side=3,line=0,at = -0.3,'b)',cex=0.9)
-mtext(side=1,line=2,at = 0.7,'Woody\nClosed',cex=0.8)
-mtext(side=1,line=2,at = 2,'Herbaceous\nOpen',cex=0.8)
-mtext(side=1,line=2,at = 3.3,"Woody\nOpen",cex=0.8)
-
-points(x = jitter(raw_x3, factor = 1),y = FDModel$C_Rich, pch = 16, cex = 0.4, col = "black")
-
-plot(x = FDModel$Elevation_Scaled,y = FDModel$C_Rich,xlab = expression("Elevation (m)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,xaxt = 'n',,cex.axis=1.2,cex.lab=1.2)
-axis(side=1, at=seq(from=min(TG_C_toprichpred8$Elevation_Scaled),to=max(TG_C_toprichpred8$Elevation_Scaled),length.out=5),labels=round(seq(from=min(FDModel$Elevation),to=max(FDModel$Elevation),length.out=5),0),cex.axis=1.2)
-mtext(side=3,line=0,at = -2.05,'c)',cex=0.9)
-
-polygon(x = c(TG_C_toprichpred8$Elevation_Scaled[KK],rev(TG_C_toprichpred8$Elevation_Scaled[KK])), y = c(TG_C_toprichpred8$lci[KK],rev(TG_C_toprichpred8$uci[KK])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_C_toprichpred8$Elevation_Scaled[KK],y = TG_C_toprichpred8$fit[KK],lwd = 2,lty = 1, col = 'grey30')
-
-polygon(x = c(TG_C_toprichpred8$Elevation_Scaled[K_K],rev(TG_C_toprichpred8$Elevation_Scaled[K_K])), y = c(TG_C_toprichpred8$lci[K_K],rev(TG_C_toprichpred8$uci[K_K])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_C_toprichpred8$Elevation_Scaled[K_K],y = TG_C_toprichpred8$fit[K_K],lwd = 2,lty = 2, col = 'grey30')
-
-polygon(x = c(TG_C_toprichpred8$Elevation_Scaled[K_K_K],rev(TG_C_toprichpred8$Elevation_Scaled[K_K_K])), y = c(TG_C_toprichpred8$lci[K_K_K],rev(TG_C_toprichpred8$uci[K_K_K])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_C_toprichpred8$Elevation_Scaled[K_K_K],y = TG_C_toprichpred8$fit[K_K_K],lwd = 2,lty = 3, col = 'grey30')
-
-legend('topleft',legend = c("Woody Closed", "Herbaceous Open", "Woody Open"), lty = c(1,2,3), col = 'grey30',pt.cex = 1)
+legend('top',legend = c("Native", "Introduced"), lty = c(2,1), col = 'grey30',pt.cex = 1)
 
 
-plot(x = 1:3,y = TG_C_toprichpred11$fit [LL],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(0,10),cex.axis=1.2,cex.lab=1.2)
-axis(side=1,at=1:3,labels=c(' ',' ', " "))
-arrows(x0=1:3, y0=TG_C_toprichpred11$lci [LL],x1=1:3, y1=TG_C_toprichpred11$uci[LL],angle=90,length=0.1, code=3, lwd=2,col = "black")
-mtext(side=3,line=0,at = -0.3,'d)',cex=0.9)
-mtext(side=1,line=1.5,at = 0.7,'Introduced',cex=0.8)
-mtext(side=1,line=1.5,at = 2.1,'Unknown',cex=0.8)
-mtext(side=1,line=1.5,at = 3.2,"Native",cex=0.8)
 
-points(x = jitter(raw_x3, factor = 1),y = FDModel$C_Rich, pch = 16, cex = 0.4, col = "black")
+plot(x = 1:2,y = TG_C_topdivpred5$fit,xlab = " ",ylab = 'Diversity', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,6))
+axis(side=1,at=1:2,labels=c(' ',' '))
+arrows(x0=1:2, y0=TG_C_topdivpred5$lci,x1=1:2, y1=TG_C_topdivpred5$uci,angle=90,length=0.1, code=3, lwd=2,col = "black")
+mtext(side=3,line=0,at = -0.25,'d)',cex=0.9)
+mtext(side=1,line=1.5,at = 0.9,'Native\n Grass',cex=0.9)
+mtext(side=1,line=1.5,at = 2.1,'Introduced\n Grass',cex=0.9)
 
+points(x = jitter(raw_x1, factor = 1),y = FDModel$C_Div, pch = 16, cex = 0.4, col = "black")
 
-plot(x = FDModel$Plant_Height,y = FDModel$C_Rich,xlab = expression("Grass Height (cm)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.axis=1.2,cex.lab=1.2)
-mtext(side=3,line=0,at = -2.05,'e)',cex=0.9)
-
-polygon(x = c(TG_C_toprichpred14$Plant_Height[MM],rev(TG_C_toprichpred14$Plant_Height[MM])), y = c(TG_C_toprichpred14$lci[MM],rev(TG_C_toprichpred14$uci[MM])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_C_toprichpred14$Plant_Height[MM],y = TG_C_toprichpred14$fit[MM],lwd = 2, lty = 1, col = 'grey30')
-
-polygon(x = c(TG_C_toprichpred14$Plant_Height[M_M],rev(TG_C_toprichpred14$Plant_Height[M_M])), y = c(TG_C_toprichpred14$lci[M_M],rev(TG_C_toprichpred14$uci[M_M])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_C_toprichpred14$Plant_Height[M_M],y = TG_C_toprichpred14$fit[M_M],lwd = 2, lty = 2, col = 'grey30')
-
-polygon(x = c(TG_C_toprichpred14$Plant_Height[M_M_M],rev(TG_C_toprichpred14$Plant_Height[M_M_M])), y = c(TG_C_toprichpred14$lci[M_M_M],rev(TG_C_toprichpred14$uci[M_M_M])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=TG_C_toprichpred14$Plant_Height[M_M_M],y = TG_C_toprichpred14$fit[M_M_M],lwd = 2, lty = 3, col = 'grey30')
-
-legend('topright',legend = c("Woody Closed", "Herbaceous Open", "Woody Open"), lty = c(1,2,3), col = 'grey30',pt.cex = 1)
+mtext(side=3,line=1.2,at = -1.25,'Non-web building spiders, herbivorous Hemiptera and medium/large grasshoppers',cex=0.7, font = 2)
 
 
 #Group B----

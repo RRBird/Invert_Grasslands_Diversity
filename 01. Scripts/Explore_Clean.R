@@ -368,9 +368,3 @@ levels(Q_matrix$Size)
 
 
 #END----
-
-
-
-Predictions_Height <- seq(min(TaxModel$Plant_Height),max(TaxModel$Plant_Height),length.out=20)
-
-Predictions_GC <- seq(min(TaxModel$Ground_Cover),max(TaxModel$Ground_Cover),length.out=20)
