@@ -11,6 +11,7 @@ options(scipen = 999) #So R doesn't use scientific notation
 library("AICcmodavg")
 library("glmmTMB")
 library('lme4')
+library("openxlsx")
 
 FDModel$Grass_Status[FDModel$Grass_Status=="Unknown"] <- NA
 
@@ -22,6 +23,7 @@ head(FDModel);dim(FDModel)
 ##Species Richness-----
 
 ###Modelling----
+
 
 ####Day
 
@@ -150,9 +152,9 @@ TG_A_Modnames <- c("TG_A_Rich_null3","TG_A_Rich_E_H",
                    "TG_A_Rich_GS_LS","TG_A_Rich_GS_LC",
                    "TG_A_Rich_C_LS","TG_A_Rich_C_LC",
                    "TG_A_Rich_LS_LC")
-TG_A_richmodlist2 <- mget(TG_A_Modnames)
+TG_A_richmodlist1 <- mget(TG_A_Modnames)
 
-aictab(TG_A_richmodlist2)
+aictab(TG_A_richmodlist1)
 
 #Ground Cover + Grass Status
 
@@ -239,7 +241,6 @@ TG_A_Modnames3<- c("TG_A_Rich_null3", "TG_A_Rich_GS", "TG_A_Rich_GC_GS","TG_A_Ri
 
 TG_A_richmodlist_Final <- mget(TG_A_Modnames3)
 aictab(TG_A_richmodlist_Final)
-
 
 #Top model = Height x Grass Status
 
@@ -523,7 +524,6 @@ TG_C_richmodlist <- list("null" = TG_C_Rich_null,
 
 aictab(TG_C_richmodlist)
 #Grass Status
-
 ####Additive
 
 TG_C_Rich_E_H <- glmmTMB(C_Rich ~ Elevation_Scaled + Plant_Height + (1 | Property), family = poisson, data = FDModel)
@@ -592,9 +592,10 @@ TG_C_Modnames <- c("TG_C_Rich_null","TG_C_Rich_E_H",
                    "TG_C_Rich_GS_LS","TG_C_Rich_GS_LC",
                    "TG_C_Rich_C_LS","TG_C_Rich_C_LC",
                    "TG_C_Rich_LS_LC")
-TG_C_richmodlist2 <- mget(TG_C_Modnames)
+TG_C_richmodlist1 <- mget(TG_C_Modnames)
 
-aictab(TG_C_richmodlist2)
+aictab(TG_C_richmodlist1)
+
 
 #Elevation + Grass Status
 
@@ -677,6 +678,7 @@ TG_C_Modnames3<- c("TG_C_Rich_null", "TG_C_Rich_GS", "TG_C_Rich_E_GS","TG_C_Rich
 
 TG_C_richmodlist_Final <- mget(TG_C_Modnames3)
 aictab(TG_C_richmodlist_Final)
+
 
 
 
@@ -983,12 +985,16 @@ TG_C_Divmodlist2 <- mget(TG_C_Divmodnames2)
 aictab(TG_C_Divmodlist2)
 #Elevation x Grass Status
 
+
+
 ###Final AICC----
 
 TG_C_DivModnames3<- c("TG_C_Div_null", "TG_C_Div_GS",
                       "TG_C_Div_E_GS","TG_C_Div_ExGS")
 TG_C_divmodlist_Final <- mget(TG_C_DivModnames3)
 aictab(TG_C_divmodlist_Final)
+
+
 
 #Top model = Elevation + Grass Status
 
@@ -1320,9 +1326,9 @@ TG_B_Modnames <- c("TG_B_null","TG_B_E_H",
                    "TG_B_GS_LS","TG_B_GS_LC",
                    "TG_B_C_LS","TG_B_C_LC",
                    "TG_B_LS_LC")
-TG_B_modlist2 <- mget(TG_B_Modnames)
+TG_B_modlist1 <- mget(TG_B_Modnames)
 
-aictab(TG_B_modlist2)
+aictab(TG_B_modlist1)
 
 #Ground Cover + Grass Status
 
@@ -1402,6 +1408,7 @@ TG_B_Modnames3<- c("TG_B_null", "TG_B_GC", "TG_B_GC_C", "TG_B_GCxLS")
 TG_B_modlist_Final <- mget(TG_B_Modnames3)
 aictab(TG_B_modlist_Final)
 
+
 #Top model = Ground Cover x Landscape Simpson
 
 #Equivalent models (within 2 AICc):
@@ -1456,7 +1463,7 @@ TG_B_pred5$uci<-plogis(TG_B_pred5$uci.link)
 head(TG_B_pred5);dim(TG_B_pred5)
 
 
-`###Visualize----
+###Visualize----
 
 #Ground Cover x Simpson
 summary(TG_B_GCxLS)
@@ -1502,6 +1509,7 @@ polygon(x = c(TG_B_pred5$Cropping_500m[K_K],rev(TG_B_pred5$Cropping_500m[K_K])),
 lines(x=TG_B_pred5$Cropping_500m[K_K],y = TG_B_pred5$fit[K_K],lwd = 2,col = 'grey30')
 
 #Group D----
+write.xlsx(aictab(TG_B_modlist1), 'TEMPDOC.xlsx')
 
 ###Modelling----
 
@@ -1698,6 +1706,8 @@ TG_D_Modnames3<- c("TG_D_null","TG_D_GS", "TG_D_H_GS", "TG_D_GS_LC", "TG_D_GS_LS
 
 TG_D_modlist_Final <- mget(TG_D_Modnames3)
 aictab(TG_D_modlist_Final)
+
+
 
 #Top model = Height + Grass Status
 
@@ -2063,6 +2073,8 @@ TG_E_Modnames3<- c("TG_E_GS", "TG_E_null","TG_E_GC_GS",
 
 TG_E_modlist_Final <- mget(TG_E_Modnames3)
 aictab(TG_E_modlist_Final)
+
+
 
 #Top model = Green GC x Grass Status   
 
@@ -2615,8 +2627,8 @@ plot(x = 1:2,y = TG_D_pred2$fit[L_L],xlab = " ",ylab = 'Occurrence', type = 'p',
 axis(side=1,at=1:2,labels=c(' ',' '))
 arrows(x0=1:2, y0=TG_D_pred2$lci[L_L],x1=1:2, y1=TG_D_pred2$uci[L_L],angle=90,length=0.1, code=3, lwd=2,col = "black")
 mtext(side=3,line=0,at = -0.25,'e)',cex=0.8)
-mtext(side=1,line=1.5,at = 0.8,'Native\n Grass',cex=0.7)
-mtext(side=1,line=1.5,at = 2.2,'Introduced\n Grass',cex=0.7)
+mtext(side=1,line=1.5,at = 0.8,'Native\n Grass',cex=0.6)
+mtext(side=1,line=1.5,at = 2.2,'Introduced\n Grass',cex=0.6)
 
 points(x = jitter(raw_x1, factor = 1),y = FDModel$TG_D, pch = 16, cex = 0.4, col = "black")
 

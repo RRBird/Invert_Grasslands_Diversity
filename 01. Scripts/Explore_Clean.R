@@ -114,7 +114,7 @@ cordata <- merge(cordata,property, by = "Property")
 
 head(cordata);dim(cordata)
 
-cordata <- cordata %>% dplyr::select(Elevation, Plant_Height, Ground_Cover,Prop_Green_GC,Weed_Estimate,Grass_Status, Natual_Grazing_1km,Cropping_1km,Naural_Grazing_500m,Cropping_500m,X500m.Simspson,X500m.Dominant.Landscape.Class,Day_Sampled)
+cordata <- cordata %>% dplyr::select(Elevation, Plant_Height, Ground_Cover,Prop_Green_GC,Weed_Estimate,Grass_Status, Natual_Grazing_1km,Cropping_1km,Naural_Grazing_500m,Cropping_500m,X500m.Simspson,X500m.Dominant.Landscape.Class,Day_Sampled,Dominant_Herb_Weed,Dominat_Grass)
 
 str(cordata)
 
@@ -130,12 +130,18 @@ cordata$X500m.Dominant.Landscape.Class <- as.numeric(
 cordata$Grass_Status <- as.factor(cordata$Grass_Status)
 cordata$Grass_Status <- as.numeric(cordata$Grass_Status)
 
+cordata$Dominant_Herb_Weed <- as.factor(cordata$Dominant_Herb_Weed)
+cordata$Dominant_Herb_Weed <- as.numeric(cordata$Dominant_Herb_Weed)
+
+cordata$Dominat_Grass <- as.factor(cordata$Dominat_Grass)
+cordata$Dominat_Grass <- as.numeric(cordata$Dominat_Grass)
+
 str(cordata) #confirmed no character columns left
 
 cor <- cor(cordata,method = "spearman")
 
-colnames(cor) <- c("Elevation", "Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Habitat Diversity","Habitat Structure", "Day Sampled")
-rownames(cor) <- c("Elevation", "Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Habitat Diversity","Habitat Structure", "Day Sampled")
+colnames(cor) <- c("Elevation", "Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Habitat Diversity","Habitat Structure", "Day Sampled","Dom Weed","Dom Grass")
+rownames(cor) <- c("Elevation", "Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Habitat Diversity","Habitat Structure", "Day Sampled","Dom Weed","Dom Grass")
 
 dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
 corrplot::corrplot(cor,method="color",  
@@ -181,7 +187,7 @@ head(TaxModel);dim(TaxModel)
 ##Species Richness----
 
 richness <- aggregate(Morphospecies ~ Point, data = invert, FUN = function(x) length(unique(x)))
-dim(richness) #only 1 point with 0 species 
+dim(richness) 
 
 TaxModel <- merge(TaxModel,richness,by = "Point",,all.x = T)
 head(TaxModel);dim(TaxModel)
@@ -193,6 +199,8 @@ min(TaxModel$Species_Rich,na.rm=T)
 max(TaxModel$Species_Rich,na.rm=T)
 
 TaxModel$Species_Rich[is.na(TaxModel$Species_Rich)] <- 0
+
+sum(TaxModel$Species_Rich==0)/length(TaxModel$Species_Rich)
 
 ##Diversity (Inverse Simpson's diversity index)----
 

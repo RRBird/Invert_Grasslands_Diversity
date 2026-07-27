@@ -208,6 +208,7 @@ aictab(richmodlist3)
 #Green GC X Grass Status
 #Grass Status X Landscape Simpson
 
+
 ##Final AICC----
 
 Modnames3<- c("Rich_null", "Rich_GS", "Rich_E_GS",
@@ -215,8 +216,6 @@ Modnames3<- c("Rich_null", "Rich_GS", "Rich_E_GS",
               "Rich_ExGS","Rich_GGCxGS","Rich_GSxLS")
 richmodlist_Final <- mget(Modnames3)
 aictab(richmodlist_Final)
-
-
 
 
 #Top model = Elevation + Grass Status
@@ -336,7 +335,6 @@ points(x = jitter(raw_x, factor = 1),y = TaxModel$Species_Rich, pch = 16, cex = 
 
 #ALL SPECIES DIVERSITY----
 
-write.xlsx(aictab(richmodlist2), 'TEMPDOC.xlsx')
 
 
 head(TaxModel)
@@ -540,6 +538,10 @@ DivModnames3<- c("Div_null", "Div_GS", "Div_E_GS",
 divmodlist_Final <- mget(DivModnames3)
 aictab(divmodlist_Final)
 
+
+
+
+
 #Top model = Grass Status
 
 #Equivalent models:
@@ -677,7 +679,7 @@ polygon(x = c(thirddivpred2$Prop_Green_GC[DD],rev(thirddivpred2$Prop_Green_GC[DD
 lines(x=thirddivpred2$Prop_Green_GC[DD],y = thirddivpred2$fit[DD],lwd = 2,col = 'grey30')
 
 
-plot(x = 1:2,y = thirddivpred2$fit[D_D],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,14))
+plot(x = 1:2,y = thirddivpred2$fit[D_D],xlab = " ",ylab = 'Diversity', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,14))
 axis(side=1,at=1:2,labels=c('Native','Introduced'))
 arrows(x0=1:2, y0=thirddivpred2$lci [D_D],x1=1:2, y1=thirddivpred2$uci[D_D],angle=90,length=0.1, code=3, lwd=2,col = "black")
 mtext(side=3,line=0,at = -0.2,'b)',cex=1.1)
@@ -771,15 +773,6 @@ mtext(side=3,line=0,at = 0,'e)',cex=0.8)
 polygon(x = c(thirddivpred2$Prop_Green_GC[DD],rev(thirddivpred2$Prop_Green_GC[DD])), y = c(thirddivpred2$lci[DD],rev(thirddivpred2$uci[DD])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=thirddivpred2$Prop_Green_GC[DD],y = thirddivpred2$fit[DD],lwd = 2,col = 'grey30')
 
-
-plot(x = 1:2,y = thirddivpred2$fit[D_D],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =1.7,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,14))
-axis(side=1,at=1:2,labels=c('',''))
-mtext(side=1,line=1.5,at = 0.8,'Native\n Grass',cex=0.7)
-mtext(side=1,line=1.5,at = 2.3,'Introduced\n Grass',cex=0.7)
-arrows(x0=1:2, y0=thirddivpred2$lci [D_D],x1=1:2, y1=thirddivpred2$uci[D_D],angle=90,length=0.05, code=3, lwd=2,col = "black")
-mtext(side=3,line=0,at = -0.2,'f)',cex=0.8)
-
-points(x = jitter(raw_x, factor = 1),y = TaxModel$Diversity, pch = 16, cex = 0.4, col = "black")
 
 
 
