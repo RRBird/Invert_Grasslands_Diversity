@@ -5,6 +5,7 @@
 #Used Methods for assessing functional responses to environmental gradients -- Kleyer et al. -- June 22, 2009
 
 options(scipen = 999) #So R doesn't use scientific notation
+write.xlsx(aictab(TG_F_modlist2), 'TEMPDOC.xlsx')
 
 #Libraries----
 
@@ -1509,7 +1510,6 @@ polygon(x = c(TG_B_pred5$Cropping_500m[K_K],rev(TG_B_pred5$Cropping_500m[K_K])),
 lines(x=TG_B_pred5$Cropping_500m[K_K],y = TG_B_pred5$fit[K_K],lwd = 2,col = 'grey30')
 
 #Group D----
-write.xlsx(aictab(TG_B_modlist1), 'TEMPDOC.xlsx')
 
 ###Modelling----
 
@@ -1623,9 +1623,9 @@ TG_D_Modnames <- c("TG_D_null","TG_D_E_H",
                    "TG_D_GS_LS","TG_D_GS_LC",
                    "TG_D_C_LS","TG_D_C_LC",
                    "TG_D_LS_LC")
-TG_D_modlist2 <- mget(TG_D_Modnames)
+TG_D_modlist1 <- mget(TG_D_Modnames)
 
-aictab(TG_D_modlist2)
+aictab(TG_D_modlist1)
 
 #Height + Grass Status
 #Grass Status + Landscape Class
@@ -1985,9 +1985,9 @@ TG_E_Modnames <- c("TG_E_null","TG_E_E_H",
                    "TG_E_GS_LS","TG_E_GS_LC",
                    "TG_E_C_LS","TG_E_C_LC",
                    "TG_E_LS_LC")
-TG_E_modlist2 <- mget(TG_E_Modnames)
+TG_E_modlist1 <- mget(TG_E_Modnames)
 
-aictab(TG_E_modlist2)
+aictab(TG_E_modlist1)
 
 #Ground Cover + Grass Status
 #Green Ground Cover + Grass Status
@@ -2352,9 +2352,9 @@ TG_F_Modnames <- c("TG_F_null","TG_F_E_H",
                    "TG_F_GS_LS","TG_F_GS_LC",
                    "TG_F_C_LS","TG_F_C_LC",
                    "TG_F_LS_LC")
-TG_F_modlist2 <- mget(TG_F_Modnames)
+TG_F_modlist1 <- mget(TG_F_Modnames)
 
-aictab(TG_F_modlist2)
+aictab(TG_F_modlist1)
 
 #Grass Status + Landscape Class
 #Weed Estimate + Grass Status
