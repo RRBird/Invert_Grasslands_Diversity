@@ -490,4 +490,19 @@ image.plot(legend.only=TRUE,
            legend.line =2.3,
            smallplot=c(0.17, 0.20, 0.20, 0.45))
 
+
+#Fix correlated design variables----
+
+head(Community);dim(Community)
+head(variables);dim(variables)
+
+ComVar <- merge(Community,variables, by = "Point")
+head(ComVar);dim(ComVar)
+
+ComVar<- ComVar %>% select(-Elevation)
+
+ComVar$ResDay <- resid(lm(Day_Sampled ~ Position, ComVar))
+
+
+
 #END----
