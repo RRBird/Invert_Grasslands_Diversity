@@ -5,67 +5,95 @@ options(scipen = 999) #prevents r from automatically displaying large numbers wi
 
 #This script contains the data modelling and analysis
 
+#Libraries----
 library("glmmTMB")
 library("stats")
 library("AICcmodavg")
+library("lme4")
+library("partR2")
+library("glmmTMB")
+library("MuMIn")
+library("vegan")
 
-
-#Site Backwards Step Model Selection----
 head(ComVar);dim(ComVar)
 
-#scale all contionus variables to limit converege issue due to variables on different scales
 str(ComVar)
+
+
+ComVar$Count[which(is.na(ComVar$Count))] <- 0
+
+#Scale continous variables
 
 ComVar$Height <- scale(ComVar$Plant_Height)
 ComVar$GC <- scale(ComVar$Ground_Cover)
 ComVar$GGC <- scale(ComVar$Prop_Green_GC)
+ComVar$Graze <- scale(ComVar$Natual_Grazing_1km)
+ComVar$HabDiv <- scale(ComVar$X500m.Simspson)
+ComVar$WeedScale <- scale(ComVar$Weed)
+head(ComVar)
 
-##Species Richness----
+
+#Q1 SITE----
 
 
+##Species Richness---- 
+head(ComVar)
 
-Site_SR_Full <- glmmTMB(Species_Rich ~ Height + GC + GGC + Weed_Estimate + Grass_Status + ResDay + Position + (1 | Property), family = nbinom2, data = ComVar)
-#removed dom weed and grass, high levels and were messing with model
 
-drop1(Site_SR_Full, test = "Chisq") 
-#so none is if the model has no terms removed
-#Others are the model AICc if that term is dropped 
-#lowest AICc is the term to remove (as long as it's lower than none line)
-#therefore remove weed estimate
+Rich_Full <- glmmTMB(Species_Rich ~ ResDay + (Position + Height + GC + GGC + WeedScale)^2 + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail",control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(Rich_Full)
 
-Site_SR_Back1 <- glmmTMB(Species_Rich ~ Height + GC + GGC + Grass_Status + ResDay + Position + (1 | Property), family = nbinom2, data = ComVar)
-#sanity check
-aictab(list("back" = Site_SR_Back1,"full" = Site_SR_Full)) #yes back is better than full
-drop1(Site_SR_Back1, test = "Chisq") #drop resday
+MuMIn::getAllTerms(Rich_Full)
+#Wrapped in cond() so need to have that around fixed term to make it run properly
 
-Site_SR_Back2 <- glmmTMB(Species_Rich ~ Height + GC + GGC + Grass_Status + Position + (1 | Property), family = nbinom2, data = ComVar)
-drop1(Site_SR_Back2, test = "Chisq") #drop height
+Rich_Dredge <- dredge(Rich_Full, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
 
-Site_SR_Back3 <- glmmTMB(Species_Rich ~ GC + GGC + Grass_Status + Position + (1 | Property), family = nbinom2, data = ComVar)
-drop1(Site_SR_Back3, test = "Chisq") #drop none
+Rich_Models <- get.models(Rich_Dredge, subset = delta < 2)
 
-#check against a null model to make sure it makes sense
-SR_null <-glmmTMB(Species_Rich ~ 1 + (1 | Property), family = nbinom2, data = ComVar)
-aictab(list("null"=SR_null, "final"=Site_SR_Back3))
+length(names(Rich_Models))
+names(Rich_Models)
+
+#Check if the null is within 2 AICc 
+Rich_Null <- glmmTMB(Species_Rich ~ 1 + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail")
+RichList <- list("null" = Rich_Null,"Top"=Rich_Models[1]$`66`)
+aictab(RichList)
 #it's good
 
-###preds----
-summary(Site_SR_Back3)
+#Top model:
+Rich_Models[1]$`66`
+
+
+RichList_All <- list("P*GC+D" = Rich_Models[1]$`66`,
+                  "P+GC+D" = Rich_Models[2]$`2`,
+                  "P+GC+GGC+D" = Rich_Models[3]$`4`,
+                  "P+GGC+D" = Rich_Models[4]$`3`,
+                  "P*GC+H+D" = Rich_Models[5]$`70`,
+                  "P*GC+GGC+D" =Rich_Models[6]$`68`,
+                  "P+H+GC+GGC+D" = Rich_Models[7]$`8`,
+                  "P+GC+H+D" = Rich_Models[8]$`6`,
+                  "P+GGC+H+D" =Rich_Models[9]$`7`,
+                  "null" = Rich_Null)
+
+aictab(RichList_All)
+
+#Predictions 
+
+Rich_Top <- glmmTMB(Species_Rich ~ ResDay + GC * Position + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail")
+summary(Rich_Top)
 
 Predictions_GC <- seq(min(ComVar$GC),max(ComVar$GC),length.out=20)
-Predictions_GGC <-seq(min(ComVar$GGC),max(ComVar$GGC),length.out=20)
+Predictions_Day <- seq(min(ComVar$ResDay),max(ComVar$ResDay),length.out=20)
 
-Site_Rich <- expand.grid(GC = Predictions_GC, GGC = Predictions_GGC, Grass_Status = c("Native","Introduced","Unknown"),Position = c("Escarpment","Valley"))
+
+Site_Rich <- expand.grid(GC = Predictions_GC, Position = c("Escarpment","Valley"),ResDay = Predictions_Day)
 head(Site_Rich);dim(Site_Rich)
 
-Site_Rich1 <- predict(object = Site_SR_Back3,newdata= Site_Rich,se.fit = T, type = "link",re.form = NA)
+Site_Rich1 <- predict(object = Rich_Top,newdata= Site_Rich,se.fit = T, type = "link",re.form = NA)
 
 Site_Rich2<-data.frame(Site_Rich,fit.link=Site_Rich1$fit,se.link=Site_Rich1$se.fit)
 
-Site_Rich2$lci.link<-Site_Rich2$fit.link-
-  (1.96*Site_Rich2$se.link)
-Site_Rich2$uci.link<-Site_Rich2$fit.link+
-  (1.96*Site_Rich2$se.link)
+Site_Rich2$lci.link<-Site_Rich2$fit.link-(1.96*Site_Rich2$se.link)
+Site_Rich2$uci.link<-Site_Rich2$fit.link+(1.96*Site_Rich2$se.link)
 
 Site_Rich2$fit<-exp(Site_Rich2$fit.link)
 Site_Rich2$se<-exp(Site_Rich2$se.link)
@@ -74,93 +102,416 @@ Site_Rich2$uci<-exp(Site_Rich2$uci.link)
 
 head(Site_Rich2);dim(Site_Rich2)
 
-###Figure----
-#basic fig no a b c and need to replace the x axis but gives a visual of model
+##Diversity----
 
-head(Site_Rich2)
-AA <- Site_Rich2$Grass_Status == "Introduced" & Site_Rich2$GGC == Predictions_GGC[10] & Site_Rich2$Position == "Escarpment" 
-AAA <- Site_Rich2$Grass_Status == "Introduced" & Site_Rich2$GC == Predictions_GC[10] & Site_Rich2$Position == "Escarpment" 
-A_A <- Site_Rich2$GGC == Predictions_GGC[10] & Site_Rich2$Position == "Escarpment" & Site_Rich2$GC == Predictions_GC[10]
-A_A_A <- Site_Rich2$GGC == Predictions_GGC[10] & Site_Rich2$Grass_Status == "Introduced" & Site_Rich2$GC == Predictions_GC[10]
+Div_Full <- glmer(Diversity ~ ResDay + (Position + Height + GC + GGC + WeedScale)^2 + (1 | Property), family = Gamma(link = "log"), data = ComVar,na.action = "na.fail")
+summary(Div_Full)
 
-raw_x <- ifelse(ComVar$Grass_Status ==
-                  "Native", 1, 
-                ifelse(ComVar$Grass_Status ==
-                         "Introduced", 2, NA))
+MuMIn::getAllTerms(Div_Full) #Not wrapped this time
 
-raw_x1 <- ifelse(ComVar$Position ==
-                  "Escarpment", 1, 
-                ifelse(ComVar$Position ==
-                         "Valley", 2, NA))
+Div_Dredge <- dredge(Div_Full, fixed = c("ResDay","Position"),m.lim = c(NA, 5),trace = TRUE)
 
-dev.new(height=10,width=10,dpi=80,pointsize=14,noRStudioGD = T)
-par(mar=c(4,4,2,2),mfrow=c(2,2),mgp=c(2.5,1,0),xpd = T)
+Div_Models <- get.models(Div_Dredge, subset = delta < 2)
 
-plot(x = ComVar$GC,y = ComVar$Species_Rich,xlab = expression("Ground Cover (%)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
+length(names(Div_Models))
+names(Div_Models)
 
-polygon(x = c(Site_Rich2$GC[AA],rev(Site_Rich2$GC[AA])), y = c(Site_Rich2$lci[AA],rev(Site_Rich2$uci[AA])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=Site_Rich2$GC[AA],y = Site_Rich2$fit[AA],lwd = 2,col = 'grey30')
+#Check if the null is within 2 AICc 
+Div_Null <- glmer(Diversity ~ 1 + (1 | Property), family = Gamma(link = "log"), data = ComVar,na.action = "na.fail")
+DivList <- list("null" = Div_Null,"Top"=Div_Models[1]$`1`)
+aictab(DivList)
+#Null is better so don't continue with model
+Div_Models[1]$`1`
 
 
-plot(x = ComVar$GGC,y = ComVar$Species_Rich,xlab = expression("Green Ground Cover (%)"),ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2)
+##Abundance----
 
-polygon(x = c(Site_Rich2$GGC[AAA],rev(Site_Rich2$GGC[AAA])), y = c(Site_Rich2$lci[AAA],rev(Site_Rich2$uci[AAA])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
-lines(x=Site_Rich2$GGC[AAA],y = Site_Rich2$fit[AAA],lwd = 2,col = 'grey30')
+Abun_Full <- glmmTMB(Count ~ ResDay + (Position + Height + GC + GGC + WeedScale)^2 + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail")
+summary(Abun_Full)
+
+MuMIn::getAllTerms(Abun_Full)
+#Wrapped in cond() so need to have that around fixed term to make it run properly
+
+Abun_Dredge <- dredge(Abun_Full, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
+
+Abun_Models <- get.models(Abun_Dredge, subset = delta < 2)
+
+length(names(Abun_Models))
+names(Abun_Models)
+
+#Check if the null is within 2 AICc 
+Abun_Null <- glmmTMB(Count ~ 1 + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail")
+AbunList <- list("null" = Abun_Null,"Top"=Abun_Models[1]$`8`)
+aictab(AbunList)
+#it's good
+
+#Top model:
+Abun_Models[1]$`8`
+
+AbunList_All <- list("GC+GGC+H+P+D" = Abun_Models[1]$`8`,
+                  "GC+P+D" = Abun_Models[2]$`2`,
+                  "GC+H+W+P+D" = Abun_Models[3]$`14`,
+                  "GC+GGC+P+D" = Abun_Models[4]$`4`,
+                  "GC+W+P+D" = Abun_Models[5]$`10`,
+                  "GC+H+P+D" =Abun_Models[6]$`6`,
+                  "GC*GGC+P+D" = Abun_Models[7]$`20`,
+                  "GC*P+H+D" = Abun_Models[8]$`70`,
+                  "GC+GGC+W+P+D" =Abun_Models[9]$`12`,
+                  "GC*P+D" =Abun_Models[10]$`66`,
+                  "GC+H*P+D" =Abun_Models[11]$`2054`,
+                  "GC*W+P+D" =Abun_Models[12]$`138`,
+                  "GC*P+W+D" =Abun_Models[13]$`74`,
+                  "null" = Abun_Null)
+
+aictab(AbunList_All)
+
+#Predictions
+
+Abun_Top <- glmmTMB(Count ~ GC + GGC + Height + Position + ResDay + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail")
+
+summary(Abun_Top)
+
+Predictions_GGC <-seq(min(ComVar$GGC),max(ComVar$GGC),length.out=20)
+Predictions_Height <-seq(min(ComVar$Height),max(ComVar$Height),length.out=20)
+
+Site_Abun <- expand.grid(GC = Predictions_GC, Position = c("Escarpment","Valley"),GGC = Predictions_GGC,ResDay = Predictions_Day, Height = Predictions_Height)
+head(Site_Abun);dim(Site_Abun)
+
+Site_Abun1 <- predict(object = Abun_Top,newdata= Site_Abun,se.fit = T, type = "link",re.form = NA)
+
+Site_Abun2<-data.frame(Site_Abun,fit.link=Site_Abun1$fit,se.link=Site_Abun1$se.fit)
+
+Site_Abun2$lci.link<-Site_Abun2$fit.link-(1.96*Site_Abun2$se.link)
+Site_Abun2$uci.link<-Site_Abun2$fit.link+(1.96*Site_Abun2$se.link)
+
+Site_Abun2$fit<-exp(Site_Abun2$fit.link)
+Site_Abun2$se<-exp(Site_Abun2$se.link)
+Site_Abun2$lci<-exp(Site_Abun2$lci.link)
+Site_Abun2$uci<-exp(Site_Abun2$uci.link)
+
+head(Site_Abun2);dim(Site_Abun2)
 
 
-plot(x = 1:2,y = Site_Rich2$fit [A_A][1:2],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,16))
-axis(side=1,at=c(0.8,2.2),labels=c('Native','Introduced'))
-arrows(x0=1:2, y0=Site_Rich2$lci [A_A][1:2],x1=1:2, y1=Site_Rich2$uci[A_A][1:2],angle=90,length=0.1, code=3, lwd=2,col = "black")
-points(x = jitter(raw_x[-which(is.na(raw_x))], factor = 1),y = ComVar$Species_Rich[-which(is.na(raw_x))], pch = 16, cex = 0.4, col = "black")
+##Community Composition----
+
+ComVar_Subsected <- ComVar[-which(is.na(ComVar$ComComp)),]
+#one site had no inverts so needed to omit them in model for dredge
+Comp_Full <- glmmTMB(ComComp ~ ResDay + (Position + Height + GC + GGC + WeedScale)^2 + (1 | Property), family = gaussian(), data = ComVar_Subsected,na.action = "na.fail")
+summary(Comp_Full)
+
+MuMIn::getAllTerms(Comp_Full) #they are wrapped
+
+Comp_Dredge <- dredge(Comp_Full, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
+
+Comp_Models <- get.models(Comp_Dredge, subset = delta < 2)
+
+length(names(Comp_Models))
+names(Comp_Models)
+
+#Check if the null is within 2 AICc 
+Comp_Null <- glmmTMB(ComComp ~ 1 + (1 | Property), family = gaussian(), data = ComVar_Subsected,na.action = "na.fail")
+CompList <- list("null" = Comp_Null,"Top"=Comp_Models[1]$`68`)
+aictab(CompList)
+#it's good
+
+#Top model:
+Comp_Models[1]$`68`
+
+CompList_All <- list("GC*P+GGC+D" = Comp_Models[1]$`68`,
+                     "GC+P+D" = Comp_Models[2]$`2`,
+                     "GC+H+P+D" = Comp_Models[3]$`6`,
+                     "GC*P+H+D" = Comp_Models[4]$`70`,
+                     "GC*P+D" = Comp_Models[5]$`66`,
+                     "H+P+D" =Comp_Models[6]$`5`,
+                     "GC+GGC+H+P+D" = Comp_Models[7]$`8`,
+                     "GC+GGC+P+D" = Comp_Models[8]$`4`,
+                     "P+D" =Comp_Models[9]$`1`,
+                     "GC+H+P+D" =Comp_Models[10]$`2054`,
+                     "GC+H+P+D" =Comp_Models[11]$`7`,
+                     "null" = Comp_Null)
+
+aictab(CompList_All)
+
+#Predictions
+
+Comp_Top <- glmmTMB(ComComp ~ GC* Position + GGC +ResDay + (1 | Property), family = gaussian(), data = ComVar_Subsected,na.action = "na.fail")
+summary(Comp_Top)
+
+Site_Comp<- expand.grid(GC = Predictions_GC, Position = c("Escarpment","Valley"), ResDay = Predictions_Day, GGC=Predictions_GGC)
+head(Site_Comp);dim(Site_Comp)
+
+Site_Comp1 <- predict(object = Comp_Top,newdata= Site_Comp,se.fit = T, type = "link",re.form = NA)
+
+Site_Comp2<-data.frame(Site_Comp,fit.link=Site_Comp1$fit,se.link=Site_Comp1$se.fit)
+
+Site_Comp2$lci.link<-Site_Comp2$fit.link-(1.96*Site_Comp2$se.link)
+Site_Comp2$uci.link<-Site_Comp2$fit.link+(1.96*Site_Comp2$se.link)
+
+Site_Comp2$fit<-exp(Site_Comp2$fit.link)
+Site_Comp2$se<-exp(Site_Comp2$se.link)
+Site_Comp2$lci<-exp(Site_Comp2$lci.link)
+Site_Comp2$uci<-exp(Site_Comp2$uci.link)
+
+head(Site_Comp2);dim(Site_Comp2)
+
+#Q2 LANDSCAPE----
+
+##Species Richness---- 
+head(ComVar)
 
 
-plot(x = 1:2,y = Site_Rich2$fit [A_A_A],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,16))
-axis(side=1,at=c(0.8,2.2),labels=c('Escarpment','Valley'))
-arrows(x0=1:2, y0=Site_Rich2$lci [A_A_A],x1=1:2, y1=Site_Rich2$uci[A_A_A],angle=90,length=0.1, code=3, lwd=2,col = "black")
-points(x = jitter(raw_x1, factor = 1),y = ComVar$Species_Rich, pch = 16, cex = 0.4, col = "black")
+Rich_Full_2 <- glmmTMB(Species_Rich ~ ResDay + (Position + HabDiv + Graze + X500m.Dominant.Landscape.Class)^2 + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail")
+summary(Rich_Full_2)
+
+MuMIn::getAllTerms(Rich_Full_2) #Wrapped
+
+Rich_Dredge_2 <- dredge(Rich_Full_2, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
+
+Rich_Models_2 <- get.models(Rich_Dredge_2, subset = delta < 2)
+
+length(names(Rich_Models_2))
+names(Rich_Models_2)
+
+#Check if the null is within 2 AICc 
+RichList_2 <- list("null" = Rich_Null,"Top"=Rich_Models_2[1]$`3`)
+aictab(RichList_2)
+#it's good
+
+#Top model:
+Rich_Models_2[1]$`3`
+
+RichList_All_2 <- list("Div+P+D" = Rich_Models_2[1]$`3`,
+                  "Div+Dom+P+D" = Rich_Models_2[2]$`7`,
+                  "null" = Rich_Null)
+
+aictab(RichList_All_2)
+
+#Predictions
+
+Rich_Top_2 <- glmmTMB(Species_Rich ~ ResDay + Position + HabDiv + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail")
+summary(Rich_Top_2)
+
+Predictions_Hab_Div <-seq(min(ComVar$HabDiv),max(ComVar$HabDiv),length.out=20)
 
 
-#Does grazing impact veg----
+Land_Rich <- expand.grid(HabDiv = Predictions_Hab_Div,Position = c("Escarpment","Valley"),ResDay = Predictions_Day)
+head(Land_Rich);dim(Land_Rich)
+
+Land_Rich1 <- predict(object = Rich_Top_2,newdata= Land_Rich,se.fit = T, type = "link",re.form = NA)
+
+Land_Rich2<-data.frame(Land_Rich,fit.link=Land_Rich1$fit,se.link=Land_Rich1$se.fit)
+
+Land_Rich2$lci.link<-Land_Rich2$fit.link-(1.96*Land_Rich2$se.link)
+Land_Rich2$uci.link<-Land_Rich2$fit.link+(1.96*Land_Rich2$se.link)
+
+Land_Rich2$fit<-exp(Land_Rich2$fit.link)
+Land_Rich2$se<-exp(Land_Rich2$se.link)
+Land_Rich2$lci<-exp(Land_Rich2$lci.link)
+Land_Rich2$uci<-exp(Land_Rich2$uci.link)
+
+head(Land_Rich2);dim(Land_Rich2)
+
+##Diversity----
+
+Div_Full_2 <- glmer(Diversity ~ ResDay + + (Position + HabDiv + Graze + X500m.Dominant.Landscape.Class)^2 + (1 | Property), family = Gamma(link = "log"), data = ComVar,na.action = "na.fail")
+summary(Div_Full_2)
+
+MuMIn::getAllTerms(Div_Full_2) #Not wrapped
+
+Div_Dredge_2 <- dredge(Div_Full_2, fixed = c("ResDay","Position"),m.lim = c(NA, 5),trace = TRUE)
+
+Div_Models_2 <- get.models(Div_Dredge_2, subset = delta < 2)
+
+length(names(Div_Models_2))
+names(Div_Models_2)
+
+#Check if the null is within 2 AICc 
+DivList_2 <- list("null" = Div_Null,"Top"=Div_Models_2[1]$`1`)
+aictab(DivList_2)
+#Null is better so don't continue with model
+Div_Models_2[1]$`1`
 
 
-grazetype_mod <- glmmTMB(Species_Rich ~ GC + GGC + Grass_Status + Position + Grazing_Type + (1 | Property), family = nbinom2, data = ComVar)
+##Abundance----
+
+Abun_Full_2 <- glmmTMB(Count ~ ResDay + (Position + HabDiv + Graze + X500m.Dominant.Landscape.Class)^2 + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail")
+summary(Abun_Full_2)
+
+MuMIn::getAllTerms(Abun_Full_2) #Wrapped
+
+Abun_Dredge_2 <- dredge(Abun_Full_2, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
+
+Abun_Models_2 <- get.models(Abun_Dredge_2, subset = delta < 2)
+
+length(names(Abun_Models_2))
+names(Abun_Models_2)
+
+#Check if the null is within 2 AICc 
+AbunList_2 <- list("null" = Abun_Null,"Top"=Abun_Models_2[1]$`3`)
+aictab(AbunList_2)
+#it's good
+
+#Top model:
+Abun_Models_2[1]$`3`
+
+AbunList_All_2 <- list("Div+P+D" = Abun_Models_2[1]$`3`,
+                     "G+Div+P+D" = Abun_Models_2[2]$`4`,
+                     "null" = Abun_Null)
+
+aictab(AbunList_All_2)
+
+#Predictions
+Abun_Top_2 <- glmmTMB(Count ~ ResDay + Position + HabDiv + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail")
+
+summary(Abun_Top_2)
+
+Land_Abun <- expand.grid(HabDiv = Predictions_Hab_Div,Position = c("Escarpment","Valley"),ResDay = Predictions_Day)
+head(Land_Abun);dim(Land_Abun)
+
+Land_Abun1 <- predict(object = Abun_Top_2,newdata= Land_Abun,se.fit = T, type = "link",re.form = NA)
+
+Land_Abun2<-data.frame(Land_Rich,fit.link=Land_Abun1$fit,se.link=Land_Abun1$se.fit)
+
+Land_Abun2$lci.link<-Land_Abun2$fit.link-(1.96*Land_Abun2$se.link)
+Land_Abun2$uci.link<-Land_Abun2$fit.link+(1.96*Land_Abun2$se.link)
+
+Land_Abun2$fit<-exp(Land_Abun2$fit.link)
+Land_Abun2$se<-exp(Land_Abun2$se.link)
+Land_Abun2$lci<-exp(Land_Abun2$lci.link)
+Land_Abun2$uci<-exp(Land_Abun2$uci.link)
+
+head(Land_Abun2);dim(Land_Abun2)
+
+##Community Composition----
+
+Comp_Full_2 <- glmmTMB(ComComp ~ ResDay + (Position + HabDiv + Graze + X500m.Dominant.Landscape.Class)^2 + (1 | Property), family = gaussian(), data = ComVar_Subsected,na.action = "na.fail")
+summary(Comp_Full_2)
+
+MuMIn::getAllTerms(Comp_Full_2) #wrapped
+
+Comp_Dredge_2 <- dredge(Comp_Full_2, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
+
+Comp_Models_2 <- get.models(Comp_Dredge_2, subset = delta < 2)
+
+length(names(Comp_Models_2))
+names(Comp_Models_2)
+
+#Check if the null is within 2 AICc 
+CompList_2 <- list("null" = Comp_Null,"Top"=Comp_Models_2[1]$`22`)
+aictab(CompList_2)
+#it's good
+
+#Top model:
+Comp_Models_2[1]$`22` #G*P+Dom+D
+
+#Predictions
+Predictions_Graze <-seq(min(ComVar$Graze),max(ComVar$Graze),length.out=20)
+Predictions_DomHab <- unique(ComVar$X500m.Dominant.Landscape.Class)
+
+Comp_Top_2 <- glmmTMB(ComComp ~ Graze * Position + X500m.Dominant.Landscape.Class + ResDay + (1 | Property), family = gaussian(), data = ComVar_Subsected,na.action = "na.fail")
+summary(Comp_Top)
+
+Land_Comp<- expand.grid(Graze = Predictions_Graze, Position = c("Escarpment","Valley"), ResDay = Predictions_Day, X500m.Dominant.Landscape.Class = Predictions_DomHab)
+head(Land_Comp);dim(Land_Comp)
+
+Land_Comp1 <- predict(object = Comp_Top_2,newdata= Land_Comp,se.fit = T, type = "link",re.form = NA)
+
+Land_Comp2<-data.frame(Land_Comp,fit.link=Land_Comp1$fit,se.link=Land_Comp1$se.fit)
+
+Land_Comp2$lci.link<-Land_Comp2$fit.link-(1.96*Land_Comp2$se.link)
+Land_Comp2$uci.link<-Land_Comp2$fit.link+(1.96*Land_Comp2$se.link)
+
+Land_Comp2$fit<-exp(Land_Comp2$fit.link)
+Land_Comp2$se<-exp(Land_Comp2$se.link)
+Land_Comp2$lci<-exp(Land_Comp2$lci.link)
+Land_Comp2$uci<-exp(Land_Comp2$uci.link)
+
+head(Land_Comp2);dim(Land_Comp2)
 
 
-
-#overall fit
-aictab(list("veg only"=Site_SR_Back3,"with grazing"=grazetype_mod))
-#equivalent
-
-#look at mod estimates
-summary(Site_SR_Back3)
-summary(grazetype_mod)
-
-#Veg related signifigance stays the same but p-values shift, higher with grazing adding -- could indicate they are intertwined in some way?
-
-
-#Landscape Backwards Step Model Selection----
-
-#scale all continuous variables to limit converge issue due to variables on different scales
-str(ComVar)
-
-ComVar$Graze <- scale(ComVar$Natual_Grazing_1km)
-ComVar$Hab_Div <- scale(ComVar$X500m.Simspson)
+#Q3 SITE VS LANDSCAPE----
 
 
 ##Species Richness----
+#Model with all variables from Q1 and Q3
+Rich_Multi_Model <- glmmTMB(Species_Rich ~ GC*Position + HabDiv + ResDay + (1 | Property), family = nbinom2, data = ComVar)
 
-Land_SR_Full <- glmmTMB(Species_Rich ~ X500m.Dominant.Landscape.Class + Graze + Hab_Div + ResDay + Position + (1 | Property), family = nbinom2, data = ComVar)
-drop1(Land_SR_Full, test = "Chisq") #drop graze
+summary(Rich_Multi_Model)
 
-Land_SR_Back1 <- glmmTMB(Species_Rich ~ X500m.Dominant.Landscape.Class + Hab_Div + ResDay + Position + (1 | Property), family = nbinom2, data = ComVar)
-drop1(Land_SR_Back1, test = "Chisq") #drop resday
+r2_SR_full <- partR2(Rich_Multi_Model, partvars = c("GC", "HabDiv", "Position","ResDay"),R2_type = "marginal", nboot = 1000, data = ComVar)
+#Doesn't work with glmmTMB
+#Need to do it manually
 
-Land_SR_Back2 <- glmmTMB(Species_Rich ~ X500m.Dominant.Landscape.Class + Hab_Div + Position + (1 | Property), family = nbinom2, data = ComVar)
-drop1(Land_SR_Back2, test = "Chisq") #drop none
+#create groups of site, landscape and design variables
+Rich_site_vars <- c("GC")
+Rich_landscape_vars <- c("HabDiv")
+Rich_design_vars <- c("Position","ResDay")
 
-#check against a null model to make sure it makes sense
-aictab(list("null"=SR_null, "final"=Land_SR_Back2))
-#it's good
+#part_r2 function written by Rhiannon with help of Claude AI
+part_r2 <- function(model, group_vars) {
+  r2_full <- r.squaredGLMM(model)[1, "R2m"]
+  all_terms <- attr(terms(model), "term.labels")
+  terms_to_drop <- all_terms[sapply(all_terms, function(t) {
+    term_parts <- strsplit(t, ":")[[1]]
+    any(term_parts %in% group_vars)
+  })]
+  
+  drop_formula <- as.formula(paste(". ~ . -", paste(terms_to_drop, collapse = " - ")))
+  reduced_formula <- update(formula(model), drop_formula)
+  reduced_model <- update(model, formula = reduced_formula)
+  
+  r2_reduced <- r.squaredGLMM(reduced_model)[1, "R2m"]
+  r2_full - r2_reduced
+}
 
+Rich_site_r2 <- part_r2(Rich_Multi_Model, Rich_site_vars)
+Rich_landscape_r2 <- part_r2(Rich_Multi_Model, Rich_landscape_vars)
+Rich_design_r2 <- part_r2(Rich_Multi_Model, Rich_design_vars)
+
+Rich_site_r2
+Rich_landscape_r2
+Rich_design_r2
+
+
+##Abundance----
+Abun_Multi_Model <- glmmTMB(Count ~ GC + GGC + Height + HabDiv + Position + ResDay+ (1 | Property), family = nbinom2, data = ComVar)
+
+summary(Abun_Multi_Model)
+
+r2_Abun_full <- r.squaredGLMM(Abun_Full_Model)[1, "R2m"]
+
+Abun_site_vars <- c("GC","GGC","Height")
+Abun_landscape_vars <- c("HabDiv")
+Abun_design_vars <- c("Position","ResDay")
+
+Abun_site_r2 <- part_r2(Abun_Multi_Model, Abun_site_vars)
+Abun_landscape_r2 <- part_r2(Abun_Multi_Model, Abun_landscape_vars)
+Abun_design_r2 <- part_r2(Abun_Multi_Model, Abun_design_vars)
+
+Abun_site_r2
+Abun_landscape_r2
+Abun_design_r2
+
+##Community Composition----
+
+Comp_Multi_Model <- glmmTMB(ComComp ~ GC * Position + GGC + Graze + X500m.Dominant.Landscape.Class + ResDay + (1 | Property), family = gaussian(), data = ComVar_Subsected,na.action = "na.fail")
+
+summary(Comp_Multi_Model)
+
+r2_Comp_full <- r.squaredGLMM(Comp_Multi_Model)[1, "R2m"]
+
+Comp_site_vars <- c("GC","GGC")
+Comp_landscape_vars <- c("Graze","X500m.Dominant.Landscape.Class")
+Comp_design_vars <- c("Position","ResDay")
+
+Comp_site_r2 <- part_r2(Comp_Multi_Model, Comp_site_vars)
+Comp_landscape_r2 <- part_r2(Comp_Multi_Model, Comp_landscape_vars)
+Comp_design_r2 <- part_r2(Comp_Multi_Model, Comp_design_vars)
+
+Comp_site_r2
+Comp_landscape_r2
+Comp_design_r2
+
+#SEM WITH MANAGEMENT----
 
 #END----

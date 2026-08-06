@@ -18,6 +18,7 @@ library("FactoMineR")
 library("factoextra")
 library("scales")
 library("fields")
+library("FactoMineR")
 
 
 #Data----
@@ -104,7 +105,6 @@ table(property$If_Graze_Animal.)
 
 colnames(property) [6] <- "Graze_Animal"
 
-property$Grazing_Type <- ifelse(is.na(property$Graze_Animal),"Native_Grazing","Ungulate_Grazing")
 
 
 ##Checking functional traits----
@@ -131,7 +131,7 @@ cordata <- merge(cordata,property, by = "Property")
 
 head(cordata);dim(cordata)
 
-cordata <- cordata %>% dplyr::select(Elevation, Plant_Height, Ground_Cover,Prop_Green_GC,Weed_Estimate,Grass_Status, Natual_Grazing_1km,Cropping_1km,Naural_Grazing_500m,Cropping_500m,X500m.Simspson,X500m.Dominant.Landscape.Class,Day_Sampled,Dominant_Herb_Weed,Dominat_Grass,Position,Grazing_Type)
+cordata <- cordata %>% dplyr::select(Plant_Height, Ground_Cover,Prop_Green_GC,Weed_Estimate,Grass_Status, Natual_Grazing_1km,Cropping_1km,Naural_Grazing_500m,Cropping_500m,X500m.Simspson,X500m.Dominant.Landscape.Class,Day_Sampled,Dominant_Herb_Weed,Dominat_Grass,Position)
 
 
 str(cordata)
@@ -159,15 +159,13 @@ cordata$Dominat_Grass <- as.numeric(cordata$Dominat_Grass)
 cordata$Position <- as.factor(cordata$Position)
 cordata$Position <- as.numeric(cordata$Position)
 
-cordata$Grazing_Type <- as.factor(cordata$Grazing_Type)
-cordata$Grazing_Type <- as.numeric(cordata$Grazing_Type)
 
 str(cordata) #confirmed no character columns left
 
 cor <- cor(cordata,method = "spearman")
 
-colnames(cor) <- c("Elevation", "Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Habitat Diversity","Habitat Structure", "Day Sampled","Dom Weed","Dom Grass","Position","Grazing Type")
-rownames(cor) <- c("Elevation", "Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Habitat Diversity","Habitat Structure", "Day Sampled","Dom Weed","Dom Grass","Position","Grazing Type")
+colnames(cor) <- c("Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Habitat Diversity","Habitat Structure", "Day Sampled","Dom Weed","Dom Grass","Position")
+rownames(cor) <- c("Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Habitat Diversity","Habitat Structure", "Day Sampled","Dom Weed","Dom Grass","Position")
 
 dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
 corrplot::corrplot(cor,method="color",  
@@ -252,7 +250,7 @@ max(Community$Diversity,na.rm=T)
 
 Community$Diversity[is.na(Community$Diversity)] <- 0
 
-#total count
+##count----
 
 count <- aggregate(Morphospecies ~ Point, data = invert, FUN = function(x) length(x))
 dim(count) 
@@ -271,14 +269,14 @@ max(Community$Species_Rich,na.rm=T)
 
 #create a site by species matrix
 
-count <- invert %>%
+Count <- invert %>%
   count(Point, Morphospecies) %>% #obs per site
   pivot_wider(names_from = Morphospecies,
               values_from = n,
               values_fill = 0) %>% #fill with 0
   column_to_rownames("Point") 
 
-pcadata <- decostand(count, method = "hellinger") #apparently makes results more ecologically meaningful, we'll see I guess
+pcadata <- decostand(Count, method = "hellinger") #apparently makes results more ecologically meaningful, we'll see I guess
 head(pcadata);dim(pcadata)
 
 pca_result <- prcomp(pcadata, center = TRUE, scale. = FALSE)
@@ -290,6 +288,14 @@ PoV2<-summary(pca_result)$importance[2,]
 
 pcadata$pca.comp1<-pca_result$x[,1]
 pcadata$pca.comp2<-pca_result$x[,2]
+head(pcadata)
+
+#Add to community
+composition <- data.frame(ComComp = pcadata$pca.comp1,Point = rownames(pcadata))
+
+Community <- merge(Community,composition,by = "Point",,all.x = T)
+head(Community);dim(Community)
+
 
 #Components
 dev.new(height=10,width=10,dpi=80,pointsize=14,noRStudioGD = T)
@@ -322,21 +328,6 @@ head(variables)
 
 pcadata2 <- merge(pcadata,variables,by = "Point")
 head(pcadata2);dim(pcadata2)
-
-##by grazing type----
-
-length(unique(pcadata2$Grazing_Type)) #need 2 colours
-col.2<-c("red","blue2")
-col_graze<-col.2[as.factor(pcadata2$Grazing_Type)]
-
-dev.new(height=10,width=10,dpi=80,pointsize=14,noRStudioGD = T)
-plot(pcadata2$pca.comp1,pcadata2$pca.comp2,pch=19, 
-     xlab="PC 1",ylab="PC 2",cex=2,las=1,col=alpha(col_graze,1))
-ordiellipse(cbind(pcadata2$pca.comp1, pcadata2$pca.comp2),
-            groups = pcadata2$Grazing_Type,col = col.2,lwd = 2,
-            kind = "sd")
-legend("bottomleft",legend = c("Native", "Ungulate"), pch = 19, col = col.2,pt.cex = 1,cex = 0.9)
-
 
 ##by weed estimate----
 
@@ -491,7 +482,7 @@ image.plot(legend.only=TRUE,
            smallplot=c(0.17, 0.20, 0.20, 0.45))
 
 
-#Fix correlated design variables----
+#Variables and diversity measures merged----
 
 head(Community);dim(Community)
 head(variables);dim(variables)
@@ -502,6 +493,51 @@ head(ComVar);dim(ComVar)
 ComVar<- ComVar %>% select(-Elevation)
 
 ComVar$ResDay <- resid(lm(Day_Sampled ~ Position, ComVar))
+
+ComVar$Diversity[ComVar$Diversity==0] <- 0.000001
+head(ComVar);dim(ComVar)
+
+#Turn weed estimate into numeric
+#Turn into middle of each bracket
+
+ComVar$Weed <- ifelse(ComVar$Weed_Estimate =="0-20%",10,
+       ifelse(ComVar$Weed_Estimate == "20-40%",30,
+              ifelse(ComVar$Weed_Estimate == "40-60%",50,
+                     ifelse(ComVar$Weed_Estimate=="60-80%",70,90))))
+head(ComVar);dim(ComVar)
+#Management variable----
+
+head(property);dim(property)
+
+property$Graze_Animal[which(is.na(property$Graze_Animal))] <- "No_Ungulate"
+
+
+manage_vars <- c("Land_Use", "Graze_Animal", "Slash.", "Burning.")
+
+MCA <- property %>%
+  select("Land_Use", "Graze_Animal", "Slash.", "Burning.") %>% 
+  mutate(across(everything(), as.character)) %>%
+  mutate(across(everything(), as.factor))
+head(MCA);dim(MCA)
+str(MCA)
+is.na(MCA)
+
+MCA_Result <- MCA(MCA, graph = FALSE)
+
+summary(MCA_Result)
+fviz_eig(MCA_Result, addlabels = TRUE) 
+#Dimension 1 explains 26.8% of variation
+
+fviz_mca_var(MCA_Result, repel = TRUE)
+MCA_Result$var$contrib
+
+property$management <- MCA_Result$ind$coord[, 1]
+
+head(property);dim(property)
+
+ComVar <- ComVar %>%
+  left_join(property %>% select(Property, management), by = "Property")
+head(ComVar)
 
 
 

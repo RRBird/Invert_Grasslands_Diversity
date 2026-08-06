@@ -4,6 +4,13 @@ options(scipen = 999) #prevents r from automatically displaying large numbers wi
 #Author: Rhiannon Bird
 #Written under version R 4.5.1
 
+
+par(mfg = c(2, 1, 2, 2))
+#skip panel and this above tells R where to put the next graph c(row, column, total row, total column)
+#might need to do for all remaining plots
+
+
+
 #This script contains the data prepping, exploration and manipulation before moving into actual analysis
 
 library("dplyr")
