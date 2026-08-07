@@ -22,7 +22,7 @@ str(ComVar)
 
 ComVar$Count[which(is.na(ComVar$Count))] <- 0
 
-#Scale continous variables
+#Scale continuous variables
 
 ComVar$Height <- scale(ComVar$Plant_Height)
 ComVar$GC <- scale(ComVar$Ground_Cover)
@@ -31,6 +31,14 @@ ComVar$Graze <- scale(ComVar$Natual_Grazing_1km)
 ComVar$HabDiv <- scale(ComVar$X500m.Simspson)
 ComVar$WeedScale <- scale(ComVar$Weed)
 head(ComVar)
+
+FunComVar$Height <- scale(FunComVar$Plant_Height)
+FunComVar$GC <- scale(FunComVar$Ground_Cover)
+FunComVar$GGC <- scale(FunComVar$Prop_Green_GC)
+FunComVar$Graze <- scale(FunComVar$Natual_Grazing_1km)
+FunComVar$HabDiv <- scale(FunComVar$X500m.Simspson)
+FunComVar$WeedScale <- scale(FunComVar$Weed)
+head(FunComVar)
 
 
 #Q1 SITE----
@@ -191,6 +199,72 @@ Site_Abun2$uci<-exp(Site_Abun2$uci.link)
 
 head(Site_Abun2);dim(Site_Abun2)
 
+##Functional Richness---- 
+head(FunComVar)
+
+Fun_Rich_Full <- glmmTMB(FRic ~ ResDay + (Position + Height + GC + GGC + WeedScale)^2 + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail",control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(Fun_Rich_Full)
+
+MuMIn::getAllTerms(Fun_Rich_Full) #Wrapped
+
+Fun_Rich_Dredge <- dredge(Fun_Rich_Full, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
+
+Fun_Rich_Models <- get.models(Fun_Rich_Dredge, subset = delta < 2)
+
+length(names(Fun_Rich_Models))
+names(Fun_Rich_Models)
+
+#Check if the null is within 2 AICc 
+Fun_Rich_Null <- glmmTMB(FRic ~ 1 + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail",control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+Fun_RichList <- list("null" = Fun_Rich_Null,"Top"=Fun_Rich_Models[1]$`3`)
+aictab(Fun_RichList)
+#Null model is better don't continue further 
+
+
+##Functional Evenness----
+head(FunComVar)
+Eve_mod_data <- ComVar[-which(is.na(ComVar$FEve)),]
+
+Fun_Eve_Full <- glmer(FEve ~ ResDay + (Position + Height + GC + GGC + WeedScale)^2 + (1 | Property), family = Gamma(link = "log"), data = Eve_mod_data,na.action = "na.fail")
+summary(Fun_Eve_Full)
+
+MuMIn::getAllTerms(Fun_Eve_Full) #Not wrapped
+
+Fun_Eve_Dredge <- dredge(Fun_Eve_Full, fixed = c("ResDay","Position"),m.lim = c(NA, 5),trace = TRUE)
+
+Fun_Eve_Models <- get.models(Fun_Eve_Dredge, subset = delta < 2)
+
+length(names(Fun_Eve_Models))
+names(Fun_Eve_Models)
+
+#Check if the null is within 2 AICc 
+Fun_Eve_Null <- glmer(FEve ~ 1 + (1 | Property), family = Gamma(link = "log"), data = Eve_mod_data,na.action = "na.fail")
+Fun_EveList <- list("null" = Fun_Eve_Null,"Top"=Fun_Eve_Models[1]$`1`)
+aictab(Fun_EveList)
+#Null is better so don't continue with model
+Fun_Eve_Models[1]$`1`
+
+##Functional Dis----
+
+Dis_Mod_Data <- ComVar[-which(is.na(ComVar$FDis)),]
+#one site had no inverts so needed to omit them in model for dredge
+Dis_Full <- glmmTMB(FDis ~ ResDay + (Position + Height + GC + GGC + WeedScale)^2 + (1 | Property), family = gaussian(), data = Dis_Mod_Data,na.action = "na.fail")
+summary(Dis_Full)
+
+MuMIn::getAllTerms(Dis_Full) #they are wrapped
+
+Dis_Dredge <- dredge(Dis_Full, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
+
+Dis_Models <- get.models(Dis_Dredge, subset = delta < 2)
+
+length(names(Dis_Models))
+names(Dis_Models)
+
+#Check if the null is within 2 AICc 
+Dis_Null <- glmmTMB(FDis ~ 1 + (1 | Property), family = gaussian(), data = Dis_Mod_Data,na.action = "na.fail")
+DisList <- list("null" = Dis_Null,"Top"=Dis_Models[1]$`1`)
+aictab(DisList)
+#Null is top
 
 ##Community Composition----
 
@@ -381,6 +455,66 @@ Land_Abun2$lci<-exp(Land_Abun2$lci.link)
 Land_Abun2$uci<-exp(Land_Abun2$uci.link)
 
 head(Land_Abun2);dim(Land_Abun2)
+
+##Functional Richness---- 
+head(FunComVar)
+
+Fun_Rich_Full_2 <- glmmTMB(FRic ~ ResDay + (Position + HabDiv + Graze + X500m.Dominant.Landscape.Class)^2 + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail")
+summary(Fun_Rich_Full_2)
+
+MuMIn::getAllTerms(Fun_Rich_Full_2) #Wrapped
+
+Fun_Rich_Dredge_2 <- dredge(Fun_Rich_Full_2, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
+
+Fun_Rich_Models_2 <- get.models(Fun_Rich_Dredge_2, subset = delta < 2)
+
+length(names(Fun_Rich_Models_2))
+names(Fun_Rich_Models_2)
+#there's 20 models but 15 convergence warnings
+#check null first then if better then null check all models and remove convergence issue models
+
+#Check if the null is within 2 AICc 
+Fun_RichList_2 <- list("null" = Fun_Rich_Null,"Top"=Fun_Rich_Models_2[1]$`67`)
+aictab(Fun_RichList_2)
+#Null is within 2 AICc
+
+##Functional Evenness----
+
+Fun_Eve_Full_2 <- glmer(FEve ~ ResDay + (Position + HabDiv + Graze + X500m.Dominant.Landscape.Class)^2 + (1 | Property), family = Gamma(link = "log"), data = Eve_mod_data,na.action = "na.fail")
+summary(Fun_Eve_Full_2)
+
+MuMIn::getAllTerms(Fun_Eve_Full_2) #Not wrapped
+
+Fun_Eve_Dredge_2 <- dredge(Fun_Eve_Full_2, fixed = c("ResDay","Position"),m.lim = c(NA, 5),trace = TRUE)
+
+Fun_Eve_Models_2 <- get.models(Fun_Eve_Dredge_2, subset = delta < 2)
+
+length(names(Fun_Eve_Models_2))
+names(Fun_Eve_Models_2)
+
+#Check if the null is within 2 AICc 
+Fun_EveList_2 <- list("null" = Fun_Eve_Null,"Top"=Fun_Eve_Models_2[1]$`1`)
+aictab(Fun_EveList_2)
+#Null is better so don't continue with model
+
+##Functional Dis----
+
+Dis_Full2 <- glmmTMB(FDis ~ ResDay + (Position + HabDiv + Graze + X500m.Dominant.Landscape.Class)^2 + (1 | Property), family = gaussian(), data = Dis_Mod_Data,na.action = "na.fail")
+summary(Dis_Full)
+
+MuMIn::getAllTerms(Dis_Full2) #they are wrapped
+
+Dis_Dredge2 <- dredge(Dis_Full2, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
+
+Dis_Models2 <- get.models(Dis_Dredge2, subset = delta < 2)
+
+length(names(Dis_Models2))
+names(Dis_Models2)
+
+#Check if the null is within 2 AICc 
+DisList2 <- list("null" = Dis_Null,"Top"=Dis_Models2[1]$`3`)
+aictab(DisList2)
+#Null is top
 
 ##Community Composition----
 
