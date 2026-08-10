@@ -199,73 +199,6 @@ Site_Abun2$uci<-exp(Site_Abun2$uci.link)
 
 head(Site_Abun2);dim(Site_Abun2)
 
-##Functional Richness---- 
-head(FunComVar)
-
-Fun_Rich_Full <- glmmTMB(FRic ~ ResDay + (Position + Height + GC + GGC + WeedScale)^2 + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail",control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-summary(Fun_Rich_Full)
-
-MuMIn::getAllTerms(Fun_Rich_Full) #Wrapped
-
-Fun_Rich_Dredge <- dredge(Fun_Rich_Full, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
-
-Fun_Rich_Models <- get.models(Fun_Rich_Dredge, subset = delta < 2)
-
-length(names(Fun_Rich_Models))
-names(Fun_Rich_Models)
-
-#Check if the null is within 2 AICc 
-Fun_Rich_Null <- glmmTMB(FRic ~ 1 + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail",control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-Fun_RichList <- list("null" = Fun_Rich_Null,"Top"=Fun_Rich_Models[1]$`3`)
-aictab(Fun_RichList)
-#Null model is better don't continue further 
-
-
-##Functional Evenness----
-head(FunComVar)
-Eve_mod_data <- ComVar[-which(is.na(ComVar$FEve)),]
-
-Fun_Eve_Full <- glmer(FEve ~ ResDay + (Position + Height + GC + GGC + WeedScale)^2 + (1 | Property), family = Gamma(link = "log"), data = Eve_mod_data,na.action = "na.fail")
-summary(Fun_Eve_Full)
-
-MuMIn::getAllTerms(Fun_Eve_Full) #Not wrapped
-
-Fun_Eve_Dredge <- dredge(Fun_Eve_Full, fixed = c("ResDay","Position"),m.lim = c(NA, 5),trace = TRUE)
-
-Fun_Eve_Models <- get.models(Fun_Eve_Dredge, subset = delta < 2)
-
-length(names(Fun_Eve_Models))
-names(Fun_Eve_Models)
-
-#Check if the null is within 2 AICc 
-Fun_Eve_Null <- glmer(FEve ~ 1 + (1 | Property), family = Gamma(link = "log"), data = Eve_mod_data,na.action = "na.fail")
-Fun_EveList <- list("null" = Fun_Eve_Null,"Top"=Fun_Eve_Models[1]$`1`)
-aictab(Fun_EveList)
-#Null is better so don't continue with model
-Fun_Eve_Models[1]$`1`
-
-##Functional Dis----
-
-Dis_Mod_Data <- ComVar[-which(is.na(ComVar$FDis)),]
-#one site had no inverts so needed to omit them in model for dredge
-Dis_Full <- glmmTMB(FDis ~ ResDay + (Position + Height + GC + GGC + WeedScale)^2 + (1 | Property), family = gaussian(), data = Dis_Mod_Data,na.action = "na.fail")
-summary(Dis_Full)
-
-MuMIn::getAllTerms(Dis_Full) #they are wrapped
-
-Dis_Dredge <- dredge(Dis_Full, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
-
-Dis_Models <- get.models(Dis_Dredge, subset = delta < 2)
-
-length(names(Dis_Models))
-names(Dis_Models)
-
-#Check if the null is within 2 AICc 
-Dis_Null <- glmmTMB(FDis ~ 1 + (1 | Property), family = gaussian(), data = Dis_Mod_Data,na.action = "na.fail")
-DisList <- list("null" = Dis_Null,"Top"=Dis_Models[1]$`1`)
-aictab(DisList)
-#Null is top
-
 ##Community Composition----
 
 ComVar_Subsected <- ComVar[-which(is.na(ComVar$ComComp)),]
@@ -311,7 +244,11 @@ aictab(CompList_All)
 Comp_Top <- glmmTMB(ComComp ~ GC* Position + GGC +ResDay + (1 | Property), family = gaussian(), data = ComVar_Subsected,na.action = "na.fail")
 summary(Comp_Top)
 
-Site_Comp<- expand.grid(GC = Predictions_GC, Position = c("Escarpment","Valley"), ResDay = Predictions_Day, GGC=Predictions_GGC)
+Predictions_CompGC <- seq(min(ComVar_Subsected$GC),max(ComVar_Subsected$GC),length.out=20)
+Predictions_CompGGC <- seq(min(ComVar_Subsected$GGC),max(ComVar_Subsected$GGC),length.out=20)
+Predictions_CompDay <- seq(min(ComVar_Subsected$ResDay),max(ComVar_Subsected$ResDay),length.out=20)
+
+Site_Comp<- expand.grid(GC = Predictions_CompGC, Position = c("Escarpment","Valley"), ResDay = Predictions_CompDay, GGC=Predictions_CompGGC)
 head(Site_Comp);dim(Site_Comp)
 
 Site_Comp1 <- predict(object = Comp_Top,newdata= Site_Comp,se.fit = T, type = "link",re.form = NA)
@@ -321,12 +258,81 @@ Site_Comp2<-data.frame(Site_Comp,fit.link=Site_Comp1$fit,se.link=Site_Comp1$se.f
 Site_Comp2$lci.link<-Site_Comp2$fit.link-(1.96*Site_Comp2$se.link)
 Site_Comp2$uci.link<-Site_Comp2$fit.link+(1.96*Site_Comp2$se.link)
 
-Site_Comp2$fit<-exp(Site_Comp2$fit.link)
-Site_Comp2$se<-exp(Site_Comp2$se.link)
-Site_Comp2$lci<-exp(Site_Comp2$lci.link)
-Site_Comp2$uci<-exp(Site_Comp2$uci.link)
-
 head(Site_Comp2);dim(Site_Comp2)
+
+##Functional Richness---- 
+head(FunComVar)
+
+Fun_Rich_Full <- glmmTMB(FRic ~ ResDay + (Position + Height + GC + GGC + WeedScale)^2 + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail",control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+summary(Fun_Rich_Full)
+glmmTMB::VarCorr(Fun_Rich_Full)
+performance::icc(Fun_Rich_Full)
+performance::check_singularity(Fun_Rich_Full)
+
+MuMIn::getAllTerms(Fun_Rich_Full) #Wrapped
+
+Fun_Rich_Dredge <- dredge(Fun_Rich_Full, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
+
+Fun_Rich_Models <- get.models(Fun_Rich_Dredge, subset = delta < 2)
+
+length(names(Fun_Rich_Models))
+names(Fun_Rich_Models)
+
+#Check if the null is within 2 AICc 
+Fun_Rich_Null <- glmmTMB(FRic ~ 1 + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail",control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
+Fun_RichList <- list("null" = Fun_Rich_Null,"Top"=Fun_Rich_Models[1]$`3`)
+aictab(Fun_RichList)
+#Null model is better don't continue further 
+
+
+##Functional Evenness----
+head(FunComVar)
+
+Fun_Eve_Full <- glmer(FEve ~ ResDay + (Position + Height + GC + GGC + WeedScale)^2 + (1 | Property), family = Gamma(link = "log"), data = ComVar_Subsected,na.action = "na.fail")
+summary(Fun_Eve_Full)
+glmmTMB::VarCorr(Fun_Eve_Full)
+performance::icc(Fun_Eve_Full)
+performance::check_singularity(Fun_Eve_Full)
+
+MuMIn::getAllTerms(Fun_Eve_Full) #Not wrapped
+
+Fun_Eve_Dredge <- dredge(Fun_Eve_Full, fixed = c("ResDay","Position"),m.lim = c(NA, 5),trace = TRUE)
+
+Fun_Eve_Models <- get.models(Fun_Eve_Dredge, subset = delta < 2)
+
+length(names(Fun_Eve_Models))
+names(Fun_Eve_Models)
+
+#Check if the null is within 2 AICc 
+Fun_Eve_Null <- glmer(FEve ~ 1 + (1 | Property), family = Gamma(link = "log"), data = ComVar_Subsected,na.action = "na.fail")
+Fun_EveList <- list("null" = Fun_Eve_Null,"Top"=Fun_Eve_Models[1]$`1`)
+aictab(Fun_EveList)
+#Null is better so don't continue with model
+Fun_Eve_Models[1]$`1`
+
+##Functional Dispersion----
+
+Dis_Full <- glmmTMB(FDis ~ ResDay + (Position + Height + GC + GGC + WeedScale)^2 + (1 | Property), family = gaussian(), data = ComVar_Subsected,na.action = "na.fail")
+summary(Dis_Full)
+
+glmmTMB::VarCorr(Dis_Full)
+performance::icc(Dis_Full)
+performance::check_singularity(Dis_Full)
+
+MuMIn::getAllTerms(Dis_Full) #they are wrapped
+
+Dis_Dredge <- dredge(Dis_Full, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
+
+Dis_Models <- get.models(Dis_Dredge, subset = delta < 2)
+
+length(names(Dis_Models))
+names(Dis_Models)
+
+#Check if the null is within 2 AICc 
+Dis_Null <- glmmTMB(FDis ~ 1 + (1 | Property), family = gaussian(), data = ComVar_Subsected,na.action = "na.fail")
+DisList <- list("null" = Dis_Null,"Top"=Dis_Models[1]$`1`)
+aictab(DisList)
+#Null is top
 
 #Q2 LANDSCAPE----
 
@@ -456,6 +462,47 @@ Land_Abun2$uci<-exp(Land_Abun2$uci.link)
 
 head(Land_Abun2);dim(Land_Abun2)
 
+##Community Composition----
+
+Comp_Full_2 <- glmmTMB(ComComp ~ ResDay + (Position + HabDiv + Graze + X500m.Dominant.Landscape.Class)^2 + (1 | Property), family = gaussian(), data = ComVar_Subsected,na.action = "na.fail")
+summary(Comp_Full_2)
+
+MuMIn::getAllTerms(Comp_Full_2) #wrapped
+
+Comp_Dredge_2 <- dredge(Comp_Full_2, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
+
+Comp_Models_2 <- get.models(Comp_Dredge_2, subset = delta < 2)
+
+length(names(Comp_Models_2))
+names(Comp_Models_2)
+
+#Check if the null is within 2 AICc 
+CompList_2 <- list("null" = Comp_Null,"Top"=Comp_Models_2[1]$`22`)
+aictab(CompList_2)
+#it's good
+
+#Top model:
+Comp_Models_2[1]$`22` #G*P+Dom+D
+
+#Predictions
+Predictions_CompGraze <-seq(min(ComVar_Subsected$Graze),max(ComVar_Subsected$Graze),length.out=20)
+Predictions_CompDomHab <- unique(ComVar_Subsected$X500m.Dominant.Landscape.Class)
+
+Comp_Top_2 <- glmmTMB(ComComp ~ Graze * Position + X500m.Dominant.Landscape.Class + ResDay + (1 | Property), family = gaussian(), data = ComVar_Subsected,na.action = "na.fail")
+summary(Comp_Top)
+
+Land_Comp<- expand.grid(Graze = Predictions_CompGraze, Position = c("Escarpment","Valley"), ResDay = Predictions_CompDay, X500m.Dominant.Landscape.Class = Predictions_CompDomHab)
+head(Land_Comp);dim(Land_Comp)
+
+Land_Comp1 <- predict(object = Comp_Top_2,newdata= Land_Comp,se.fit = T, type = "link",re.form = NA)
+
+Land_Comp2<-data.frame(Land_Comp,fit.link=Land_Comp1$fit,se.link=Land_Comp1$se.fit)
+
+Land_Comp2$lci.link<-Land_Comp2$fit.link-(1.96*Land_Comp2$se.link)
+Land_Comp2$uci.link<-Land_Comp2$fit.link+(1.96*Land_Comp2$se.link)
+
+head(Land_Comp2);dim(Land_Comp2)
+
 ##Functional Richness---- 
 head(FunComVar)
 
@@ -480,7 +527,7 @@ aictab(Fun_RichList_2)
 
 ##Functional Evenness----
 
-Fun_Eve_Full_2 <- glmer(FEve ~ ResDay + (Position + HabDiv + Graze + X500m.Dominant.Landscape.Class)^2 + (1 | Property), family = Gamma(link = "log"), data = Eve_mod_data,na.action = "na.fail")
+Fun_Eve_Full_2 <- glmer(FEve ~ ResDay + (Position + HabDiv + Graze + X500m.Dominant.Landscape.Class)^2 + (1 | Property), family = Gamma(link = "log"), data = ComVar_Subsected,na.action = "na.fail")
 summary(Fun_Eve_Full_2)
 
 MuMIn::getAllTerms(Fun_Eve_Full_2) #Not wrapped
@@ -497,9 +544,9 @@ Fun_EveList_2 <- list("null" = Fun_Eve_Null,"Top"=Fun_Eve_Models_2[1]$`1`)
 aictab(Fun_EveList_2)
 #Null is better so don't continue with model
 
-##Functional Dis----
+##Functional Dispersion----
 
-Dis_Full2 <- glmmTMB(FDis ~ ResDay + (Position + HabDiv + Graze + X500m.Dominant.Landscape.Class)^2 + (1 | Property), family = gaussian(), data = Dis_Mod_Data,na.action = "na.fail")
+Dis_Full2 <- glmmTMB(FDis ~ ResDay + (Position + HabDiv + Graze + X500m.Dominant.Landscape.Class)^2 + (1 | Property), family = gaussian(), data = ComVar_Subsected,na.action = "na.fail")
 summary(Dis_Full)
 
 MuMIn::getAllTerms(Dis_Full2) #they are wrapped
@@ -515,52 +562,6 @@ names(Dis_Models2)
 DisList2 <- list("null" = Dis_Null,"Top"=Dis_Models2[1]$`3`)
 aictab(DisList2)
 #Null is top
-
-##Community Composition----
-
-Comp_Full_2 <- glmmTMB(ComComp ~ ResDay + (Position + HabDiv + Graze + X500m.Dominant.Landscape.Class)^2 + (1 | Property), family = gaussian(), data = ComVar_Subsected,na.action = "na.fail")
-summary(Comp_Full_2)
-
-MuMIn::getAllTerms(Comp_Full_2) #wrapped
-
-Comp_Dredge_2 <- dredge(Comp_Full_2, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
-
-Comp_Models_2 <- get.models(Comp_Dredge_2, subset = delta < 2)
-
-length(names(Comp_Models_2))
-names(Comp_Models_2)
-
-#Check if the null is within 2 AICc 
-CompList_2 <- list("null" = Comp_Null,"Top"=Comp_Models_2[1]$`22`)
-aictab(CompList_2)
-#it's good
-
-#Top model:
-Comp_Models_2[1]$`22` #G*P+Dom+D
-
-#Predictions
-Predictions_Graze <-seq(min(ComVar$Graze),max(ComVar$Graze),length.out=20)
-Predictions_DomHab <- unique(ComVar$X500m.Dominant.Landscape.Class)
-
-Comp_Top_2 <- glmmTMB(ComComp ~ Graze * Position + X500m.Dominant.Landscape.Class + ResDay + (1 | Property), family = gaussian(), data = ComVar_Subsected,na.action = "na.fail")
-summary(Comp_Top)
-
-Land_Comp<- expand.grid(Graze = Predictions_Graze, Position = c("Escarpment","Valley"), ResDay = Predictions_Day, X500m.Dominant.Landscape.Class = Predictions_DomHab)
-head(Land_Comp);dim(Land_Comp)
-
-Land_Comp1 <- predict(object = Comp_Top_2,newdata= Land_Comp,se.fit = T, type = "link",re.form = NA)
-
-Land_Comp2<-data.frame(Land_Comp,fit.link=Land_Comp1$fit,se.link=Land_Comp1$se.fit)
-
-Land_Comp2$lci.link<-Land_Comp2$fit.link-(1.96*Land_Comp2$se.link)
-Land_Comp2$uci.link<-Land_Comp2$fit.link+(1.96*Land_Comp2$se.link)
-
-Land_Comp2$fit<-exp(Land_Comp2$fit.link)
-Land_Comp2$se<-exp(Land_Comp2$se.link)
-Land_Comp2$lci<-exp(Land_Comp2$lci.link)
-Land_Comp2$uci<-exp(Land_Comp2$uci.link)
-
-head(Land_Comp2);dim(Land_Comp2)
 
 
 #Q3 SITE VS LANDSCAPE----
@@ -647,5 +648,363 @@ Comp_landscape_r2
 Comp_design_r2
 
 #SEM WITH MANAGEMENT----
+
+#Model for each relationship in concept diagram
+head(ComVar);dim(ComVar)
+head(property);dim(property)
+ComVar$Height <- as.numeric(ComVar$Height)
+ComVar$GC <- as.numeric(ComVar$GC)
+ComVar$GGC <- as.numeric(ComVar$GGC)
+ComVar$Graze <- as.numeric(ComVar$Graze)
+ComVar$HabDiv <- as.numeric(ComVar$HabDiv)
+
+library("piecewiseSEM")
+library("reformulas")
+
+mod_Rich <- glmmTMB(Species_Rich ~ management + Height + GC + GGC + Graze + HabDiv + (1 | Property), family = nbinom2, data = ComVar)
+
+mod_H <- glmmTMB(Height ~ management + (1 | Property), family = gaussian, data = ComVar)
+
+mod_GC <- glmmTMB(GC ~ management + (1 | Property), family = gaussian, data = ComVar)
+
+mod_GGC <- glmmTMB(GGC ~ management + (1 | Property), family = gaussian, data = ComVar)
+
+psem_Rich_mods <- psem(mod_Rich,mod_H,mod_GC,mod_GGC, data=ComVar)
+summary(psem_Rich_mods)
+
+
+
+
+mod_Abun <- glmmTMB(Count ~ management + Height + GC + GGC + Graze + HabDiv + (1 | Property), family = nbinom2, data = ComVar)
+
+psem_Abun_mods <- psem(mod_Abun,mod_H,mod_GC,mod_GGC, data=ComVar)
+summary(psem_Abun_mods)
+
+
+
+ComVar_Subsected[,23:27] <- sapply(ComVar_Subsected[,23:27],as.numeric)
+class(ComVar_Subsected$Height)
+
+mod_Comp <- glmmTMB(ComComp ~ management + Height + GC + GGC + Graze + HabDiv + (1 | Property), family = gaussian(), data = ComVar_Subsected)
+
+mod_H2 <- glmmTMB(Height ~ management + (1 | Property), family = gaussian, data = ComVar_Subsected)
+
+mod_GC2 <- glmmTMB(GC ~ management + (1 | Property), family = gaussian, data = ComVar_Subsected)
+
+mod_GGC2 <- glmmTMB(GGC ~ management + (1 | Property), family = gaussian, data = ComVar_Subsected)
+
+psem_Comp_mods <- psem(mod_Comp,mod_H2,mod_GC2,mod_GGC2, data=ComVar_Subsected)
+summary(psem_Comp_mods)
+
+mod_Comp <- glmmTMB(ComComp ~ management + Height + GC + GGC + Graze + HabDiv + (1 | Property), family = gaussian(), data = ComVar_Subsected)
+
+
+mod_Div <- glmer(Diversity ~ management + Height + GC + GGC + Graze + HabDiv + (1 | Property), family = Gamma(link = "log"), data = ComVar_Subsected)
+
+psem_Div_mods <- psem(mod_Div,mod_H2,mod_GC2,mod_GGC2, data=ComVar_Subsected)
+summary(psem_Div_mods)
+
+
+#Functional 
+
+mod_FRic <- glmmTMB(FRic ~ management + Height + GC + GGC + Graze + HabDiv +(1 | Property), family = nbinom2, data = ComVar)
+mod_FEve <- glmer(FEve ~ management + Height + GC + GGC + Graze + HabDiv+ (1 | Property), family = Gamma(link = "log"), data = ComVar_Subsected)
+mod_FDis <- glmmTMB(FDis ~ management + Height + GC + GGC + Graze + HabDiv+ (1 | Property), family = gaussian(), data = ComVar_Subsected)
+
+psem_FRic_mods <- psem(mod_FRic,mod_H,mod_GC,mod_GGC, data=ComVar)
+summary(psem_FRic_mods)
+
+psem_FEve_mods <- psem(mod_FEve,mod_H2,mod_GC2,mod_GGC2, data=ComVar_Subsected)
+summary(psem_FRic_mods)
+
+psem_FDis_mods <- psem(mod_FDis,mod_H2,mod_GC2,mod_GGC2, data=ComVar_Subsected)
+summary(psem_FRic_mods)
+#Figures----
+
+##Species Richness----
+head(Site_Rich2);dim(Site_Rich2)
+summary(Rich_Top)
+
+head(Land_Rich2);dim(Land_Rich2)
+summary(Rich_Top_2)
+
+AA <- Site_Rich2$ResDay == Predictions_Day & Site_Rich2$Position == "Escarpment"
+A_A <- Site_Rich2$ResDay == Predictions_Day & Site_Rich2$Position == "Valley"
+AAA <- Site_Rich2$GC == Predictions_GC[10] & Site_Rich2$Position == "Escarpment"
+
+#par(mfg = c(2, 1, 2, 2))
+#to skip panel and this above tells R where to put the next graph c(row, column, total row, total column)
+
+BB <-Land_Rich2$Position == "Escarpment" & Land_Rich2$ResDay == Predictions_Day[10]
+B_B <- Land_Rich2$HabDiv == Predictions_Hab_Div[10] & Land_Rich2$ResDay == Predictions_Day[10]
+BBB <- Land_Rich2$HabDiv == Predictions_Hab_Div[10] & Land_Rich2$Position == "Escarpment"
+
+raw_x1 <- ifelse(ComVar$Position ==
+                   "Escarpment", 1, 
+                 ifelse(ComVar$Position ==
+                          "Valley", 2, NA))
+
+
+dev.new(height=10,width=15,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,3,2),mfrow=c(2,3),mgp=c(2.5,1,0),xpd = T)
+
+plot(x = ComVar$GC,y = ComVar$Species_Rich,xlab = "Ground Cover (%)",ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.4,cex.axis=1.4,xaxt = 'n')
+axis(side=1, at=seq(from=min(Site_Rich2$GC),to=max(Site_Rich2$GC),length.out=5),labels=round(seq(from=min(ComVar$Ground_Cover),to=max(ComVar$Ground_Cover),length.out=5),0),cex.axis=1.4)
+mtext(side=3,line=0,at = -3.2,'a)',cex=0.8)
+
+polygon(x = c(Site_Rich2$GC[AA],rev(Site_Rich2$GC[AA])), y = c(Site_Rich2$lci[AA],rev(Site_Rich2$uci[AA])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Site_Rich2$GC[AA],y = Site_Rich2$fit[AA],lwd = 2,col = 'grey30')
+
+polygon(x = c(Site_Rich2$GC[A_A],rev(Site_Rich2$GC[A_A])), y = c(Site_Rich2$lci[A_A],rev(Site_Rich2$uci[A_A])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Site_Rich2$GC[A_A],y = Site_Rich2$fit[A_A],lwd = 2,col = 'grey30',lty=2)
+
+legend("topleft",legend = c("Escaprment", "Valley"), lty = c(1,2), col = 'grey30',pt.cex = 1,cex = 1.4)
+
+
+plot(x = ComVar$ResDay,y = ComVar$Species_Rich,xlab = "Day (position-adjusted)",ylab='Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd =2,cex.lab=1.4,cex.axis=1.4,xaxt = 'n')
+axis(side=1, at=seq(from=min(Site_Rich2$ResDay),to=max(Site_Rich2$ResDay),length.out=5),labels=round(seq(from=min(ComVar$ResDay),to=max(ComVar$ResDay),length.out=5),0),cex.axis=1.4)
+mtext(side=3,line=0,at = -15,'b)',cex=0.8)
+
+polygon(x = c(Site_Rich2$ResDay[AAA],rev(Site_Rich2$ResDay[AAA])), y = c(Site_Rich2$lci[AAA],rev(Site_Rich2$uci[AAA])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Site_Rich2$ResDay[AAA],y = Site_Rich2$fit[AAA],lwd = 2,col = 'grey30')
+
+mtext(side=3,line=1,at = -25,'-------------------Site-------------------',cex=0.9, font = 2)
+
+
+mtext(bquote(R^2 == 0.061), side=1,line=-10,at = 50,cex=1.1)
+mtext("Site", side=1,line=-10,at = 40,cex=1.1)
+mtext(bquote(R^2 == 0.061), side=1,line=-8,at = 50,cex=1.1)
+mtext("Landscape", side=1,line=-8,at = 35,cex=1.1)
+mtext(bquote(R^2 == 0.224), side=1,line=-6,at = 50,cex=1.1)
+mtext("Fixed", side=1,line=-6,at = 39,cex=1.1)
+
+
+par(mfg = c(2, 1, 2, 3))
+plot(x = ComVar$HabDiv,y = ComVar$Species_Rich,xlab = "Habitat Diveristy within 500m",ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.4,cex.axis=1.4,xaxt = 'n')
+axis(side=1, at=seq(from=min(Land_Rich2$HabDiv),to=max(Land_Rich2$HabDiv),length.out=5),labels=round(seq(from=min(ComVar$X500m.Simspson),to=max(ComVar$X500m.Simspson),length.out=5),1),cex.axis=1.4)
+mtext(side=3,line=0,at = -3.1,'c)',cex=0.8)
+
+polygon(x = c(Land_Rich2$HabDiv[BB],rev(Land_Rich2$HabDiv[BB])), y = c(Land_Rich2$lci[BB],rev(Land_Rich2$uci[BB])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Land_Rich2$HabDiv[BB],y = Land_Rich2$fit[BB],lwd = 2,col = 'grey30')
+
+
+plot(x = 1:2,y = Land_Rich2$fit[B_B],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,20),cex.lab =1.4,cex.axis = 1.4)
+axis(side=1,at=c(0.8,2.2),labels=c('Escarpment','Valley'),cex.axis=1.4)
+mtext(side=3,line=0,at = -0.25,'d)',cex=0.8)
+arrows(x0=1:2, y0=Land_Rich2$lci [B_B],x1=1:2, y1=Land_Rich2$uci[B_B],angle=90,length=0.1, code=3, lwd=2,col = "black")
+points(x = jitter(raw_x1, factor = 1),y = ComVar$Species_Rich, pch = 16, cex = 0.4, col = "black")
+
+mtext(side=3,line=1,at = 1.5,'--------------------------------Landscape--------------------------------',cex=0.9, font = 2)
+
+
+plot(x = ComVar$ResDay,y = ComVar$Species_Rich,xlab = "Day (position-adjusted)",ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd= 2,cex.lab=1.4,cex.axis=1.4,xaxt = 'n')
+axis(side=1, at=seq(from=min(Land_Rich2$ResDay),to=max(Land_Rich2$ResDay),length.out=5),labels=round(seq(from=min(ComVar$ResDay),to=max(ComVar$ResDay),length.out=5),0),cex.axis=1.4)
+mtext(side=3,line=0,at = -15,'e)',cex=0.8)
+
+polygon(x = c(Land_Rich2$ResDay[BBB],rev(Land_Rich2$ResDay[BBB])), y = c(Land_Rich2$lci[BBB],rev(Land_Rich2$uci[BBB])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Land_Rich2$ResDay[BBB],y = Land_Rich2$fit[BBB],lwd = 2,col = 'grey30')
+
+
+
+##Abundance----
+head(Site_Abun2);dim(Site_Abun2)
+summary(Abun_Top)
+
+head(Land_Abun2);dim(Land_Abun2)
+summary(Abun_Top_2)
+
+
+CC <- Site_Abun2$GGC == Predictions_GGC[10] & Site_Abun2$Height == Predictions_Height[10] & Site_Abun2$Position == "Escarpment" & Site_Abun2$ResDay == Predictions_Day[10]
+C_C <- Site_Abun2$GC == Predictions_GC[10] & Site_Abun2$Height == Predictions_Height[10] & Site_Abun2$Position == "Escarpment" & Site_Abun2$ResDay == Predictions_Day[10]
+CCC <- Site_Abun2$GGC == Predictions_GGC[10] & Site_Abun2$Position == "Escarpment" & Site_Abun2$GC == Predictions_GC[10] & Site_Abun2$ResDay == Predictions_Day[10]
+C_C_C <- Site_Abun2$GGC == Predictions_GGC[10] & Site_Abun2$Height == Predictions_Height[10] & Site_Abun2$GC == Predictions_GC[10] & Site_Abun2$ResDay == Predictions_Day[10]
+CCCC <- Site_Abun2$GGC == Predictions_GGC[10] & Site_Abun2$Height == Predictions_Height[10] & Site_Abun2$GC == Predictions_GC[10] &  Site_Abun2$Position == "Escarpment"
+
+
+DD <- Land_Abun2$Position == "Escarpment" & Land_Abun2$ResDay == Predictions_Day[10]
+D_D <- Land_Abun2$HabDiv == Predictions_Hab_Div[10] & Land_Abun2$ResDay == Predictions_Day[10]
+DDD <- Land_Abun2$Position == "Escarpment" & Land_Abun2$HabDiv == Predictions_Hab_Div[10]
+
+
+
+dev.new(height=15,width=15,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,3,2),mfrow=c(3,3),mgp=c(2.5,1,0),xpd = T)
+
+plot(x = ComVar$GC,y = ComVar$Count,xlab = "Ground Cover (%)",ylab = 'Abundance', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+axis(side=1, at=seq(from=min(Site_Abun2$GC),to=max(Site_Abun2$GC),length.out=4),labels=round(seq(from=min(ComVar$Ground_Cover),to=max(ComVar$Ground_Cover),length.out=4),0),cex.axis=1.2)
+mtext(side=3,line=0,at = -3.3,'a)',cex=0.8)
+
+polygon(x = c(Site_Abun2$GC[CC],rev(Site_Abun2$GC[CC])), y = c(Site_Abun2$lci[CC],rev(Site_Abun2$uci[CC])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Site_Abun2$GC[CC],y = Site_Abun2$fit[CC],lwd = 2,col = 'grey30')
+
+
+plot(x = ComVar$GGC,y = ComVar$Count,xlab = "Green Ground Cover (%)",ylab = 'Abundance', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+axis(side=1, at=seq(from=min(Site_Abun2$GGC),to=max(Site_Abun2$GGC),length.out=4),labels=round(seq(from=min(ComVar$Prop_Green_GC),to=max(ComVar$Prop_Green_GC),length.out=4),0),cex.axis=1.2)
+mtext(side=3,line=0,at = -2.1,'b)',cex=0.8)
+
+polygon(x = c(Site_Abun2$GGC[C_C],rev(Site_Abun2$GGC[C_C])), y = c(Site_Abun2$lci[C_C],rev(Site_Abun2$uci[C_C])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Site_Abun2$GGC[C_C],y = Site_Abun2$fit[C_C],lwd = 2,col = 'grey30')
+
+plot(x = ComVar$Height,y = ComVar$Count,xlab = "Grass Height (cm)",ylab = 'Abundance', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+axis(side=1, at=seq(from=min(Site_Abun2$Height),to=max(Site_Abun2$Height),length.out=4),labels=round(seq(from=min(ComVar$Plant_Height),to=max(ComVar$Plant_Height),length.out=4),0),cex.axis=1.2)
+mtext(side=3,line=0,at = -1.6,'c)',cex=0.8)
+
+polygon(x = c(Site_Abun2$Height[CCC],rev(Site_Abun2$Height[CCC])), y = c(Site_Abun2$lci[CCC],rev(Site_Abun2$uci[CCC])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Site_Abun2$Height[CCC],y = Site_Abun2$fit[CCC],lwd = 2,col = 'grey30')
+
+mtext(side=3,line=1,at = -7,'------------------------Site------------------------',cex=0.8, font = 2)
+
+plot(x = 1:2,y = Site_Abun2$fit[C_C_C],xlab = " ",ylab = 'Abundance', type = 'p',pch = 16,cex =1.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,40),cex.lab =1.2,cex.axis = 1.2)
+axis(side=1,at=c(0.7,2.3),labels=c('Escarpment','Valley'),cex.axis=0.9)
+mtext(side=3,line=0,at = -0.25,'d)',cex=0.8)
+arrows(x0=1:2, y0=Site_Abun2$lci [C_C_C],x1=1:2, y1=Site_Abun2$uci[C_C_C],angle=90,length=0.05, code=3, lwd=2,col = "black")
+points(x = jitter(raw_x1, factor = 1),y = ComVar$Count, pch = 16, cex = 0.4, col = "grey30")
+
+mtext(side=3,line=1,at = 4,'----------Site----------',cex=0.8, font = 2)
+
+
+plot(x = ComVar$ResDay,y = ComVar$Count,xlab = "Day (position-adjusted)",ylab = 'Abundance', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+axis(side=1, at=seq(from=min(Site_Abun2$ResDay),to=max(Site_Abun2$ResDay),length.out=4),labels=round(seq(from=min(ComVar$ResDay),to=max(ComVar$ResDay),length.out=4),0),cex.axis=1.2)
+mtext(side=3,line=0,at = -15,'e)',cex=0.8)
+
+polygon(x = c(Site_Abun2$ResDay[CCCC],rev(Site_Abun2$ResDay[CCCC])), y = c(Site_Abun2$lci[CCCC],rev(Site_Abun2$uci[CCCC])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Site_Abun2$ResDay[CCCC],y = Site_Abun2$fit[CCCC],lwd = 2,col = 'grey30')
+
+mtext(bquote(R^2 == 0.131), side=1,line=-6,at = 60,cex=0.8)
+mtext("Site", side=1,line=-6,at = 46,cex=0.8)
+mtext(bquote(R^2 == 0.094), side=1,line=-4,at = 60,cex=0.8)
+mtext("Landscape", side=1,line=-4,at = 40,cex=0.8)
+mtext(bquote(R^2 == 0.183), side=1,line=-2,at = 60,cex=0.8)
+mtext("Fixed", side=1,line=-2,at = 45,cex=0.8)
+
+
+par(mfg = c(3, 1, 3, 3))
+plot(x = ComVar$HabDiv,y = ComVar$Count,xlab = "Habitat Diveristy within 500m",ylab = 'Abundance', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+axis(side=1, at=seq(from=min(Land_Abun2$HabDiv),to=max(Land_Abun2$HabDiv),length.out=4),labels=round(seq(from=min(ComVar$X500m.Simspson),to=max(ComVar$X500m.Simspson),length.out=4),1),cex.axis=1.2)
+mtext(side=3,line=0,at = -3.1,'f)',cex=0.8)
+
+polygon(x = c(Land_Abun2$HabDiv[DD],rev(Land_Abun2$HabDiv[DD])), y = c(Land_Abun2$lci[DD],rev(Land_Abun2$uci[DD])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Land_Abun2$HabDiv[DD],y = Land_Abun2$fit[DD],lwd = 2,col = 'grey30')
+
+
+plot(x = 1:2,y = Land_Abun2$fit[D_D],xlab = " ",ylab = 'Abundance', type = 'p',pch = 16,cex =1.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,40),cex.lab =1.2,cex.axis = 1.2)
+axis(side=1,at=c(0.7,2.3),labels=c('Escarpment','Valley'),cex.axis=0.9)
+mtext(side=3,line=0,at = -0.25,'g)',cex=0.8)
+arrows(x0=1:2, y0=Land_Abun2$lci [D_D],x1=1:2, y1=Land_Abun2$uci[D_D],angle=90,length=0.05, code=3, lwd=2,col = "black")
+points(x = jitter(raw_x1, factor = 1),y = ComVar$Count, pch = 16, cex = 0.4, col = "grey30")
+
+mtext(side=3,line=1,at = 1.5,'----------------------Landscape----------------------',cex=0.8, font = 2)
+
+
+plot(x = ComVar$ResDay,y = ComVar$Count,xlab = "Day (position-adjusted)",ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+axis(side=1, at=seq(from=min(Land_Abun2$ResDay),to=max(Land_Abun2$ResDay),length.out=4),labels=round(seq(from=min(ComVar$ResDay),to=max(ComVar$ResDay),length.out=4),0),cex.axis=1.2)
+mtext(side=3,line=0,at = -15,'h)',cex=0.8)
+
+polygon(x = c(Land_Abun2$ResDay[DDD],rev(Land_Abun2$ResDay[DDD])), y = c(Land_Abun2$lci[DDD],rev(Land_Abun2$uci[DDD])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Land_Abun2$ResDay[DDD],y = Land_Abun2$fit[DDD],lwd = 2,col = 'grey30')
+
+
+##Composition----
+head(ComVar_Subsected);dim(ComVar_Subsected)
+
+head(Site_Comp2);dim(Site_Comp2)
+summary(Comp_Top)
+
+head(Land_Comp2);dim(Land_Comp2)
+summary(Comp_Top_2)
+
+
+EE <- Site_Comp2$GC == Predictions_CompGC[10] & Site_Comp2$Position == "Escarpment" & Site_Comp2$ResDay == Predictions_CompDay[10]
+E_E <- Site_Comp2$GGC == Predictions_CompGGC[10] & Site_Comp2$Position == "Escarpment" & Site_Comp2$ResDay == Predictions_CompDay[10]
+EEE <- Site_Comp2$GGC == Predictions_CompGGC[10] & Site_Comp2$Position == "Valley" & Site_Comp2$ResDay == Predictions_CompDay[10]
+E_E_E <- Site_Comp2$GGC == Predictions_CompGGC[10] & Site_Comp2$Position == "Escarpment" & Site_Comp2$GC == Predictions_CompGC[10]
+
+FF <- Land_Comp2$X500m.Dominant.Landscape.Class == "NTV_Woody_Closed" & Land_Comp2$Position == "Escarpment" & Land_Comp2$ResDay == Predictions_CompDay[10]
+F_F <- Land_Comp2$X500m.Dominant.Landscape.Class == "NTV_Woody_Closed" & Land_Comp2$ Position == "Valley" & Land_Comp2$ResDay == Predictions_CompDay[10]
+FFF <- Land_Comp2$Graze == Predictions_CompGraze[10] & Land_Comp2$Position == "Escarpment" & Land_Comp2$ResDay == Predictions_CompDay[10]
+F_F_F <- Land_Comp2$Graze == Predictions_CompGraze[10] & Land_Comp2$Position == "Escarpment" & Land_Comp2$X500m.Dominant.Landscape.Class == "NTV_Woody_Closed"
+
+raw_x2 <- ifelse(ComVar_Subsected$X500m.Dominant.Landscape.Class ==
+                   "NTV_Woody_Closed", 1, 
+                 ifelse(ComVar_Subsected$X500m.Dominant.Landscape.Class ==
+                          "NTV_Herbaceous_Open ", 2, 3))
+
+dev.new(height=15,width=30,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,3,2),mfrow=c(2,4),mgp=c(2.5,0.7,0),xpd = T)
+
+plot(x = ComVar_Subsected$GGC,y = ComVar_Subsected$ComComp,xlab = "Green Ground Cover (%)",ylab = 'Community Composition', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+axis(side=1, at=seq(from=min(Site_Comp2$GGC),to=max(Site_Comp2$GGC),length.out=5),labels=round(seq(from=min(ComVar_Subsected$Prop_Green_GC),to=max(ComVar_Subsected$Prop_Green_GC),length.out=5),0),cex.axis=1.2)
+mtext(side=3,line=0,at = -2.1,'a)',cex=0.8)
+
+polygon(x = c(Site_Comp2$GGC[EE],rev(Site_Comp2$GGC[EE])), y = c(Site_Comp2$lci[EE],rev(Site_Comp2$uci[EE])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Site_Comp2$GGC[EE],y = Site_Comp2$fit[EE],lwd = 2,col = 'grey30')
+
+plot(x = ComVar_Subsected$GC,y = ComVar_Subsected$ComComp,xlab = "Ground Cover (%)",ylab = 'Community Composition', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+axis(side=1, at=seq(from=min(Site_Comp2$GC),to=max(Site_Comp2$GC),length.out=5),labels=round(seq(from=min(ComVar_Subsected$Ground_Cover),to=max(ComVar_Subsected$Ground_Cover),length.out=5),0),cex.axis=1.2)
+mtext(side=3,line=0,at = -3.2,'b)',cex=0.8)
+
+polygon(x = c(Site_Comp2$GC[E_E],rev(Site_Comp2$GC[E_E])), y = c(Site_Comp2$lci[E_E],rev(Site_Comp2$uci[E_E])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Site_Comp2$GC[E_E],y = Site_Comp2$fit[E_E],lwd = 2,col = 'grey30')
+
+polygon(x = c(Site_Comp2$GC[EEE],rev(Site_Comp2$GC[EEE])), y = c(Site_Comp2$lci[EEE],rev(Site_Comp2$uci[EEE])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Site_Comp2$GC[EEE],y = Site_Comp2$fit[EEE],lwd = 2,col = 'grey30',lty=2)
+
+legend("bottomleft",legend = c("Escaprment", "Valley"), lty = c(1,2), col = 'grey30',pt.cex = 1,cex = 1.2)
+
+
+
+plot(x = ComVar_Subsected$ResDay,y = ComVar_Subsected$ComComp,xlab = "Day (position-adjusted) ",ylab = 'Community Composition', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+axis(side=1, at=seq(from=min(Site_Comp2$ResDay),to=max(Site_Comp2$ResDay),length.out=5),labels=round(seq(from=min(ComVar_Subsected$ResDay),to=max(ComVar_Subsected$ResDay),length.out=5),0),cex.axis=1.2)
+mtext(side=3,line=0,at = -15.5,'c)',cex=0.8)
+
+polygon(x = c(Site_Comp2$ResDay[E_E_E],rev(Site_Comp2$ResDay[E_E_E])), y = c(Site_Comp2$lci[E_E_E],rev(Site_Comp2$uci[E_E_E])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Site_Comp2$ResDay[E_E_E],y = Site_Comp2$fit[E_E_E],lwd = 2,col = 'grey30')
+
+
+mtext(side=3,line=1,at = -45,'-----------------------Site-----------------------',cex=0.9, font = 2)
+
+mtext(bquote(R^2 == 0.019), side=1,line=-8,at = 40,cex=0.9)
+mtext("Site", side=1,line=-8,at = 30,cex=0.9)
+mtext(bquote(R^2 == 0.201), side=1,line=-6,at = 40,cex=0.9)
+mtext("Landscape", side=1,line=-6,at = 25,cex=0.9)
+mtext(bquote(R^2 == 0.226), side=1,line=-4,at = 40,cex=0.9)
+mtext("Fixed", side=1,line=-4,at = 29,cex=0.9)
+
+par(mfg = c(2, 1, 2, 4))
+plot(x = ComVar_Subsected$Graze,y = ComVar_Subsected$ComComp,xlab = "Grazing Land within 1km (%)",ylab = 'Community Composition', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+axis(side=1, at=seq(from=min(Land_Comp2$Graze),to=max(Land_Comp2$Graze),length.out=5),labels=round(seq(from=min(ComVar_Subsected$Natual_Grazing_1km),to=max(ComVar_Subsected$Natual_Grazing_1km),length.out=5),0),cex.axis=1.2)
+mtext(side=3,line=0,at = -1.9,'d)',cex=0.8)
+
+polygon(x = c(Land_Comp2$Graze[FF],rev(Land_Comp2$Graze[FF])), y = c(Land_Comp2$lci[FF],rev(Land_Comp2$uci[FF])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Land_Comp2$Graze[FF],y = Land_Comp2$fit[FF],lwd = 2,col = 'grey30')
+
+polygon(x = c(Land_Comp2$Graze[F_F],rev(Land_Comp2$Graze[F_F])), y = c(Land_Comp2$lci[F_F],rev(Land_Comp2$uci[F_F])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Land_Comp2$Graze[F_F],y = Land_Comp2$fit[F_F],lwd = 2,col = 'grey30',lty=2)
+
+legend("bottomleft",legend = c("Escaprment", "Valley"), lty = c(1,2), col = 'grey30',pt.cex = 1,cex = 1.2)
+
+
+plot(x = 1:3,y = Land_Comp2$fit[FFF],xlab = " ",ylab = 'Community Composition', type = 'p',pch = 16,cex =1.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(-0.7,0.4),cex.lab =1.2,cex.axis = 1.2)
+axis(side=1,at=c(1,2,3),labels=c("","",""),cex.axis=0.9)
+mtext(side=1,line =1.5, at=0.8,'Woody\nClosed',cex=0.6)
+mtext(side=1,line =1.5, at=2,'Herbaceous\nOpen',cex=0.6)
+mtext(side=1,line =1.5, at=3.2,'Woody\nOpen',cex=0.6)
+mtext(side=1,line =2.5,"Dominant Surrounding Habitat",cex = 0.8)
+mtext(side=3,line=0,at = -0.26,'e)',cex=0.8)
+arrows(x0=1:3, y0=Land_Comp2$lci[FFF],x1=1:3, y1=Land_Comp2$uci[FFF],angle=90,length=0.05, code=3, lwd=2,col = "black")
+points(x = jitter(raw_x2, factor = 1),y = ComVar_Subsected$ComComp, pch = 16, cex = 0.4, col = "grey30")
+
+
+plot(x = ComVar_Subsected$ResDay,y = ComVar_Subsected$ComComp,xlab = "Day (position-adjusted) ",ylab = 'Community Composition', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+axis(side=1, at=seq(from=min(Land_Comp2$ResDay),to=max(Land_Comp2$ResDay),length.out=5),labels=round(seq(from=min(ComVar_Subsected$ResDay),to=max(ComVar_Subsected$ResDay),length.out=5),0),cex.axis=1.2)
+mtext(side=3,line=0,at = -15.5,'f)',cex=0.8)
+
+polygon(x = c(Land_Comp2$ResDay[F_F_F],rev(Land_Comp2$ResDay[F_F_F])), y = c(Land_Comp2$lci[F_F_F],rev(Land_Comp2$uci[F_F_F])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Land_Comp2$ResDay[F_F_F],y = Land_Comp2$fit[F_F_F],lwd = 2,col = 'grey30')
+
+
+mtext(side=3,line=1,at = -45,'------------------Landscape------------------',cex=0.9, font = 2)
+
+
 
 #END----
