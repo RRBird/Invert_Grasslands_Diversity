@@ -2,6 +2,90 @@
 
 #Archive
 
+
+FunGroups<- expand.grid(Trophic = unique(morpho$Trophic), Hunting_Style = unique(morpho$Hunting_Style), Size =unique(morpho$Size))
+head(FunGroups);dim(FunGroups)
+#Produces 200 combinations
+
+FunGroups$GroupNum <- 1:200
+
+morpho1 <- morpho %>%
+  left_join(FunGroups, by = c("Trophic", "Hunting_Style", "Size")) 
+
+head(morpho1);dim(morpho1)
+
+length(unique(morpho1$GroupNum))
+#Total of 36 functional group combinations
+
+invert2 <- data.frame(Point = obs$Point,Morphospecies = obs$Morphospecies)
+head(invert2)
+
+invert2 <- merge(invert2,morpho1,by = "Morphospecies")
+head(invert2);dim(invert2)
+
+
+FunCommunity <- data.frame(Point = variables$Point)
+head(FunCommunity);dim(FunCommunity)
+
+##Richness----
+
+Funrichness <- aggregate(GroupNum ~ Point, data = invert2, FUN = function(x) length(unique(x)))
+dim(Funrichness) 
+
+FunCommunity <- merge(FunCommunity,Funrichness,by = "Point",,all.x = T)
+head(FunCommunity);dim(FunCommunity)
+
+colnames(FunCommunity)[2] <- "Fun_Rich"
+head(FunCommunity);dim(FunCommunity)
+
+min(FunCommunity$Fun_Rich,na.rm=T)
+max(FunCommunity$Fun_Rich,na.rm=T)
+
+FunCommunity$Fun_Rich[is.na(FunCommunity$Fun_Rich)] <- 0
+
+##Diversity----
+
+Fundiversity <- aggregate(GroupNum ~ Point, data = invert2, FUN = function(x) diversity(table(x), index = "invsimpson"))
+dim(Fundiversity)
+
+FunCommunity <- merge(FunCommunity,Fundiversity,by = "Point",all.x = T)
+head(FunCommunity);dim(FunCommunity)
+colnames(FunCommunity)[3] <- "FunDiversity"
+head(FunCommunity);dim(FunCommunity)
+
+min(FunCommunity$FunDiversity,na.rm=T)
+max(FunCommunity$FunDiversity,na.rm=T)
+
+FunCommunity$FunDiversity[is.na(FunCommunity$FunDiversity)] <- 0.000001
+
+#Functional Data ----
+
+head(FunCommunity);dim(FunCommunity)
+head(variables);dim(variables)
+
+FunComVar <- merge(FunCommunity,variables, by = "Point")
+head(FunComVar);dim(FunComVar)
+
+FunComVar<- FunComVar %>% select(-Elevation)
+
+FunComVar$ResDay <- resid(lm(Day_Sampled ~ Position, FunComVar))
+
+head(FunComVar);dim(FunComVar)
+
+#Turn weed estimate into numeric
+#Turn into middle of each bracket
+
+FunComVar$Weed <- ifelse(FunComVar$Weed_Estimate =="0-20%",10,
+                         ifelse(FunComVar$Weed_Estimate == "20-40%",30,
+                                ifelse(FunComVar$Weed_Estimate == "40-60%",50,
+                                       ifelse(FunComVar$Weed_Estimate=="60-80%",70,90))))
+head(FunComVar);dim(FunComVar)
+
+
+FunComVar <- FunComVar %>%
+  left_join(property %>% select(Property, management), by = "Property")
+head(FunComVar)
+
 ##SPECIES RICHNESS----
 
 ###Model Selection----

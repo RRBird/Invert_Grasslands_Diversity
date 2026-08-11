@@ -14,6 +14,8 @@ library("partR2")
 library("glmmTMB")
 library("MuMIn")
 library("vegan")
+library("piecewiseSEM")
+library("reformulas")
 
 head(ComVar);dim(ComVar)
 
@@ -265,34 +267,63 @@ head(FunComVar)
 
 Fun_Rich_Full <- glmmTMB(FRic ~ ResDay + (Position + Height + GC + GGC + WeedScale)^2 + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail",control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
 summary(Fun_Rich_Full)
-glmmTMB::VarCorr(Fun_Rich_Full)
-performance::icc(Fun_Rich_Full)
-performance::check_singularity(Fun_Rich_Full)
+
 
 MuMIn::getAllTerms(Fun_Rich_Full) #Wrapped
 
+packageVersion("MuMIn")
+options(warn = 1)
+
 Fun_Rich_Dredge <- dredge(Fun_Rich_Full, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
 
-Fun_Rich_Models <- get.models(Fun_Rich_Dredge, subset = delta < 2)
+Fun_Rich_Models <- get.models(Fun_Rich_Dredge, subset = delta < 2 & !(row.names(Fun_Rich_Dredge) %in% bad_model_indices))
 
 length(names(Fun_Rich_Models))
 names(Fun_Rich_Models)
 
 #Check if the null is within 2 AICc 
 Fun_Rich_Null <- glmmTMB(FRic ~ 1 + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail",control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS")))
-Fun_RichList <- list("null" = Fun_Rich_Null,"Top"=Fun_Rich_Models[1]$`3`)
+Fun_RichList <- list("null" = Fun_Rich_Null,"Top"=Fun_Rich_Models[1]$`8`)
 aictab(Fun_RichList)
-#Null model is better don't continue further 
+#Top is better
 
+#need to check if top has warnings or no?
+Fun_Rich_Top <- glmmTMB(FRic ~ GC + GGC + Height + Position + ResDay + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail",control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS"))) #no warnings that's good can continue
+
+#Possibly could use Fun_Rich_Models$`8203`$fit$convergence to look at the convergence of all the different models?? might need to do a small loop to check them all iteratively 
+
+#Work out how to pull a list with models that have warnings removed
+#TO DO for AICc and Esimtate tables----
+
+#Predictions 
+
+summary(Fun_Rich_Top)
+
+
+Site_Fun_Rich <- expand.grid(GC = Predictions_GC, GGC = Predictions_GGC, Height = Predictions_Height, Position = c("Escarpment","Valley"),ResDay = Predictions_Day)
+head(Site_Fun_Rich);dim(Site_Fun_Rich)
+
+Site_Fun_Rich1 <- predict(object = Fun_Rich_Top,newdata= Site_Fun_Rich,se.fit = T, type = "link",re.form = NA)
+
+Site_Fun_Rich2<-data.frame(Site_Fun_Rich,fit.link=Site_Fun_Rich1$fit,se.link=Site_Fun_Rich1$se.fit)
+
+Site_Fun_Rich2$lci.link<-Site_Fun_Rich2$fit.link-(1.96*Site_Fun_Rich2$se.link)
+Site_Fun_Rich2$uci.link<-Site_Fun_Rich2$fit.link+(1.96*Site_Fun_Rich2$se.link)
+
+Site_Fun_Rich2$fit<-exp(Site_Fun_Rich2$fit.link)
+Site_Fun_Rich2$se<-exp(Site_Fun_Rich2$se.link)
+Site_Fun_Rich2$lci<-exp(Site_Fun_Rich2$lci.link)
+Site_Fun_Rich2$uci<-exp(Site_Fun_Rich2$uci.link)
+
+head(Site_Fun_Rich2);dim(Site_Fun_Rich2)
 
 ##Functional Evenness----
-head(FunComVar)
+head(ComVar)
+ComVar_Fun_Sub <- ComVar[-which(is.na(ComVar$FEve)),]
 
-Fun_Eve_Full <- glmer(FEve ~ ResDay + (Position + Height + GC + GGC + WeedScale)^2 + (1 | Property), family = Gamma(link = "log"), data = ComVar_Subsected,na.action = "na.fail")
+
+Fun_Eve_Full <- glmer(FEve ~ ResDay + (Position + Height + GC + GGC + WeedScale)^2 + (1 | Property), family = Gamma(link = "log"), data = ComVar_Fun_Sub,na.action = "na.fail")
 summary(Fun_Eve_Full)
-glmmTMB::VarCorr(Fun_Eve_Full)
-performance::icc(Fun_Eve_Full)
-performance::check_singularity(Fun_Eve_Full)
 
 MuMIn::getAllTerms(Fun_Eve_Full) #Not wrapped
 
@@ -304,7 +335,7 @@ length(names(Fun_Eve_Models))
 names(Fun_Eve_Models)
 
 #Check if the null is within 2 AICc 
-Fun_Eve_Null <- glmer(FEve ~ 1 + (1 | Property), family = Gamma(link = "log"), data = ComVar_Subsected,na.action = "na.fail")
+Fun_Eve_Null <- glmer(FEve ~ 1 + (1 | Property), family = Gamma(link = "log"), data = ComVar_Fun_Sub,na.action = "na.fail")
 Fun_EveList <- list("null" = Fun_Eve_Null,"Top"=Fun_Eve_Models[1]$`1`)
 aictab(Fun_EveList)
 #Null is better so don't continue with model
@@ -312,12 +343,8 @@ Fun_Eve_Models[1]$`1`
 
 ##Functional Dispersion----
 
-Dis_Full <- glmmTMB(FDis ~ ResDay + (Position + Height + GC + GGC + WeedScale)^2 + (1 | Property), family = gaussian(), data = ComVar_Subsected,na.action = "na.fail")
+Dis_Full <- glmmTMB(FDis ~ ResDay + (Position + Height + GC + GGC + WeedScale)^2 + (1 | Property), family = gaussian(), data = ComVar_Fun_Sub,na.action = "na.fail")
 summary(Dis_Full)
-
-glmmTMB::VarCorr(Dis_Full)
-performance::icc(Dis_Full)
-performance::check_singularity(Dis_Full)
 
 MuMIn::getAllTerms(Dis_Full) #they are wrapped
 
@@ -329,10 +356,42 @@ length(names(Dis_Models))
 names(Dis_Models)
 
 #Check if the null is within 2 AICc 
-Dis_Null <- glmmTMB(FDis ~ 1 + (1 | Property), family = gaussian(), data = ComVar_Subsected,na.action = "na.fail")
+Dis_Null <- glmmTMB(FDis ~ 1 + (1 | Property), family = gaussian(), data = ComVar_Fun_Sub,na.action = "na.fail")
 DisList <- list("null" = Dis_Null,"Top"=Dis_Models[1]$`1`)
 aictab(DisList)
-#Null is top
+#Top is better than null
+#however only has fixed effects? 
+#Present in supporting as it doesn't answer question abound site
+Dis_Models[1]$`1`
+
+DisList_All <- list("P+D" = Dis_Models[1]$`1`,
+                    "GC+P+D" = Dis_Models[2]$`2`, 
+                    "Weed+Dom+P+D" = Dis_Models[3]$`9`,
+                    "null" = Dis_Null)
+
+aictab(DisList_All)
+
+#Top model:
+Dis_Models[1]$`1`
+
+#Predictions
+
+Dis_Top <- glmmTMB(FDis  ~ Position + ResDay + (1 | Property), family = gaussian(), data = ComVar_Fun_Sub,na.action = "na.fail")
+summary(Dis_Top)
+
+Predictions_FunResday <- seq(min(ComVar_Fun_Sub$ResDay),max(ComVar_Fun_Sub$ResDay),length.out=20)
+
+Site_Dis<- expand.grid(Position = c("Escarpment","Valley"), ResDay = Predictions_FunResday)
+head(Site_Dis);dim(Site_Dis)
+
+Site_Dis1 <- predict(object = Dis_Top,newdata= Site_Dis,se.fit = T, type = "link",re.form = NA)
+
+Site_Dis2<-data.frame(Site_Dis,fit.link=Site_Dis1$fit,se.link=Site_Dis1$se.fit)
+
+Site_Dis2$lci.link<-Site_Dis2$fit.link-(1.96*Site_Dis2$se.link)
+Site_Dis2$uci.link<-Site_Dis2$fit.link+(1.96*Site_Dis2$se.link)
+
+head(Site_Dis2);dim(Site_Dis2)
 
 #Q2 LANDSCAPE----
 
@@ -504,7 +563,7 @@ Land_Comp2$uci.link<-Land_Comp2$fit.link+(1.96*Land_Comp2$se.link)
 head(Land_Comp2);dim(Land_Comp2)
 
 ##Functional Richness---- 
-head(FunComVar)
+head(ComVar)
 
 Fun_Rich_Full_2 <- glmmTMB(FRic ~ ResDay + (Position + HabDiv + Graze + X500m.Dominant.Landscape.Class)^2 + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail")
 summary(Fun_Rich_Full_2)
@@ -517,17 +576,17 @@ Fun_Rich_Models_2 <- get.models(Fun_Rich_Dredge_2, subset = delta < 2)
 
 length(names(Fun_Rich_Models_2))
 names(Fun_Rich_Models_2)
-#there's 20 models but 15 convergence warnings
+#there's 20 models but 11 convergence warnings
 #check null first then if better then null check all models and remove convergence issue models
 
 #Check if the null is within 2 AICc 
-Fun_RichList_2 <- list("null" = Fun_Rich_Null,"Top"=Fun_Rich_Models_2[1]$`67`)
+Fun_RichList_2 <- list("null" = Fun_Rich_Null,"Top"=Fun_Rich_Models_2[1]$`1`)
 aictab(Fun_RichList_2)
-#Null is within 2 AICc
+#Null is within 2 AICc don't continue
 
 ##Functional Evenness----
 
-Fun_Eve_Full_2 <- glmer(FEve ~ ResDay + (Position + HabDiv + Graze + X500m.Dominant.Landscape.Class)^2 + (1 | Property), family = Gamma(link = "log"), data = ComVar_Subsected,na.action = "na.fail")
+Fun_Eve_Full_2 <- glmer(FEve ~ ResDay + (Position + HabDiv + Graze + X500m.Dominant.Landscape.Class)^2 + (1 | Property), family = Gamma(link = "log"), data = ComVar_Fun_Sub,na.action = "na.fail")
 summary(Fun_Eve_Full_2)
 
 MuMIn::getAllTerms(Fun_Eve_Full_2) #Not wrapped
@@ -546,7 +605,7 @@ aictab(Fun_EveList_2)
 
 ##Functional Dispersion----
 
-Dis_Full2 <- glmmTMB(FDis ~ ResDay + (Position + HabDiv + Graze + X500m.Dominant.Landscape.Class)^2 + (1 | Property), family = gaussian(), data = ComVar_Subsected,na.action = "na.fail")
+Dis_Full2 <- glmmTMB(FDis ~ ResDay + (Position + HabDiv + Graze + X500m.Dominant.Landscape.Class)^2 + (1 | Property), family = gaussian(), data = ComVar_Fun_Sub,na.action = "na.fail")
 summary(Dis_Full)
 
 MuMIn::getAllTerms(Dis_Full2) #they are wrapped
@@ -559,9 +618,10 @@ length(names(Dis_Models2))
 names(Dis_Models2)
 
 #Check if the null is within 2 AICc 
-DisList2 <- list("null" = Dis_Null,"Top"=Dis_Models2[1]$`3`)
+DisList2 <- list("null" = Dis_Null,"Top"=Dis_Models2[1]$`1`)
 aictab(DisList2)
-#Null is top
+#Top is better but it's only the fixed effects
+#Same model as site dis model
 
 
 #Q3 SITE VS LANDSCAPE----
@@ -658,8 +718,7 @@ ComVar$GGC <- as.numeric(ComVar$GGC)
 ComVar$Graze <- as.numeric(ComVar$Graze)
 ComVar$HabDiv <- as.numeric(ComVar$HabDiv)
 
-library("piecewiseSEM")
-library("reformulas")
+
 
 mod_Rich <- glmmTMB(Species_Rich ~ management + Height + GC + GGC + Graze + HabDiv + (1 | Property), family = nbinom2, data = ComVar)
 
@@ -685,8 +744,6 @@ summary(psem_Abun_mods)
 ComVar_Subsected[,23:27] <- sapply(ComVar_Subsected[,23:27],as.numeric)
 class(ComVar_Subsected$Height)
 
-mod_Comp <- glmmTMB(ComComp ~ management + Height + GC + GGC + Graze + HabDiv + (1 | Property), family = gaussian(), data = ComVar_Subsected)
-
 mod_H2 <- glmmTMB(Height ~ management + (1 | Property), family = gaussian, data = ComVar_Subsected)
 
 mod_GC2 <- glmmTMB(GC ~ management + (1 | Property), family = gaussian, data = ComVar_Subsected)
@@ -708,17 +765,27 @@ summary(psem_Div_mods)
 #Functional 
 
 mod_FRic <- glmmTMB(FRic ~ management + Height + GC + GGC + Graze + HabDiv +(1 | Property), family = nbinom2, data = ComVar)
-mod_FEve <- glmer(FEve ~ management + Height + GC + GGC + Graze + HabDiv+ (1 | Property), family = Gamma(link = "log"), data = ComVar_Subsected)
-mod_FDis <- glmmTMB(FDis ~ management + Height + GC + GGC + Graze + HabDiv+ (1 | Property), family = gaussian(), data = ComVar_Subsected)
+mod_FEve <- glmer(FEve ~ management + Height + GC + GGC + Graze + HabDiv+ (1 | Property), family = Gamma(link = "log"), data = ComVar_Fun_Sub)
+mod_FDis <- glmmTMB(FDis ~ management + Height + GC + GGC + Graze + HabDiv+ (1 | Property), family = gaussian(), data = ComVar_Fun_Sub)
 
 psem_FRic_mods <- psem(mod_FRic,mod_H,mod_GC,mod_GGC, data=ComVar)
 summary(psem_FRic_mods)
+#Error - can't compute
 
-psem_FEve_mods <- psem(mod_FEve,mod_H2,mod_GC2,mod_GGC2, data=ComVar_Subsected)
-summary(psem_FRic_mods)
+mod_H3 <- glmmTMB(Height ~ management + (1 | Property), family = gaussian, data = ComVar_Fun_Sub)
 
-psem_FDis_mods <- psem(mod_FDis,mod_H2,mod_GC2,mod_GGC2, data=ComVar_Subsected)
+mod_GC3 <- glmmTMB(GC ~ management + (1 | Property), family = gaussian, data = ComVar_Fun_Sub)
+
+mod_GGC3 <- glmmTMB(GGC ~ management + (1 | Property), family = gaussian, data = ComVar_Fun_Sub)
+
+psem_FEve_mods <- psem(mod_FEve,mod_H3,mod_GC3,mod_GGC3, data=ComVar_Fun_Sub)
 summary(psem_FRic_mods)
+#Error - can't compute
+
+psem_FDis_mods <- psem(mod_FDis,mod_H3,mod_GC3,mod_GGC3, data=ComVar_Fun_Sub)
+summary(psem_FRic_mods)
+#Error - can't compute
+
 #Figures----
 
 ##Species Richness----
@@ -879,7 +946,7 @@ mtext("Fixed", side=1,line=-2,at = 45,cex=0.8)
 
 
 par(mfg = c(3, 1, 3, 3))
-plot(x = ComVar$HabDiv,y = ComVar$Count,xlab = "Habitat Diveristy within 500m",ylab = 'Abundance', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+plot(x = ComVar$HabDiv,y = ComVar$Count,xlab = "Habitat Diveristy in 500m",ylab = 'Abundance', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
 axis(side=1, at=seq(from=min(Land_Abun2$HabDiv),to=max(Land_Abun2$HabDiv),length.out=4),labels=round(seq(from=min(ComVar$X500m.Simspson),to=max(ComVar$X500m.Simspson),length.out=4),1),cex.axis=1.2)
 mtext(side=3,line=0,at = -3.1,'f)',cex=0.8)
 
@@ -896,7 +963,7 @@ points(x = jitter(raw_x1, factor = 1),y = ComVar$Count, pch = 16, cex = 0.4, col
 mtext(side=3,line=1,at = 1.5,'----------------------Landscape----------------------',cex=0.8, font = 2)
 
 
-plot(x = ComVar$ResDay,y = ComVar$Count,xlab = "Day (position-adjusted)",ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+plot(x = ComVar$ResDay,y = ComVar$Count,xlab = "Day (position-adjusted)",ylab = 'Abundance', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
 axis(side=1, at=seq(from=min(Land_Abun2$ResDay),to=max(Land_Abun2$ResDay),length.out=4),labels=round(seq(from=min(ComVar$ResDay),to=max(ComVar$ResDay),length.out=4),0),cex.axis=1.2)
 mtext(side=3,line=0,at = -15,'h)',cex=0.8)
 
@@ -927,7 +994,7 @@ F_F_F <- Land_Comp2$Graze == Predictions_CompGraze[10] & Land_Comp2$Position == 
 raw_x2 <- ifelse(ComVar_Subsected$X500m.Dominant.Landscape.Class ==
                    "NTV_Woody_Closed", 1, 
                  ifelse(ComVar_Subsected$X500m.Dominant.Landscape.Class ==
-                          "NTV_Herbaceous_Open ", 2, 3))
+                          "NTV_Herbaceous_Open", 2, 3))
 
 dev.new(height=15,width=30,dpi=80,pointsize=14,noRStudioGD = T)
 par(mar=c(4,4,3,2),mfrow=c(2,4),mgp=c(2.5,0.7,0),xpd = T)
@@ -971,7 +1038,7 @@ mtext(bquote(R^2 == 0.226), side=1,line=-4,at = 40,cex=0.9)
 mtext("Fixed", side=1,line=-4,at = 29,cex=0.9)
 
 par(mfg = c(2, 1, 2, 4))
-plot(x = ComVar_Subsected$Graze,y = ComVar_Subsected$ComComp,xlab = "Grazing Land within 1km (%)",ylab = 'Community Composition', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+plot(x = ComVar_Subsected$Graze,y = ComVar_Subsected$ComComp,xlab = "Grazing Land in 1km (%)",ylab = 'Community Composition', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
 axis(side=1, at=seq(from=min(Land_Comp2$Graze),to=max(Land_Comp2$Graze),length.out=5),labels=round(seq(from=min(ComVar_Subsected$Natual_Grazing_1km),to=max(ComVar_Subsected$Natual_Grazing_1km),length.out=5),0),cex.axis=1.2)
 mtext(side=3,line=0,at = -1.9,'d)',cex=0.8)
 
@@ -1004,6 +1071,92 @@ lines(x=Land_Comp2$ResDay[F_F_F],y = Land_Comp2$fit[F_F_F],lwd = 2,col = 'grey30
 
 
 mtext(side=3,line=1,at = -45,'------------------Landscape------------------',cex=0.9, font = 2)
+
+
+##Functional Richness----
+summary(Fun_Rich_Top)
+head(Site_Fun_Rich2)
+
+
+GG <- Site_Fun_Rich2$GGC == Predictions_GGC[10] & Site_Fun_Rich2$Height == Predictions_Height[10] & Site_Fun_Rich2$Position == "Escarpment" & Site_Fun_Rich2$ResDay == Predictions_Day[10]
+G_G <- Site_Fun_Rich2$GC == Predictions_GC[10] & Site_Fun_Rich2$Height == Predictions_Height[10] & Site_Fun_Rich2$Position == "Escarpment" & Site_Fun_Rich2$ResDay == Predictions_Day[10]
+GGG <- Site_Fun_Rich2$GGC == Predictions_GGC[10] & Site_Fun_Rich2$Position == "Escarpment" & Site_Fun_Rich2$GC == Predictions_GC[10] & Site_Fun_Rich2$ResDay == Predictions_Day[10]
+G_G_G <- Site_Fun_Rich2$GGC == Predictions_GGC[10] & Site_Fun_Rich2$Height == Predictions_Height[10] & Site_Fun_Rich2$GC == Predictions_GC[10] & Site_Fun_Rich2$ResDay == Predictions_Day[10]
+GGGG <- Site_Fun_Rich2$GGC == Predictions_GGC[10] & Site_Fun_Rich2$Height == Predictions_Height[10] & Site_Fun_Rich2$GC == Predictions_GC[10] &  Site_Fun_Rich2$Position == "Escarpment"
+
+
+dev.new(height=10,width=15,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,3,2),mfrow=c(2,3),mgp=c(2.5,1,0),xpd = T)
+
+plot(x = ComVar$GC,y = ComVar$FRic,xlab = "Ground Cover (%)",ylab = 'Functional Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+axis(side=1, at=seq(from=min(Site_Fun_Rich2$GC),to=max(Site_Fun_Rich2$GC),length.out=5),labels=round(seq(from=min(ComVar$Ground_Cover),to=max(ComVar$Ground_Cover),length.out=5),0),cex.axis=1.2)
+mtext(side=3,line=0,at = -3.3,'a)',cex=0.8)
+
+polygon(x = c(Site_Fun_Rich2$GC[GG],rev(Site_Fun_Rich2$GC[GG])), y = c(Site_Fun_Rich2$lci[GG],rev(Site_Fun_Rich2$uci[GG])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Site_Fun_Rich2$GC[GG],y = Site_Fun_Rich2$fit[GG],lwd = 2,col = 'grey30')
+
+
+plot(x = ComVar$GGC,y = ComVar$FRic,xlab = "Green Ground Cover (%)",ylab = 'Functional Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+axis(side=1, at=seq(from=min(Site_Fun_Rich2$GGC),to=max(Site_Fun_Rich2$GGC),length.out=5),labels=round(seq(from=min(ComVar$Prop_Green_GC),to=max(ComVar$Prop_Green_GC),length.out=5),0),cex.axis=1.2)
+mtext(side=3,line=0,at = -2,'b)',cex=0.8)
+
+polygon(x = c(Site_Fun_Rich2$GGC[G_G],rev(Site_Fun_Rich2$GGC[G_G])), y = c(Site_Fun_Rich2$lci[G_G],rev(Site_Fun_Rich2$uci[G_G])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Site_Fun_Rich2$GGC[G_G],y = Site_Fun_Rich2$fit[G_G],lwd = 2,col = 'grey30')
+
+plot(x = ComVar$Height,y = ComVar$FRic,xlab = "Grass Height (cm)",ylab = 'Functional Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+axis(side=1, at=seq(from=min(Site_Fun_Rich2$Height),to=max(Site_Fun_Rich2$Height),length.out=5),labels=round(seq(from=min(ComVar$Plant_Height),to=max(ComVar$Plant_Height),length.out=5),0),cex.axis=1.2)
+mtext(side=3,line=0,at = -1.5,'c)',cex=0.8)
+
+polygon(x = c(Site_Fun_Rich2$Height[GGG],rev(Site_Fun_Rich2$Height[GGG])), y = c(Site_Fun_Rich2$lci[GGG],rev(Site_Fun_Rich2$uci[GGG])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Site_Fun_Rich2$Height[GGG],y = Site_Fun_Rich2$fit[GGG],lwd = 2,col = 'grey30')
+
+
+plot(x = 1:2,y = Site_Fun_Rich2$fit[G_G_G],xlab = " ",ylab = 'Functional Richness', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,14),cex.lab =1.2,cex.axis = 1.2)
+axis(side=1,at=c(0.8,2.2),labels=c('Escarpment','Valley'),cex.axis=1.2)
+mtext(side=3,line=0,at = -0.25,'d)',cex=0.8)
+arrows(x0=1:2, y0=Site_Fun_Rich2$lci [G_G_G],x1=1:2, y1=Site_Fun_Rich2$uci[G_G_G],angle=90,length=0.1, code=3, lwd=2,col = "black")
+points(x = jitter(raw_x1, factor = 1),y = ComVar$FRic, pch = 16, cex = 0.4, col = "grey30")
+
+
+plot(x = ComVar$ResDay,y = ComVar$FRic,xlab = "Day (position-adjusted)",ylab = 'Functional Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+axis(side=1, at=seq(from=min(Site_Fun_Rich2$ResDay),to=max(Site_Fun_Rich2$ResDay),length.out=5),labels=round(seq(from=min(ComVar$ResDay),to=max(ComVar$ResDay),length.out=5),0),cex.axis=1.2)
+mtext(side=3,line=0,at = -15,'e)',cex=0.8)
+
+polygon(x = c(Site_Fun_Rich2$ResDay[GGGG],rev(Site_Fun_Rich2$ResDay[GGGG])), y = c(Site_Fun_Rich2$lci[GGGG],rev(Site_Fun_Rich2$uci[GGGG])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Site_Fun_Rich2$ResDay[GGGG],y = Site_Fun_Rich2$fit[GGGG],lwd = 2,col = 'grey30')
+
+#Supporting Figure----
+
+head(Site_Dis2)
+summary(Top_Dis)
+
+head(ComVar_Fun_Sub);dim(ComVar_Fun_Sub)
+
+
+XX <- Site_Dis2$ResDay == Predictions_FunResday[10]
+X_X <- Site_Dis2$Position == "Escarpment"
+
+
+raw_x3 <- ifelse(ComVar_Fun_Sub$Position ==
+                   "Escarpment", 1,2)
+
+dev.new(height=10,width=20,dpi=80,pointsize=14,noRStudioGD = T)
+par(mar=c(4,4,3,2),mfrow=c(1,2),mgp=c(2.5,0.7,0),xpd = T)
+
+plot(x = 1:2,y = Site_Dis2$fit[XX],xlab = " ",ylab = 'Functional Dispersion', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0.1,0.6),cex.lab =1,cex.axis = 1)
+axis(side=1,at=c(0.8,2.2),labels=c('Escarpment','Valley'),cex.axis=1)
+mtext(side=3,line=0,at = -0.15,'a)',cex=1)
+arrows(x0=1:2, y0=Site_Dis2$lci [XX],x1=1:2, y1=Site_Dis2$uci[XX],angle=90,length=0.1, code=3, lwd=2,col = "black")
+points(x = jitter(raw_x3, factor = 1),y = ComVar_Fun_Sub$FDis, pch = 16, cex = 0.4, col = "grey30")
+
+
+plot(x = ComVar_Fun_Sub$ResDay,y = ComVar_Fun_Sub$FDis,xlab = "Day (position-adjusted) ",ylab = 'Functional Dispersion', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1,cex.axis=1)
+mtext(side=3,line=0,at = -14.6,'b)',cex=1)
+
+polygon(x = c(Site_Dis2$ResDay[X_X],rev(Site_Dis2$ResDay[X_X])), y = c(Site_Dis2$lci[X_X],rev(Site_Dis2$uci[X_X])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
+lines(x=Site_Dis2$ResDay[X_X],y = Site_Dis2$fit[X_X],lwd = 2,col = 'grey30')
+
+
 
 
 

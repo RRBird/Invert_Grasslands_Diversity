@@ -19,6 +19,7 @@ library("factoextra")
 library("scales")
 library("fields")
 library("FactoMineR")
+library("FD")
 
 
 #Data----
@@ -164,8 +165,8 @@ str(cordata) #confirmed no character columns left
 
 cor <- cor(cordata,method = "spearman")
 
-colnames(cor) <- c("Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Habitat Diversity","Habitat Structure", "Day Sampled","Dom Weed","Dom Grass","Position")
-rownames(cor) <- c("Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Habitat Diversity","Habitat Structure", "Day Sampled","Dom Weed","Dom Grass","Position")
+colnames(cor) <- c("Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Habitat Diversity","Habitat Structure", "Day","Dom Weed","Dom Grass","Position")
+rownames(cor) <- c("Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Habitat Diversity","Habitat Structure", "Day","Dom Weed","Dom Grass","Position")
 
 dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
 corrplot::corrplot(cor,method="color",  
@@ -552,94 +553,11 @@ morpho$Hunting_Style[morpho$Hunting_Style=="Unknown"] <-NA
 morpho$Size[morpho$Size=="Unknown"] <-NA
 morpho$Size[morpho$Size=="No_Size"] <-NA
 
-FunGroups<- expand.grid(Trophic = unique(morpho$Trophic), Hunting_Style = unique(morpho$Hunting_Style), Size =unique(morpho$Size))
-head(FunGroups);dim(FunGroups)
-#Produces 200 combinations
-
-FunGroups$GroupNum <- 1:200
-
-morpho1 <- morpho %>%
-  left_join(FunGroups, by = c("Trophic", "Hunting_Style", "Size")) 
-
-head(morpho1);dim(morpho1)
-
-length(unique(morpho1$GroupNum))
-#Total of 36 functional group combinations
-
-invert2 <- data.frame(Point = obs$Point,Morphospecies = obs$Morphospecies)
-head(invert2)
-
-invert2 <- merge(invert2,morpho1,by = "Morphospecies")
-head(invert2);dim(invert2)
-
-
-FunCommunity <- data.frame(Point = variables$Point)
-head(FunCommunity);dim(FunCommunity)
-
-##Richness----
-
-Funrichness <- aggregate(GroupNum ~ Point, data = invert2, FUN = function(x) length(unique(x)))
-dim(Funrichness) 
-
-FunCommunity <- merge(FunCommunity,Funrichness,by = "Point",,all.x = T)
-head(FunCommunity);dim(FunCommunity)
-
-colnames(FunCommunity)[2] <- "Fun_Rich"
-head(FunCommunity);dim(FunCommunity)
-
-min(FunCommunity$Fun_Rich,na.rm=T)
-max(FunCommunity$Fun_Rich,na.rm=T)
-
-FunCommunity$Fun_Rich[is.na(FunCommunity$Fun_Rich)] <- 0
-
-##Diversity----
-
-Fundiversity <- aggregate(GroupNum ~ Point, data = invert2, FUN = function(x) diversity(table(x), index = "invsimpson"))
-dim(Fundiversity)
-
-FunCommunity <- merge(FunCommunity,Fundiversity,by = "Point",all.x = T)
-head(FunCommunity);dim(FunCommunity)
-colnames(FunCommunity)[3] <- "FunDiversity"
-head(FunCommunity);dim(FunCommunity)
-
-min(FunCommunity$FunDiversity,na.rm=T)
-max(FunCommunity$FunDiversity,na.rm=T)
-
-FunCommunity$FunDiversity[is.na(FunCommunity$FunDiversity)] <- 0.000001
-
-#Functional Data ----
-
-head(FunCommunity);dim(FunCommunity)
-head(variables);dim(variables)
-
-FunComVar <- merge(FunCommunity,variables, by = "Point")
-head(FunComVar);dim(FunComVar)
-
-FunComVar<- FunComVar %>% select(-Elevation)
-
-FunComVar$ResDay <- resid(lm(Day_Sampled ~ Position, FunComVar))
-
-head(FunComVar);dim(FunComVar)
-
-#Turn weed estimate into numeric
-#Turn into middle of each bracket
-
-FunComVar$Weed <- ifelse(FunComVar$Weed_Estimate =="0-20%",10,
-                      ifelse(FunComVar$Weed_Estimate == "20-40%",30,
-                             ifelse(FunComVar$Weed_Estimate == "40-60%",50,
-                                    ifelse(FunComVar$Weed_Estimate=="60-80%",70,90))))
-head(FunComVar);dim(FunComVar)
-
-
-FunComVar <- FunComVar %>%
-  left_join(property %>% select(Property, management), by = "Property")
-head(FunComVar)
-
 #Distance-Based Functional Diversity Indices----
 
 head(morpho)
 
-traits <- morpho %>%  select(Morphospecies,Trophic, Hunting_Style, Size)
+traits <- morpho %>%  select(Morphospecies,Trophic, Hunting_Style, Size, Order)
 rownames(traits) <- traits$Morphospecies
 traits$Morphospecies <- NULL
 head(traits);dim(traits)
@@ -647,6 +565,7 @@ head(traits);dim(traits)
 str(traits)
 traits$Trophic <- as.factor(traits$Trophic)
 traits$Hunting_Style <- as.factor(traits$Hunting_Style)
+traits$Order <- as.factor(traits$Order)
 unique(traits$Size)
 traits$Size <- as.factor(traits$Size)
 traits$Size <- factor(traits$Size,levels=c("0-2.5mm","2.5-5mm",'5-10mm','>10mm'))
@@ -670,10 +589,6 @@ traits <- traits[-which(rownames(traits)=="Pale_Moth"),]
 traits <- traits[-which(rownames(traits)=="Dark_Leafhopper"),]
 traits <- traits[-which(rownames(traits)=="Small_Black_Flying_Hemiptera"),]
 traits <- traits[-which(rownames(traits)=="Cricket"),]
-traits <- traits[-which(rownames(traits)=="Large_Black_Fly"),]
-#last one caused computational issues so needed to be removed (pairs of species need at least one common trait to calulate a distance matrix)
-which(colnames(abundance) == "Large_Black_Fly")
-abundance <- abundance[,-128]
 
 setdiff(rownames(traits),colnames(abundance)) #good
 
@@ -681,20 +596,6 @@ setdiff(rownames(traits),colnames(abundance)) #good
 abundance <- abundance[, sort(colnames(abundance))]
 traits <- traits[sort(rownames(traits)), , drop = FALSE]
 
-#Figuring out the species pairs causing issues with dbFD function
-gow_dist <- gowdis(traits)
-sum(is.na(gow_dist))
-
-gow_dist <- gowdis(traits)
-gow_mat <- as.matrix(gow_dist)
-
-na_pairs <- which(is.na(gow_mat), arr.ind = TRUE)
-na_pairs <- na_pairs[na_pairs[,1] < na_pairs[,2], ]
-
-data.frame(species_1 = rownames(gow_mat)[na_pairs[,1]],species_2 = rownames(gow_mat)[na_pairs[,2]])
-
-
-library("FD")
 FunMeasure <- dbFD(traits, abundance, corr = "cailliez")
 str(FunMeasure)
 #important measures - FRic, FEve, FDis
