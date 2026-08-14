@@ -16,6 +16,7 @@ library("MuMIn")
 library("vegan")
 library("piecewiseSEM")
 library("reformulas")
+library("openxlsx")
 
 head(ComVar);dim(ComVar)
 
@@ -61,10 +62,13 @@ Rich_Dredge <- dredge(Rich_Full, fixed = c("cond(ResDay)","cond(Position)"),m.li
 Rich_Models <- get.models(Rich_Dredge, subset = delta < 10)
 
 Rich_Dredge
-model.selection(Rich_Dredge)
 class(Rich_Dredge)
 Rich_Dredge[[1]]
-and data.frame
+rownames(Rich_Dredge)
+names(attributes(Rich_Dredge))
+
+attr(Rich_Dredge, "model.calls")
+write.xlsx(Rich_Dredge.Excel, 'TEMPDOC.xlsx')
 
 length(names(Rich_Models))
 names(Rich_Models)
@@ -127,6 +131,9 @@ MuMIn::getAllTerms(Div_Full) #Not wrapped this time
 
 Div_Dredge <- dredge(Div_Full, fixed = c("ResDay","Position"),m.lim = c(NA, 5),trace = TRUE)
 
+attr(Div_Dredge, "model.calls")
+write.xlsx(Div_Dredge, 'TEMPDOC.xlsx')
+
 Div_Models <- get.models(Div_Dredge, subset = delta < 2)
 
 length(names(Div_Models))
@@ -139,6 +146,7 @@ aictab(DivList)
 #Null is better so don't continue with model
 Div_Models[1]$`1`
 
+Div_Dredge[[1]]
 
 ##Abundance----
 
@@ -149,6 +157,10 @@ MuMIn::getAllTerms(Abun_Full)
 #Wrapped in cond() so need to have that around fixed term to make it run properly
 
 Abun_Dredge <- dredge(Abun_Full, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
+Abun_Dredge[[1]]
+
+attr(Abun_Dredge, "model.calls")
+write.xlsx(Abun_Dredge, 'TEMPDOC.xlsx')
 
 Abun_Models <- get.models(Abun_Dredge, subset = delta < 2)
 
@@ -218,6 +230,11 @@ MuMIn::getAllTerms(Comp_Full) #they are wrapped
 
 Comp_Dredge <- dredge(Comp_Full, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
 
+attr(Comp_Dredge, "model.calls")
+write.xlsx(Comp_Dredge, 'TEMPDOC.xlsx')
+
+Comp_Dredge[[1]]
+
 Comp_Models <- get.models(Comp_Dredge, subset = delta < 2)
 
 length(names(Comp_Models))
@@ -282,6 +299,12 @@ options(warn = 1)
 
 Fun_Rich_Dredge <- dredge(Fun_Rich_Full, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
 
+Fun_Rich_Dredge[[1]]
+Fun_Rich_Dredge_No_Error <- Fun_Rich_Dredge[1:26, ]
+
+attr(Fun_Rich_Dredge_No_Error, "model.calls")
+write.xlsx(Fun_Rich_Dredge_No_Error, 'TEMPDOC.xlsx')
+
 Fun_Rich_Models <- get.models(Fun_Rich_Dredge, subset = delta < 2 & !(row.names(Fun_Rich_Dredge) %in% bad_model_indices))
 
 length(names(Fun_Rich_Models))
@@ -296,10 +319,6 @@ aictab(Fun_RichList)
 #need to check if top has warnings or no?
 Fun_Rich_Top <- glmmTMB(FRic ~ GC + GGC + Height + Position + ResDay + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail",control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS"))) #no warnings that's good can continue
 
-#Possibly could use Fun_Rich_Models$`8203`$fit$convergence to look at the convergence of all the different models?? might need to do a small loop to check them all iteratively 
-
-#Work out how to pull a list with models that have warnings removed
-#TO DO for AICc and Esimtate tables----
 
 #Predictions 
 
@@ -335,6 +354,11 @@ MuMIn::getAllTerms(Fun_Eve_Full) #Not wrapped
 
 Fun_Eve_Dredge <- dredge(Fun_Eve_Full, fixed = c("ResDay","Position"),m.lim = c(NA, 5),trace = TRUE)
 
+attr(Fun_Eve_Dredge, "model.calls")
+write.xlsx(Fun_Eve_Dredge, 'TEMPDOC.xlsx')
+
+Fun_Eve_Dredge[[1]]
+
 Fun_Eve_Models <- get.models(Fun_Eve_Dredge, subset = delta < 2)
 
 length(names(Fun_Eve_Models))
@@ -355,6 +379,11 @@ summary(Dis_Full)
 MuMIn::getAllTerms(Dis_Full) #they are wrapped
 
 Dis_Dredge <- dredge(Dis_Full, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
+
+Dis_Dredge[[1]]
+
+attr(Dis_Dredge, "model.calls")
+write.xlsx(Dis_Dredge, 'TEMPDOC.xlsx')
 
 Dis_Models <- get.models(Dis_Dredge, subset = delta < 2)
 
@@ -412,6 +441,11 @@ MuMIn::getAllTerms(Rich_Full_2) #Wrapped
 
 Rich_Dredge_2 <- dredge(Rich_Full_2, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
 
+Rich_Dredge_2[[1]]
+
+attr(Rich_Dredge_2, "model.calls")
+write.xlsx(Rich_Dredge_2, 'TEMPDOC.xlsx')
+
 Rich_Models_2 <- get.models(Rich_Dredge_2, subset = delta < 2)
 
 length(names(Rich_Models_2))
@@ -465,6 +499,11 @@ MuMIn::getAllTerms(Div_Full_2) #Not wrapped
 
 Div_Dredge_2 <- dredge(Div_Full_2, fixed = c("ResDay","Position"),m.lim = c(NA, 5),trace = TRUE)
 
+attr(Div_Dredge_2, "model.calls")
+write.xlsx(Div_Dredge_2, 'TEMPDOC.xlsx')
+
+Div_Dredge_2[[1]]
+
 Div_Models_2 <- get.models(Div_Dredge_2, subset = delta < 2)
 
 length(names(Div_Models_2))
@@ -485,6 +524,11 @@ summary(Abun_Full_2)
 MuMIn::getAllTerms(Abun_Full_2) #Wrapped
 
 Abun_Dredge_2 <- dredge(Abun_Full_2, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
+
+Abun_Dredge_2[[1]]
+
+attr(Abun_Dredge_2, "model.calls")
+write.xlsx(Abun_Dredge_2, 'TEMPDOC.xlsx')
 
 Abun_Models_2 <- get.models(Abun_Dredge_2, subset = delta < 2)
 
@@ -536,6 +580,11 @@ MuMIn::getAllTerms(Comp_Full_2) #wrapped
 
 Comp_Dredge_2 <- dredge(Comp_Full_2, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
 
+Comp_Dredge_2[[1]]
+
+attr(Comp_Dredge_2, "model.calls")
+write.xlsx(Comp_Dredge_2, 'TEMPDOC.xlsx')
+
 Comp_Models_2 <- get.models(Comp_Dredge_2, subset = delta < 2)
 
 length(names(Comp_Models_2))
@@ -578,6 +627,13 @@ MuMIn::getAllTerms(Fun_Rich_Full_2) #Wrapped
 
 Fun_Rich_Dredge_2 <- dredge(Fun_Rich_Full_2, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
 
+Fun_Rich_Dredge_2[[1]]
+
+Fun_Rich_Dredge_2_No_Error <- Fun_Rich_Dredge_2[1:12, ]
+
+attr(Fun_Rich_Dredge_2_No_Error, "model.calls")
+write.xlsx(Fun_Rich_Dredge_2_No_Error, 'TEMPDOC.xlsx')
+
 Fun_Rich_Models_2 <- get.models(Fun_Rich_Dredge_2, subset = delta < 2)
 
 length(names(Fun_Rich_Models_2))
@@ -599,6 +655,11 @@ MuMIn::getAllTerms(Fun_Eve_Full_2) #Not wrapped
 
 Fun_Eve_Dredge_2 <- dredge(Fun_Eve_Full_2, fixed = c("ResDay","Position"),m.lim = c(NA, 5),trace = TRUE)
 
+Fun_Eve_Dredge_2[[1]]
+
+attr(Fun_Eve_Dredge_2, "model.calls")
+write.xlsx(Fun_Eve_Dredge_2, 'TEMPDOC.xlsx')
+
 Fun_Eve_Models_2 <- get.models(Fun_Eve_Dredge_2, subset = delta < 2)
 
 length(names(Fun_Eve_Models_2))
@@ -617,6 +678,11 @@ summary(Dis_Full)
 MuMIn::getAllTerms(Dis_Full2) #they are wrapped
 
 Dis_Dredge2 <- dredge(Dis_Full2, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
+
+Dis_Dredge2[[1]]
+
+attr(Dis_Dredge2, "model.calls")
+write.xlsx(Dis_Dredge2, 'TEMPDOC.xlsx')
 
 Dis_Models2 <- get.models(Dis_Dredge2, subset = delta < 2)
 
