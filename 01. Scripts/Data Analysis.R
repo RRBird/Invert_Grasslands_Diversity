@@ -59,7 +59,7 @@ MuMIn::getAllTerms(Rich_Full)
 
 Rich_Dredge <- dredge(Rich_Full, fixed = c("cond(ResDay)","cond(Position)"),m.lim = c(NA, 5),trace = TRUE)
 
-Rich_Models <- get.models(Rich_Dredge, subset = delta < 10)
+Rich_Models <- get.models(Rich_Dredge, subset = delta < 2)
 
 Rich_Dredge
 class(Rich_Dredge)
@@ -100,6 +100,32 @@ aictab(RichList_All)
 
 Rich_Top <- glmmTMB(Species_Rich ~ ResDay + GC * Position + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail")
 summary(Rich_Top)
+
+Rich_Top_cf <- summary(Rich_Top)$coefficients$cond
+
+Rich_Top_cf <- data.frame(term = row.names(Rich_Top_cf),Rich_Top_cf)
+row.names(Rich_Top_cf) <- 1:nrow(Rich_Top_cf)
+
+colnames(Rich_Top_cf) <- c("term","est",'std_err',"z","p")
+
+Rich_Top_cf$lci <- Rich_Top_cf$est-(1.96*Rich_Top_cf$std_err)
+Rich_Top_cf$uci <- Rich_Top_cf$est+(1.96*Rich_Top_cf$std_err)
+
+head(Rich_Top_cf)
+
+Rich_Top_cf$term <- c("Intercept", "Day", "Ground Cover", "Valley","Ground Cover:Valley")
+
+
+dev.new(height=8,width=10,dpi=60,pointsize=14,noRStudioGD = T)
+par(mar=c(6,10,1,1),mfrow=c(1,1),mgp=c(2.5,1,0),xpd = F)
+
+plot(x=rev(Rich_Top_cf$est),y=1:length(Rich_Top_cf$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Rich_Top_cf$lci),max(Rich_Top_cf$uci)))
+axis(2, at=1:length(Rich_Top_cf$term),labels = rev(Rich_Top_cf$term),las=1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 5.5,length = 0)
+arrows(x0 = rev(Rich_Top_cf$lci),y0 = 1:length(Rich_Top_cf$term),x1 = rev(Rich_Top_cf$uci),y1 = 1:length(Rich_Top_cf$term),length = 0)
+
+
+
 
 Predictions_GC <- seq(min(ComVar$GC),max(ComVar$GC),length.out=20)
 Predictions_Day <- seq(min(ComVar$ResDay),max(ComVar$ResDay),length.out=20)
@@ -305,7 +331,7 @@ Fun_Rich_Dredge_No_Error <- Fun_Rich_Dredge[1:26, ]
 attr(Fun_Rich_Dredge_No_Error, "model.calls")
 write.xlsx(Fun_Rich_Dredge_No_Error, 'TEMPDOC.xlsx')
 
-Fun_Rich_Models <- get.models(Fun_Rich_Dredge, subset = delta < 2 & !(row.names(Fun_Rich_Dredge) %in% bad_model_indices))
+Fun_Rich_Models <- get.models(Fun_Rich_Dredge_No_Error, subset = delta < 2)
 
 length(names(Fun_Rich_Models))
 names(Fun_Rich_Models)
@@ -1219,7 +1245,10 @@ mtext("Fixed", side=1,line=-8,at = 40.5,cex=0.9)
 
 
 
-#Supporting Figure----
+#Supporting Figures----
+
+
+##Functional Dispersion Unneeded??----
 
 head(Site_Dis2)
 summary(Top_Dis)
@@ -1251,7 +1280,565 @@ polygon(x = c(Site_Dis2$ResDay[X_X],rev(Site_Dis2$ResDay[X_X])), y = c(Site_Dis2
 lines(x=Site_Dis2$ResDay[X_X],y = Site_Dis2$fit[X_X],lwd = 2,col = 'grey30')
 
 
+##Forest plots----
+
+site_term_map <- c(
+  "(Intercept)" = "Intercept", "PositionValley" = "Valley",
+  "ResDay" = "Day", "GC" = "Ground Cover", 
+  "GGC"= "Green Ground Cover",
+  "GC:PositionValley" ="Ground Cover:Valley", 
+  "WeedScale" = "Weed", 
+  "GGC:PositionValley" = "Green Ground Cover:Valley",
+  "Height:PositionValley" = "Height:Valley", 
+  "GC:WeedScale" = "Ground Cover:Weed", 
+  "GGC:WeedScale" = "Green Ground Cover:Weed",
+  "WeedScale:PositionValley" = "Weed:Valley",
+  "Height:WeedScale" = "Height:Weed")
 
 
+land_term_map <- c(
+  "(Intercept)" = "Intercept", "HabDiv" = "Habitat Diveristy",
+  "PositionValley" = "Valley", "ResDay" = "Day", 
+  "X500m.Dominant.Landscape.ClassNTV_Woody_Closed" ="Woody Closed",   "X500m.Dominant.Landscape.ClassNTV_Woody_Open" = "Woody Open",
+  "Graze" = "Grazing Land")
+
+###Site Species Richness----
+
+summary(Rich_Models[1]$`66`)$coefficients$cond
+str(Rich_Models[1])
+names(Rich_Models)
+
+Site_SR_ModNum <- names(Rich_Models)
+Site_SR_Forest <- vector(mode = "list", length = length(Site_SR_ModNum))
+q <- 1
+
+for (x in Site_SR_ModNum) {
+  
+
+Site_SR_CF <- summary(Rich_Models[[x]])$coefficients$cond
+Site_SR_CF <- data.frame(term = row.names(Site_SR_CF),Site_SR_CF)
+row.names(Site_SR_CF) <- 1:nrow(Site_SR_CF)
+colnames(Site_SR_CF) <- c("term","est",'std_err',"z","p")
+
+Site_SR_CF$lci <- Site_SR_CF$est-(1.96*Site_SR_CF$std_err)
+Site_SR_CF$uci <- Site_SR_CF$est+(1.96*Site_SR_CF$std_err)
+
+Site_SR_Forest[[q]] <- Site_SR_CF
+
+q <- q+1
+}
+Site_SR_Forest[[3]]
+
+Site_SR_Forest <- lapply(Site_SR_Forest, function(df) {
+  df$term <- ifelse(df$term %in% names(site_term_map), site_term_map[df$term], df$term)
+  df
+})
+
+
+dev.new(height=13.5,width=17.5,dpi=60,pointsize=14,noRStudioGD = T)
+par(mar=c(6,10,1,1),mfrow=c(3,3),mgp=c(2.5,1,0),xpd = F)
+
+plot(x=rev(Site_SR_Forest[[2]]$est),y=1:length(Site_SR_Forest[[2]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_SR_Forest[[2]]$lci),max(Site_SR_Forest[[2]]$uci)),cex.axis=0.9,cex.lab=1.2)
+axis(2, at=1:length(Site_SR_Forest[[2]]$term),labels = rev(Site_SR_Forest[[2]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_SR_Forest[[2]]$lci),y0 = 1:length(Site_SR_Forest[[2]]$term),x1 = rev(Site_SR_Forest[[2]]$uci),y1 = 1:length(Site_SR_Forest[[2]]$term),length = 0)
+mtext("a)",side = 3,line = -0.5,at=-4.5,cex = 0.8)
+
+plot(x=rev(Site_SR_Forest[[3]]$est),y=1:length(Site_SR_Forest[[3]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_SR_Forest[[3]]$lci),max(Site_SR_Forest[[3]]$uci)),cex.axis=0.9,cex.lab=1.2)
+axis(2, at=1:length(Site_SR_Forest[[3]]$term),labels = rev(Site_SR_Forest[[3]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_SR_Forest[[3]]$lci),y0 = 1:length(Site_SR_Forest[[3]]$term),x1 = rev(Site_SR_Forest[[3]]$uci),y1 = 1:length(Site_SR_Forest[[3]]$term),length = 0)
+mtext("b)",side = 3,line = -0.5,at=-4.5,cex = 0.8)
+
+plot(x=rev(Site_SR_Forest[[4]]$est),y=1:length(Site_SR_Forest[[4]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_SR_Forest[[4]]$lci),max(Site_SR_Forest[[4]]$uci)),cex.axis=0.9,cex.lab=1.2)
+axis(2, at=1:length(Site_SR_Forest[[4]]$term),labels = rev(Site_SR_Forest[[4]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_SR_Forest[[4]]$lci),y0 = 1:length(Site_SR_Forest[[4]]$term),x1 = rev(Site_SR_Forest[[4]]$uci),y1 = 1:length(Site_SR_Forest[[4]]$term),length = 0)
+mtext("c)",side = 3,line = -0.5,at=-4.5,cex = 0.8)
+
+plot(x=rev(Site_SR_Forest[[5]]$est),y=1:length(Site_SR_Forest[[5]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_SR_Forest[[5]]$lci),max(Site_SR_Forest[[5]]$uci)),cex.axis=0.9,cex.lab=1.2)
+axis(2, at=1:length(Site_SR_Forest[[5]]$term),labels = rev(Site_SR_Forest[[5]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_SR_Forest[[5]]$lci),y0 = 1:length(Site_SR_Forest[[5]]$term),x1 = rev(Site_SR_Forest[[5]]$uci),y1 = 1:length(Site_SR_Forest[[5]]$term),length = 0)
+mtext("d)",side = 3,line = -0.5,at=-4.5,cex = 0.8)
+
+plot(x=rev(Site_SR_Forest[[6]]$est),y=1:length(Site_SR_Forest[[6]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_SR_Forest[[6]]$lci),max(Site_SR_Forest[[6]]$uci)),cex.axis=0.9,cex.lab=1.2)
+axis(2, at=1:length(Site_SR_Forest[[6]]$term),labels = rev(Site_SR_Forest[[6]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_SR_Forest[[6]]$lci),y0 = 1:length(Site_SR_Forest[[6]]$term),x1 = rev(Site_SR_Forest[[6]]$uci),y1 = 1:length(Site_SR_Forest[[6]]$term),length = 0)
+mtext("e)",side = 3,line = -0.5,at=-4.5,cex = 0.8)
+
+plot(x=rev(Site_SR_Forest[[7]]$est),y=1:length(Site_SR_Forest[[7]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_SR_Forest[[7]]$lci),max(Site_SR_Forest[[7]]$uci)),cex.axis=0.9,cex.lab=1.2)
+axis(2, at=1:length(Site_SR_Forest[[7]]$term),labels = rev(Site_SR_Forest[[7]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_SR_Forest[[7]]$lci),y0 = 1:length(Site_SR_Forest[[7]]$term),x1 = rev(Site_SR_Forest[[7]]$uci),y1 = 1:length(Site_SR_Forest[[7]]$term),length = 0)
+mtext("f)",side = 3,line = -0.5,at=-4.5,cex = 0.8)
+
+plot(x=rev(Site_SR_Forest[[8]]$est),y=1:length(Site_SR_Forest[[8]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_SR_Forest[[8]]$lci),max(Site_SR_Forest[[8]]$uci)),cex.axis=0.9,cex.lab=1.2)
+axis(2, at=1:length(Site_SR_Forest[[8]]$term),labels = rev(Site_SR_Forest[[8]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_SR_Forest[[8]]$lci),y0 = 1:length(Site_SR_Forest[[8]]$term),x1 = rev(Site_SR_Forest[[8]]$uci),y1 = 1:length(Site_SR_Forest[[8]]$term),length = 0)
+mtext("g)",side = 3,line = -0.5,at=-4.5,cex = 0.8)
+
+plot(x=rev(Site_SR_Forest[[9]]$est),y=1:length(Site_SR_Forest[[9]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_SR_Forest[[9]]$lci),max(Site_SR_Forest[[9]]$uci)),cex.axis=0.9,cex.lab=1.2)
+axis(2, at=1:length(Site_SR_Forest[[9]]$term),labels = rev(Site_SR_Forest[[9]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_SR_Forest[[9]]$lci),y0 = 1:length(Site_SR_Forest[[9]]$term),x1 = rev(Site_SR_Forest[[9]]$uci),y1 = 1:length(Site_SR_Forest[[9]]$term),length = 0)
+mtext("h)",side = 3,line = -0.5,at=-4.3,cex = 0.8)
+
+
+
+###Site Abundance----
+
+Abun_Models[1]
+names(Abun_Models)
+
+Site_Ab_ModNum <- names(Abun_Models)
+Site_Ab_Forest <- vector(mode = "list", length = length(Site_Ab_ModNum))
+q <- 1
+
+for (x in Site_Ab_ModNum) {
+  
+  
+  Site_Ab_CF <- summary(Abun_Models[[x]])$coefficients$cond
+  Site_Ab_CF <- data.frame(term = row.names(Site_Ab_CF),Site_Ab_CF)
+  row.names(Site_Ab_CF) <- 1:nrow(Site_Ab_CF)
+  colnames(Site_Ab_CF) <- c("term","est",'std_err',"z","p")
+  
+  Site_Ab_CF$lci <- Site_Ab_CF$est-(1.96*Site_Ab_CF$std_err)
+  Site_Ab_CF$uci <- Site_Ab_CF$est+(1.96*Site_Ab_CF$std_err)
+  
+  Site_Ab_Forest[[q]] <- Site_Ab_CF
+  
+  q <- q+1
+}
+Site_Ab_Forest[[3]]
+
+Site_Ab_Forest <- lapply(Site_Ab_Forest, function(df) {
+  df$term <- ifelse(df$term %in% names(site_term_map), site_term_map[df$term], df$term)
+  df
+})
+
+dev.new(height=13.5,width=22,dpi=60,pointsize=14,noRStudioGD = T)
+par(mar=c(6,10,1,1),mfrow=c(3,4),mgp=c(2.5,1,0),xpd = F)
+
+plot(x=rev(Site_Ab_Forest[[2]]$est),y=1:length(Site_Ab_Forest[[2]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_Ab_Forest[[2]]$lci),max(Site_Ab_Forest[[2]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_Ab_Forest[[2]]$term),labels = rev(Site_Ab_Forest[[2]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_Ab_Forest[[2]]$lci),y0 = 1:length(Site_Ab_Forest[[2]]$term),x1 = rev(Site_Ab_Forest[[2]]$uci),y1 = 1:length(Site_Ab_Forest[[2]]$term),length = 0)
+mtext("a)",side = 3,line = -0.5,at=-6,cex = 0.8)
+
+plot(x=rev(Site_Ab_Forest[[3]]$est),y=1:length(Site_Ab_Forest[[3]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_Ab_Forest[[3]]$lci),max(Site_Ab_Forest[[3]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_Ab_Forest[[3]]$term),labels = rev(Site_Ab_Forest[[3]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_Ab_Forest[[3]]$lci),y0 = 1:length(Site_Ab_Forest[[3]]$term),x1 = rev(Site_Ab_Forest[[3]]$uci),y1 = 1:length(Site_Ab_Forest[[3]]$term),length = 0)
+mtext("b)",side = 3,line = -0.5,at=-6,cex = 0.8)
+
+plot(x=rev(Site_Ab_Forest[[4]]$est),y=1:length(Site_Ab_Forest[[4]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_Ab_Forest[[4]]$lci),max(Site_Ab_Forest[[4]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_Ab_Forest[[4]]$term),labels = rev(Site_Ab_Forest[[4]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_Ab_Forest[[4]]$lci),y0 = 1:length(Site_Ab_Forest[[4]]$term),x1 = rev(Site_Ab_Forest[[4]]$uci),y1 = 1:length(Site_Ab_Forest[[4]]$term),length = 0)
+mtext("c)",side = 3,line = -0.5,at=-6,cex = 0.8)
+
+plot(x=rev(Site_Ab_Forest[[5]]$est),y=1:length(Site_Ab_Forest[[5]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_Ab_Forest[[5]]$lci),max(Site_Ab_Forest[[5]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_Ab_Forest[[5]]$term),labels = rev(Site_Ab_Forest[[5]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_Ab_Forest[[5]]$lci),y0 = 1:length(Site_Ab_Forest[[5]]$term),x1 = rev(Site_Ab_Forest[[5]]$uci),y1 = 1:length(Site_Ab_Forest[[5]]$term),length = 0)
+mtext("d)",side = 3,line = -0.5,at=-6,cex = 0.8)
+
+plot(x=rev(Site_Ab_Forest[[6]]$est),y=1:length(Site_Ab_Forest[[6]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_Ab_Forest[[6]]$lci),max(Site_Ab_Forest[[6]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_Ab_Forest[[6]]$term),labels = rev(Site_Ab_Forest[[6]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_Ab_Forest[[6]]$lci),y0 = 1:length(Site_Ab_Forest[[6]]$term),x1 = rev(Site_Ab_Forest[[6]]$uci),y1 = 1:length(Site_Ab_Forest[[6]]$term),length = 0)
+mtext("e)",side = 3,line = -0.5,at=-5,cex = 0.8)
+
+plot(x=rev(Site_Ab_Forest[[7]]$est),y=1:length(Site_Ab_Forest[[7]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_Ab_Forest[[7]]$lci),max(Site_Ab_Forest[[7]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_Ab_Forest[[7]]$term),labels = rev(Site_Ab_Forest[[7]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_Ab_Forest[[7]]$lci),y0 = 1:length(Site_Ab_Forest[[7]]$term),x1 = rev(Site_Ab_Forest[[7]]$uci),y1 = 1:length(Site_Ab_Forest[[7]]$term),length = 0)
+mtext("f)",side = 3,line = -0.5,at=-5.5,cex = 0.8)
+
+plot(x=rev(Site_Ab_Forest[[8]]$est),y=1:length(Site_Ab_Forest[[8]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_Ab_Forest[[8]]$lci),max(Site_Ab_Forest[[8]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_Ab_Forest[[8]]$term),labels = rev(Site_Ab_Forest[[8]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_Ab_Forest[[8]]$lci),y0 = 1:length(Site_Ab_Forest[[8]]$term),x1 = rev(Site_Ab_Forest[[8]]$uci),y1 = 1:length(Site_Ab_Forest[[8]]$term),length = 0)
+mtext("g)",side = 3,line = -0.5,at=-6,cex = 0.8)
+
+plot(x=rev(Site_Ab_Forest[[9]]$est),y=1:length(Site_Ab_Forest[[9]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_Ab_Forest[[9]]$lci),max(Site_Ab_Forest[[9]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_Ab_Forest[[9]]$term),labels = rev(Site_Ab_Forest[[9]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_Ab_Forest[[9]]$lci),y0 = 1:length(Site_Ab_Forest[[9]]$term),x1 = rev(Site_Ab_Forest[[9]]$uci),y1 = 1:length(Site_Ab_Forest[[9]]$term),length = 0)
+mtext("h)",side = 3,line = -0.5,at=-5.5,cex = 0.8)
+
+plot(x=rev(Site_Ab_Forest[[10]]$est),y=1:length(Site_Ab_Forest[[10]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_Ab_Forest[[10]]$lci),max(Site_Ab_Forest[[10]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_Ab_Forest[[10]]$term),labels = rev(Site_Ab_Forest[[10]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_Ab_Forest[[10]]$lci),y0 = 1:length(Site_Ab_Forest[[10]]$term),x1 = rev(Site_Ab_Forest[[10]]$uci),y1 = 1:length(Site_Ab_Forest[[10]]$term),length = 0)
+mtext("i)",side = 3,line = -0.5,at=-6,cex = 0.8)
+
+plot(x=rev(Site_Ab_Forest[[11]]$est),y=1:length(Site_Ab_Forest[[11]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_Ab_Forest[[11]]$lci),max(Site_Ab_Forest[[11]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_Ab_Forest[[11]]$term),labels = rev(Site_Ab_Forest[[11]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_Ab_Forest[[11]]$lci),y0 = 1:length(Site_Ab_Forest[[11]]$term),x1 = rev(Site_Ab_Forest[[11]]$uci),y1 = 1:length(Site_Ab_Forest[[11]]$term),length = 0)
+mtext("j)",side = 3,line = -0.5,at=-6,cex = 0.8)
+
+plot(x=rev(Site_Ab_Forest[[12]]$est),y=1:length(Site_Ab_Forest[[12]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_Ab_Forest[[12]]$lci),max(Site_Ab_Forest[[12]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_Ab_Forest[[12]]$term),labels = rev(Site_Ab_Forest[[12]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_Ab_Forest[[12]]$lci),y0 = 1:length(Site_Ab_Forest[[12]]$term),x1 = rev(Site_Ab_Forest[[12]]$uci),y1 = 1:length(Site_Ab_Forest[[12]]$term),length = 0)
+mtext("k)",side = 3,line = -0.5,at=-6,cex = 0.8)
+
+plot(x=rev(Site_Ab_Forest[[13]]$est),y=1:length(Site_Ab_Forest[[13]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_Ab_Forest[[13]]$lci),max(Site_Ab_Forest[[13]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_Ab_Forest[[13]]$term),labels = rev(Site_Ab_Forest[[13]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_Ab_Forest[[13]]$lci),y0 = 1:length(Site_Ab_Forest[[13]]$term),x1 = rev(Site_Ab_Forest[[13]]$uci),y1 = 1:length(Site_Ab_Forest[[13]]$term),length = 0)
+mtext("l)",side = 3,line = -0.5,at=-6,cex = 0.8)
+
+###Site Community Comp----
+
+Comp_Models[1]
+names(Comp_Models)
+
+Site_CC_ModNum <- names(Comp_Models)
+Site_CC_Forest <- vector(mode = "list", length = length(Site_CC_ModNum))
+q <- 1
+
+for (x in Site_CC_ModNum) {
+  
+  
+  Site_CC_CF <- summary(Comp_Models[[x]])$coefficients$cond
+  Site_CC_CF <- data.frame(term = row.names(Site_CC_CF),Site_CC_CF)
+  row.names(Site_CC_CF) <- 1:nrow(Site_CC_CF)
+  colnames(Site_CC_CF) <- c("term","est",'std_err',"z","p")
+  
+  Site_CC_CF$lci <- Site_CC_CF$est-(1.96*Site_CC_CF$std_err)
+  Site_CC_CF$uci <- Site_CC_CF$est+(1.96*Site_CC_CF$std_err)
+  
+  Site_CC_Forest[[q]] <- Site_CC_CF
+  
+  q <- q+1
+}
+Site_CC_Forest[[3]]
+
+Site_CC_Forest <- lapply(Site_CC_Forest, function(df) {
+  df$term <- ifelse(df$term %in% names(site_term_map), site_term_map[df$term], df$term)
+  df
+})
+
+dev.new(height=13.5,width=22,dpi=60,pointsize=14,noRStudioGD = T)
+par(mar=c(6,10,1,1),mfrow=c(3,4),mgp=c(2.5,1,0),xpd = F)
+
+plot(x=rev(Site_CC_Forest[[2]]$est),y=1:length(Site_CC_Forest[[2]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_CC_Forest[[2]]$lci),max(Site_CC_Forest[[2]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_CC_Forest[[2]]$term),labels = rev(Site_CC_Forest[[2]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_CC_Forest[[2]]$lci),y0 = 1:length(Site_CC_Forest[[2]]$term),x1 = rev(Site_CC_Forest[[2]]$uci),y1 = 1:length(Site_CC_Forest[[2]]$term),length = 0)
+mtext("a)",side = 3,line = -0.5,at=-1.1,cex = 0.8)
+
+plot(x=rev(Site_CC_Forest[[3]]$est),y=1:length(Site_CC_Forest[[3]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_CC_Forest[[3]]$lci),max(Site_CC_Forest[[3]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_CC_Forest[[3]]$term),labels = rev(Site_CC_Forest[[3]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_CC_Forest[[3]]$lci),y0 = 1:length(Site_CC_Forest[[3]]$term),x1 = rev(Site_CC_Forest[[3]]$uci),y1 = 1:length(Site_CC_Forest[[3]]$term),length = 0)
+mtext("b)",side = 3,line = -0.5,at=-1.1,cex = 0.8)
+
+plot(x=rev(Site_CC_Forest[[4]]$est),y=1:length(Site_CC_Forest[[4]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_CC_Forest[[4]]$lci),max(Site_CC_Forest[[4]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_CC_Forest[[4]]$term),labels = rev(Site_CC_Forest[[4]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_CC_Forest[[4]]$lci),y0 = 1:length(Site_CC_Forest[[4]]$term),x1 = rev(Site_CC_Forest[[4]]$uci),y1 = 1:length(Site_CC_Forest[[4]]$term),length = 0)
+mtext("c)",side = 3,line = -0.5,at=-1.1,cex = 0.8)
+
+plot(x=rev(Site_CC_Forest[[5]]$est),y=1:length(Site_CC_Forest[[5]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_CC_Forest[[5]]$lci),max(Site_CC_Forest[[5]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_CC_Forest[[5]]$term),labels = rev(Site_CC_Forest[[5]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_CC_Forest[[5]]$lci),y0 = 1:length(Site_CC_Forest[[5]]$term),x1 = rev(Site_CC_Forest[[5]]$uci),y1 = 1:length(Site_CC_Forest[[5]]$term),length = 0)
+mtext("d)",side = 3,line = -0.5,at=-1.1,cex = 0.8)
+
+plot(x=rev(Site_CC_Forest[[6]]$est),y=1:length(Site_CC_Forest[[6]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_CC_Forest[[6]]$lci),max(Site_CC_Forest[[6]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_CC_Forest[[6]]$term),labels = rev(Site_CC_Forest[[6]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_CC_Forest[[6]]$lci),y0 = 1:length(Site_CC_Forest[[6]]$term),x1 = rev(Site_CC_Forest[[6]]$uci),y1 = 1:length(Site_CC_Forest[[6]]$term),length = 0)
+mtext("e)",side = 3,line = -0.5,at=-1.1,cex = 0.8)
+
+plot(x=rev(Site_CC_Forest[[7]]$est),y=1:length(Site_CC_Forest[[7]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_CC_Forest[[7]]$lci),max(Site_CC_Forest[[7]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_CC_Forest[[7]]$term),labels = rev(Site_CC_Forest[[7]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_CC_Forest[[7]]$lci),y0 = 1:length(Site_CC_Forest[[7]]$term),x1 = rev(Site_CC_Forest[[7]]$uci),y1 = 1:length(Site_CC_Forest[[7]]$term),length = 0)
+mtext("f)",side = 3,line = -0.5,at=-1.1,cex = 0.8)
+
+plot(x=rev(Site_CC_Forest[[8]]$est),y=1:length(Site_CC_Forest[[8]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_CC_Forest[[8]]$lci),max(Site_CC_Forest[[8]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_CC_Forest[[8]]$term),labels = rev(Site_CC_Forest[[8]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_CC_Forest[[8]]$lci),y0 = 1:length(Site_CC_Forest[[8]]$term),x1 = rev(Site_CC_Forest[[8]]$uci),y1 = 1:length(Site_CC_Forest[[8]]$term),length = 0)
+mtext("g)",side = 3,line = -0.5,at=-1.1,cex = 0.8)
+
+plot(x=rev(Site_CC_Forest[[9]]$est),y=1:length(Site_CC_Forest[[9]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_CC_Forest[[9]]$lci),max(Site_CC_Forest[[9]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_CC_Forest[[9]]$term),labels = rev(Site_CC_Forest[[9]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_CC_Forest[[9]]$lci),y0 = 1:length(Site_CC_Forest[[9]]$term),x1 = rev(Site_CC_Forest[[9]]$uci),y1 = 1:length(Site_CC_Forest[[9]]$term),length = 0)
+mtext("h)",side = 3,line = -0.5,at=-1.1,cex = 0.8)
+
+plot(x=rev(Site_CC_Forest[[10]]$est),y=1:length(Site_CC_Forest[[10]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_CC_Forest[[10]]$lci),max(Site_CC_Forest[[10]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_CC_Forest[[10]]$term),labels = rev(Site_CC_Forest[[10]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_CC_Forest[[10]]$lci),y0 = 1:length(Site_CC_Forest[[10]]$term),x1 = rev(Site_CC_Forest[[10]]$uci),y1 = 1:length(Site_CC_Forest[[10]]$term),length = 0)
+mtext("i)",side = 3,line = -0.5,at=-1.1,cex = 0.8)
+
+plot(x=rev(Site_CC_Forest[[11]]$est),y=1:length(Site_CC_Forest[[11]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_CC_Forest[[11]]$lci),max(Site_CC_Forest[[11]]$uci)),cex.axis=1,cex.lab=1.2)
+axis(2, at=1:length(Site_CC_Forest[[11]]$term),labels = rev(Site_CC_Forest[[11]]$term),las=1,cex.axis=1.1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_CC_Forest[[11]]$lci),y0 = 1:length(Site_CC_Forest[[11]]$term),x1 = rev(Site_CC_Forest[[11]]$uci),y1 = 1:length(Site_CC_Forest[[11]]$term),length = 0)
+mtext("j)",side = 3,line = -0.5,at=-1.1,cex = 0.8)
+
+###Site Functional Richness----
+
+Fun_Rich_Models[1]
+names(Fun_Rich_Models)
+
+Site_FR_ModNum <- names(Fun_Rich_Models)
+Site_FR_Forest <- vector(mode = "list", length = length(Site_FR_ModNum))
+q <- 1
+
+for (x in Site_FR_ModNum) {
+  
+  
+  Site_FR_CF <- summary(Fun_Rich_Models[[x]])$coefficients$cond
+  Site_FR_CF <- data.frame(term = row.names(Site_FR_CF),Site_FR_CF)
+  row.names(Site_FR_CF) <- 1:nrow(Site_FR_CF)
+  colnames(Site_FR_CF) <- c("term","est",'std_err',"z","p")
+  
+  Site_FR_CF$lci <- Site_FR_CF$est-(1.96*Site_FR_CF$std_err)
+  Site_FR_CF$uci <- Site_FR_CF$est+(1.96*Site_FR_CF$std_err)
+  
+  Site_FR_Forest[[q]] <- Site_FR_CF
+  
+  q <- q+1
+}
+Site_FR_Forest[[3]]
+
+Site_FR_Forest <- lapply(Site_FR_Forest, function(df) {
+  df$term <- ifelse(df$term %in% names(site_term_map), site_term_map[df$term], df$term)
+  df
+})
+
+
+dev.new(height=9,width=20,dpi=60,pointsize=14,noRStudioGD = T)
+par(mar=c(6,14,1,1),mfrow=c(2,3),mgp=c(2.5,1,0),xpd = F)
+
+plot(x=rev(Site_FR_Forest[[2]]$est),y=1:length(Site_FR_Forest[[2]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_FR_Forest[[2]]$lci),max(Site_FR_Forest[[2]]$uci)),cex.axis=1.2,cex.lab=1.2)
+axis(2, at=1:length(Site_FR_Forest[[2]]$term),labels = rev(Site_FR_Forest[[2]]$term),las=1,cex.axis=1.2)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_FR_Forest[[2]]$lci),y0 = 1:length(Site_FR_Forest[[2]]$term),x1 = rev(Site_FR_Forest[[2]]$uci),y1 = 1:length(Site_FR_Forest[[2]]$term),length = 0)
+mtext("a)",side = 3,line = -0.5,at=-3.6,cex = 0.9)
+
+plot(x=rev(Site_FR_Forest[[3]]$est),y=1:length(Site_FR_Forest[[3]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_FR_Forest[[3]]$lci),max(Site_FR_Forest[[3]]$uci)),cex.axis=1.2,cex.lab=1.2)
+axis(2, at=1:length(Site_FR_Forest[[3]]$term),labels = rev(Site_FR_Forest[[3]]$term),las=1,cex.axis=1.2)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_FR_Forest[[3]]$lci),y0 = 1:length(Site_FR_Forest[[3]]$term),x1 = rev(Site_FR_Forest[[3]]$uci),y1 = 1:length(Site_FR_Forest[[3]]$term),length = 0)
+mtext("b)",side = 3,line = -0.5,at=-4,cex = 0.9)
+
+plot(x=rev(Site_FR_Forest[[4]]$est),y=1:length(Site_FR_Forest[[4]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_FR_Forest[[4]]$lci),max(Site_FR_Forest[[4]]$uci)),cex.axis=1.2,cex.lab=1.2)
+axis(2, at=1:length(Site_FR_Forest[[4]]$term),labels = rev(Site_FR_Forest[[4]]$term),las=1,cex.axis=1.2)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_FR_Forest[[4]]$lci),y0 = 1:length(Site_FR_Forest[[4]]$term),x1 = rev(Site_FR_Forest[[4]]$uci),y1 = 1:length(Site_FR_Forest[[4]]$term),length = 0)
+mtext("c)",side = 3,line = -0.5,at=-4,cex = 0.9)
+
+plot(x=rev(Site_FR_Forest[[5]]$est),y=1:length(Site_FR_Forest[[5]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_FR_Forest[[5]]$lci),max(Site_FR_Forest[[5]]$uci)),cex.axis=1.2,cex.lab=1.2)
+axis(2, at=1:length(Site_FR_Forest[[5]]$term),labels = rev(Site_FR_Forest[[5]]$term),las=1,cex.axis=1.2)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_FR_Forest[[5]]$lci),y0 = 1:length(Site_FR_Forest[[5]]$term),x1 = rev(Site_FR_Forest[[5]]$uci),y1 = 1:length(Site_FR_Forest[[5]]$term),length = 0)
+mtext("d)",side = 3,line = -0.5,at=-4,cex = 0.9)
+
+plot(x=rev(Site_FR_Forest[[6]]$est),y=1:length(Site_FR_Forest[[6]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_FR_Forest[[6]]$lci),max(Site_FR_Forest[[6]]$uci)),cex.axis=1.1,cex.lab=1.2)
+axis(2, at=1:length(Site_FR_Forest[[6]]$term),labels = rev(Site_FR_Forest[[6]]$term),las=1,cex.axis=1.2)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_FR_Forest[[6]]$lci),y0 = 1:length(Site_FR_Forest[[6]]$term),x1 = rev(Site_FR_Forest[[6]]$uci),y1 = 1:length(Site_FR_Forest[[6]]$term),length = 0)
+mtext("e)",side = 3,line = -0.5,at=-4,cex = 0.9)
+
+###Site Functional Dispersion----
+
+Dis_Models[1]
+names(Dis_Models)
+
+Site_FD_ModNum <- names(Dis_Models)
+Site_FD_Forest <- vector(mode = "list", length = length(Site_FD_ModNum))
+q <- 1
+
+for (x in Site_FD_ModNum) {
+  
+  
+  Site_FD_CF <- summary(Dis_Models[[x]])$coefficients$cond
+  Site_FD_CF <- data.frame(term = row.names(Site_FD_CF),Site_FD_CF)
+  row.names(Site_FD_CF) <- 1:nrow(Site_FD_CF)
+  colnames(Site_FD_CF) <- c("term","est",'std_err',"z","p")
+  
+  Site_FD_CF$lci <- Site_FD_CF$est-(1.96*Site_FD_CF$std_err)
+  Site_FD_CF$uci <- Site_FD_CF$est+(1.96*Site_FD_CF$std_err)
+  
+  Site_FD_Forest[[q]] <- Site_FD_CF
+  
+  q <- q+1
+}
+Site_FD_Forest[[3]]
+
+Site_FD_Forest <- lapply(Site_FD_Forest, function(df) {
+  df$term <- ifelse(df$term %in% names(site_term_map), site_term_map[df$term], df$term)
+  df
+})
+
+
+dev.new(height=9,width=11,dpi=60,pointsize=14,noRStudioGD = T)
+par(mar=c(6,10,1,1),mfrow=c(2,2),mgp=c(2.5,1,0),xpd = F)
+
+plot(x=rev(Site_FD_Forest[[1]]$est),y=1:length(Site_FD_Forest[[1]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_FD_Forest[[1]]$lci),max(Site_FD_Forest[[1]]$uci)))
+axis(2, at=1:length(Site_FD_Forest[[1]]$term),labels = rev(Site_FD_Forest[[1]]$term),las=1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_FD_Forest[[1]]$lci),y0 = 1:length(Site_FD_Forest[[1]]$term),x1 = rev(Site_FD_Forest[[1]]$uci),y1 = 1:length(Site_FD_Forest[[1]]$term),length = 0)
+mtext("a)",side = 3,line = -0.5,at=-0.7,cex = 0.9)
+
+plot(x=rev(Site_FD_Forest[[2]]$est),y=1:length(Site_FD_Forest[[2]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_FD_Forest[[2]]$lci),max(Site_FD_Forest[[2]]$uci)))
+axis(2, at=1:length(Site_FD_Forest[[2]]$term),labels = rev(Site_FD_Forest[[2]]$term),las=1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_FD_Forest[[2]]$lci),y0 = 1:length(Site_FD_Forest[[2]]$term),x1 = rev(Site_FD_Forest[[2]]$uci),y1 = 1:length(Site_FD_Forest[[2]]$term),length = 0)
+mtext("b)",side = 3,line = -0.5,at=-0.7,cex = 0.9)
+
+plot(x=rev(Site_FD_Forest[[3]]$est),y=1:length(Site_FD_Forest[[3]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Site_FD_Forest[[3]]$lci),max(Site_FD_Forest[[3]]$uci)))
+axis(2, at=1:length(Site_FD_Forest[[3]]$term),labels = rev(Site_FD_Forest[[3]]$term),las=1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Site_FD_Forest[[3]]$lci),y0 = 1:length(Site_FD_Forest[[3]]$term),x1 = rev(Site_FD_Forest[[3]]$uci),y1 = 1:length(Site_FD_Forest[[3]]$term),length = 0)
+mtext("c)",side = 3,line = -0.5,at=-0.7,cex = 0.9)
+
+
+###Landscape Species Richness----
+
+Rich_Models_2[1]
+names(Rich_Models_2)
+
+Land_SR_ModNum <- names(Rich_Models_2)
+Land_SR_Forest <- vector(mode = "list", length = length(Land_SR_ModNum))
+q <- 1
+
+for (x in Land_SR_ModNum) {
+  
+  
+  Land_SR_CF <- summary(Rich_Models_2[[x]])$coefficients$cond
+  Land_SR_CF <- data.frame(term = row.names(Land_SR_CF),Land_SR_CF)
+  row.names(Land_SR_CF) <- 1:nrow(Land_SR_CF)
+  colnames(Land_SR_CF) <- c("term","est",'std_err',"z","p")
+  
+  Land_SR_CF$lci <- Land_SR_CF$est-(1.96*Land_SR_CF$std_err)
+  Land_SR_CF$uci <- Land_SR_CF$est+(1.96*Land_SR_CF$std_err)
+  
+  Land_SR_Forest[[q]] <- Land_SR_CF
+  
+  q <- q+1
+}
+Land_SR_Forest[[2]]
+
+Land_SR_Forest <- lapply(Land_SR_Forest, function(df) {
+  df$term <- ifelse(df$term %in% names(land_term_map), land_term_map[df$term], df$term)
+  df
+})
+
+
+dev.new(height=5,width=6,dpi=60,pointsize=14,noRStudioGD = T)
+par(mar=c(6,10,1,1),mfrow=c(1,1),mgp=c(2.5,1,0),xpd = F)
+
+plot(x=rev(Land_SR_Forest[[2]]$est),y=1:length(Land_SR_Forest[[2]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Land_SR_Forest[[2]]$lci),max(Land_SR_Forest[[2]]$uci)))
+axis(2, at=1:length(Land_SR_Forest[[2]]$term),labels = rev(Land_SR_Forest[[2]]$term),las=1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Land_SR_Forest[[2]]$lci),y0 = 1:length(Land_SR_Forest[[2]]$term),x1 = rev(Land_SR_Forest[[2]]$uci),y1 = 1:length(Land_SR_Forest[[2]]$term),length = 0)
+
+
+###Landscape Abundance----
+
+Abun_Models_2[1]
+names(Abun_Models_2)
+
+Land_Ab_ModNum <- names(Abun_Models_2)
+Land_Ab_Forest <- vector(mode = "list", length = length(Land_Ab_ModNum))
+q <- 1
+
+for (x in Land_Ab_ModNum) {
+  
+  
+  Land_Ab_CF <- summary(Abun_Models_2[[x]])$coefficients$cond
+  Land_Ab_CF <- data.frame(term = row.names(Land_Ab_CF),Land_Ab_CF)
+  row.names(Land_Ab_CF) <- 1:nrow(Land_Ab_CF)
+  colnames(Land_Ab_CF) <- c("term","est",'std_err',"z","p")
+  
+  Land_Ab_CF$lci <- Land_Ab_CF$est-(1.96*Land_Ab_CF$std_err)
+  Land_Ab_CF$uci <- Land_Ab_CF$est+(1.96*Land_Ab_CF$std_err)
+  
+  Land_Ab_Forest[[q]] <- Land_Ab_CF
+  
+  q <- q+1
+}
+Land_Ab_Forest[[2]]
+
+Land_Ab_Forest <- lapply(Land_Ab_Forest, function(df) {
+  df$term <- ifelse(df$term %in% names(land_term_map), land_term_map[df$term], df$term)
+  df
+})
+
+dev.new(height=5,width=6,dpi=60,pointsize=14,noRStudioGD = T)
+par(mar=c(6,10,1,1),mfrow=c(1,1),mgp=c(2.5,1,0),xpd = F)
+
+plot(x=rev(Land_Ab_Forest[[2]]$est),y=1:length(Land_Ab_Forest[[2]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Land_Ab_Forest[[2]]$lci),max(Land_Ab_Forest[[2]]$uci)))
+axis(2, at=1:length(Land_Ab_Forest[[2]]$term),labels = rev(Land_Ab_Forest[[2]]$term),las=1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Land_Ab_Forest[[2]]$lci),y0 = 1:length(Land_Ab_Forest[[2]]$term),x1 = rev(Land_Ab_Forest[[2]]$uci),y1 = 1:length(Land_Ab_Forest[[2]]$term),length = 0)
+
+
+###Landscape Functional Dispersion----
+
+Dis_Models2[1]
+names(Dis_Models2)
+
+Land_FD_ModNum <- names(Dis_Models2)
+Land_FD_Forest <- vector(mode = "list", length = length(Land_FD_ModNum))
+q <- 1
+
+for (x in Land_FD_ModNum) {
+  
+  
+  Land_FD_CF <- summary(Dis_Models2[[x]])$coefficients$cond
+  Land_FD_CF <- data.frame(term = row.names(Land_FD_CF),Land_FD_CF)
+  row.names(Land_FD_CF) <- 1:nrow(Land_FD_CF)
+  colnames(Land_FD_CF) <- c("term","est",'std_err',"z","p")
+  
+  Land_FD_CF$lci <- Land_FD_CF$est-(1.96*Land_FD_CF$std_err)
+  Land_FD_CF$uci <- Land_FD_CF$est+(1.96*Land_FD_CF$std_err)
+  
+  Land_FD_Forest[[q]] <- Land_FD_CF
+  
+  q <- q+1
+}
+Land_FD_Forest[[2]]
+
+Land_FD_Forest <- lapply(Land_FD_Forest, function(df) {
+  df$term <- ifelse(df$term %in% names(land_term_map), land_term_map[df$term], df$term)
+  df
+})
+
+
+dev.new(height=9,width=11,dpi=60,pointsize=14,noRStudioGD = T)
+par(mar=c(6,10,1,1),mfrow=c(2,2),mgp=c(2.5,1,0),xpd = F)
+
+plot(x=rev(Land_FD_Forest[[1]]$est),y=1:length(Land_FD_Forest[[1]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Land_FD_Forest[[1]]$lci),max(Land_FD_Forest[[1]]$uci)))
+axis(2, at=1:length(Land_FD_Forest[[1]]$term),labels = rev(Land_FD_Forest[[1]]$term),las=1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Land_FD_Forest[[1]]$lci),y0 = 1:length(Land_FD_Forest[[1]]$term),x1 = rev(Land_FD_Forest[[1]]$uci),y1 = 1:length(Land_FD_Forest[[1]]$term),length = 0)
+mtext("a)",side = 3,line = -0.5,at=-0.7,cex = 0.9)
+
+plot(x=rev(Land_FD_Forest[[2]]$est),y=1:length(Land_FD_Forest[[2]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Land_FD_Forest[[2]]$lci),max(Land_FD_Forest[[2]]$uci)))
+axis(2, at=1:length(Land_FD_Forest[[2]]$term),labels = rev(Land_FD_Forest[[2]]$term),las=1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Land_FD_Forest[[2]]$lci),y0 = 1:length(Land_FD_Forest[[2]]$term),x1 = rev(Land_FD_Forest[[2]]$uci),y1 = 1:length(Land_FD_Forest[[2]]$term),length = 0)
+mtext("b)",side = 3,line = -0.5,at=-0.7,cex = 0.9)
+
+plot(x=rev(Land_FD_Forest[[3]]$est),y=1:length(Land_FD_Forest[[3]]$term),ylab="",xlab="Model Estimate",pch=16,yaxt="n",xlim = c(min(Land_FD_Forest[[3]]$lci),max(Land_FD_Forest[[3]]$uci)))
+axis(2, at=1:length(Land_FD_Forest[[3]]$term),labels = rev(Land_FD_Forest[[3]]$term),las=1)
+arrows(x0 = 0,y0 = 0.5,x1 = 0,y1 = 10,length = 0)
+arrows(x0 = rev(Land_FD_Forest[[3]]$lci),y0 = 1:length(Land_FD_Forest[[3]]$term),x1 = rev(Land_FD_Forest[[3]]$uci),y1 = 1:length(Land_FD_Forest[[3]]$term),length = 0)
+mtext("c)",side = 3,line = -0.5,at=-0.7,cex = 0.9)
 
 #END----

@@ -200,7 +200,6 @@ levels(variables$Weed_Estimate)
 table(variables$Grass_Status,variables$Day_Sampled)
 
 head(obs)
-#total observations = 1127
 
 invert <- data.frame(Point = obs$Point,Morphospecies = obs$Morphospecies)
 head(invert)
@@ -277,11 +276,11 @@ Count <- invert %>%
               values_fill = 0) %>% #fill with 0
   column_to_rownames("Point") 
 
-pcadata <- decostand(Count, method = "hellinger") #apparently makes results more ecologically meaningful, we'll see I guess
+pcadata <- decostand(Count, method = "hellinger")
 head(pcadata);dim(pcadata)
 
 pca_result <- prcomp(pcadata, center = TRUE, scale. = FALSE)
-#scale false becuase already transformed above with hellinger
+#scale false because already transformed above with hellinger
 summary(pca_result)
 biplot(pca_result)
 
