@@ -80,13 +80,11 @@ hist(point$Prop_Green_GC)
 
 hist(point$Natual_Grazing_1km)
 dim(table(point$Natual_Grazing_1km))
-hist(point$Naural_Grazing_500m)
-dim(table(point$Naural_Grazing_500m))
+
 
 hist(point$Cropping_1km)
 dim(table(point$Cropping_1km)) #histogram makes it look like not much variation with lots of 0 but there are a lot of values here so I think there's still enough variation
-hist(point$Cropping_500m)
-dim(table(point$Cropping_500m)) #whereas this one is almost half 0's, we'll leave it if its correlated with 1km crops then we'll pick that one because it has more variation
+
 hist(point$X500m.Simspson)
 table(point$X500m.Simspson) #lots of variation
 
@@ -132,7 +130,7 @@ cordata <- merge(cordata,property, by = "Property")
 
 head(cordata);dim(cordata)
 
-cordata <- cordata %>% dplyr::select(Plant_Height, Ground_Cover,Prop_Green_GC,Weed_Estimate,Grass_Status, Natual_Grazing_1km,Cropping_1km,Naural_Grazing_500m,Cropping_500m,X500m.Simspson,X500m.Dominant.Landscape.Class,Day_Sampled,Dominant_Herb_Weed,Dominat_Grass,Position)
+cordata <- cordata %>% dplyr::select(Plant_Height, Ground_Cover,Prop_Green_GC,Weed_Estimate,Grass_Status, Natual_Grazing_1km,Cropping_1km,X500m.Simspson,X500m.Dominant.Landscape.Class,Day_Sampled,Dominant_Herb_Weed,Dominat_Grass,Position)
 
 
 str(cordata)
@@ -165,8 +163,8 @@ str(cordata) #confirmed no character columns left
 
 cor <- cor(cordata,method = "spearman")
 
-colnames(cor) <- c("Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Habitat Diversity","Habitat Structure", "Day","Dom Weed","Dom Grass","Position")
-rownames(cor) <- c("Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Grazing 500m","Crops 500m","Habitat Diversity","Habitat Structure", "Day","Dom Weed","Dom Grass","Position")
+colnames(cor) <- c("Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Habitat Diversity","Habitat Structure", "Day","Dom Weed","Dom Grass","Position")
+rownames(cor) <- c("Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Habitat Diversity","Habitat Structure", "Day","Dom Weed","Dom Grass","Position")
 
 dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
 corrplot::corrplot(cor,method="color",  
@@ -174,8 +172,8 @@ corrplot::corrplot(cor,method="color",
 
 head(cor)
 
-#remove grazing 500m, crops 1km, and crops 500m
-#Chose Grazing 1km as this had the most variation among these four correlated variables
+#remove crops 1km
+#Choose Grazing 1km as this had the most variation
 
 #Remove elevation or position
 #need to work out how to deal with confounding factors of day and elevation/position since those are design factors in the survey
