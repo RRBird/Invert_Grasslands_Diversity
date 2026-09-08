@@ -503,39 +503,6 @@ ComVar$Weed <- ifelse(ComVar$Weed_Estimate =="0-20%",10,
               ifelse(ComVar$Weed_Estimate == "40-60%",50,
                      ifelse(ComVar$Weed_Estimate=="60-80%",70,90))))
 head(ComVar);dim(ComVar)
-#Management variable----
-
-head(property);dim(property)
-
-property$Graze_Animal[which(is.na(property$Graze_Animal))] <- "No_Ungulate"
-
-
-manage_vars <- c("Land_Use", "Graze_Animal", "Slash.", "Burning.")
-
-MCA <- property %>%
-  select("Land_Use", "Graze_Animal", "Slash.", "Burning.") %>% 
-  mutate(across(everything(), as.character)) %>%
-  mutate(across(everything(), as.factor))
-head(MCA);dim(MCA)
-str(MCA)
-is.na(MCA)
-
-MCA_Result <- MCA(MCA, graph = FALSE)
-
-summary(MCA_Result)
-fviz_eig(MCA_Result, addlabels = TRUE) 
-#Dimension 1 explains 26.8% of variation
-
-fviz_mca_var(MCA_Result, repel = TRUE)
-MCA_Result$var$contrib
-
-property$management <- MCA_Result$ind$coord[, 1]
-
-head(property);dim(property)
-
-ComVar <- ComVar %>%
-  left_join(property %>% select(Property, management), by = "Property")
-head(ComVar)
 
 
 #Functional Traits----
