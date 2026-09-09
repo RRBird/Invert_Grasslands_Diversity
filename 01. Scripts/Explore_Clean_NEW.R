@@ -460,7 +460,7 @@ image.plot(legend.only=TRUE,
            zlim=range(pcadata2$Prop_Green_GC,na.rm=TRUE),
            col=gradient_cols, legend.lab="Green Ground Cover",
            legend.line =2.3,
-           smallplot=c(0.17, 0.20, 0.20, 0.45))
+           smallplot=c(0.17, 0.20, 0.23, 0.45))
 
 ##by height----
 
@@ -479,6 +479,71 @@ image.plot(legend.only=TRUE,
            legend.line =2.3,
            smallplot=c(0.17, 0.20, 0.20, 0.45))
 
+##by grazing and position----
+
+pos_shape <- ifelse(pcadata2$Position == "Escarpment",yes = 17,no=19)
+
+dev.new(height=10, width=10, dpi=80, pointsize=14, noRStudioGD=T)
+plot(pcadata2$pca.comp1, pcadata2$pca.comp2, pch=pos_shape,
+     xlab="PC 1", ylab="PC 2", cex=2, las=1,
+     col=alpha(col_graze1km,1))
+image.plot(legend.only=TRUE, 
+           zlim=range(pcadata2$Natual_Grazing_1km,na.rm=TRUE),
+           col=gradient_cols, legend.lab="Propotion Grazing Land",
+           legend.line =2,
+           smallplot=c(0.17, 0.20, 0.22, 0.50))
+
+
+##by position and ground cover----
+
+dev.new(height=10, width=10, dpi=80, pointsize=14, noRStudioGD=T)
+plot(pcadata2$pca.comp1, pcadata2$pca.comp2, pch=pos_shape,
+     xlab="PC 1", ylab="PC 2", cex=2, las=1,
+     col=alpha(col_GC,1))
+image.plot(legend.only=TRUE, 
+           zlim=range(pcadata2$Ground_Cover,na.rm=TRUE),
+           col=gradient_cols, legend.lab="Ground Cover",
+           legend.line =2.3,
+           smallplot=c(0.17, 0.20, 0.20, 0.45))
+
+##Putting together a PCA plot for model----
+
+dev.new(height=10, width=12, dpi=80, pointsize=14, noRStudioGD=T)
+par(mar=c(4,4,3,2),mfrow=c(2,2),mgp=c(2.5,1,0),xpd = T)
+
+plot(pcadata2$pca.comp1, pcadata2$pca.comp2, pch=19,
+     xlab="PC 1", ylab="PC 2", cex=1, las=1,
+     col=alpha(col_GGC,1))
+image.plot(legend.only=TRUE, 
+           zlim=range(pcadata2$Prop_Green_GC,na.rm=TRUE),
+           col=gradient_cols, legend.lab="Green Ground Cover",
+           legend.line =2.3,
+           smallplot=c(0.17, 0.20, 0.20, 0.45))
+
+plot(pcadata2$pca.comp1, pcadata2$pca.comp2, pch=pos_shape,
+     xlab="PC 1", ylab="PC 2", cex=2, las=1,
+     col=alpha(col_GC,1))
+image.plot(legend.only=TRUE, 
+           zlim=range(pcadata2$Ground_Cover,na.rm=TRUE),
+           col=gradient_cols, legend.lab="Ground Cover",
+           legend.line =2.3,
+           smallplot=c(0.17, 0.20, 0.20, 0.45))
+
+plot(pcadata2$pca.comp1, pcadata2$pca.comp2, pch=pos_shape,
+     xlab="PC 1", ylab="PC 2", cex=2, las=1,
+     col=alpha(col_graze1km,1))
+image.plot(legend.only=TRUE, 
+           zlim=range(pcadata2$Natual_Grazing_1km,na.rm=TRUE),
+           col=gradient_cols, legend.lab="Grazing within 1km",
+           legend.line =2.3,
+           smallplot=c(0.17, 0.20, 0.20, 0.45))
+
+plot(pcadata2$pca.comp1,pcadata2$pca.comp2,pch=19, 
+     xlab="PC 1",ylab="PC 2",cex=2,las=1,col=alpha(col_domhab,1))
+ordiellipse(cbind(pcadata2$pca.comp1, pcadata2$pca.comp2),
+            groups = pcadata2$X500m.Dominant.Landscape.Class,
+            col = col.5,lwd = 2, kind = "sd")
+legend("bottomleft",legend = c("Herbaceous Open", "Woody Closed", "Woody Open"), pch = 19, col = col.5,pt.cex = 1,cex = 0.9)
 
 #Variables and diversity measures merged----
 

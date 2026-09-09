@@ -17,6 +17,7 @@ library("vegan")
 library("piecewiseSEM")
 library("reformulas")
 library("openxlsx")
+library("glmm.hp")
 
 head(ComVar);dim(ComVar)
 
@@ -725,103 +726,22 @@ aictab(DisList2)
 #Q3 SITE VS LANDSCAPE----
 
 
-##Species Richness----
-#Model with all variables from Q1 and Q3
-Rich_Multi_Model <- glmmTMB(Species_Rich ~ GC*Position + HabDiv + ResDay + (1 | Property), family = nbinom2, data = ComVar)
+##Species Richness
 
-summary(Rich_Multi_Model)
+R2_SR <- glmm.hp(glmmTMB(Species_Rich ~  ResDay + Position + GC +  GC:Position + HabDiv +(1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail"))
 
-r2_SR_full <- partR2(Rich_Multi_Model, partvars = c("GC", "HabDiv", "Position","ResDay"),R2_type = "marginal", nboot = 1000, data = ComVar)
-#Doesn't work with glmmTMB
-#Need to do it manually
+##Abundance
 
-#create groups of site, landscape and design variables
-Rich_site_vars <- c("GC")
-Rich_landscape_vars <- c("HabDiv")
-Rich_design_vars <- c("Position","ResDay")
+R2_Abund <- glmm.hp(glmmTMB(Count ~ ResDay + Position +GC + GGC + Height +   HabDiv + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail"))
 
-#part_r2 function written by Rhiannon with help of Claude AI
-part_r2 <- function(model, group_vars) {
-  r2_full <- r.squaredGLMM(model)[1, "R2m"]
-  all_terms <- attr(terms(model), "term.labels")
-  terms_to_drop <- all_terms[sapply(all_terms, function(t) {
-    term_parts <- strsplit(t, ":")[[1]]
-    any(term_parts %in% group_vars)
-  })]
-  
-  drop_formula <- as.formula(paste(". ~ . -", paste(terms_to_drop, collapse = " - ")))
-  reduced_formula <- update(formula(model), drop_formula)
-  reduced_model <- update(model, formula = reduced_formula)
-  
-  r2_reduced <- r.squaredGLMM(reduced_model)[1, "R2m"]
-  r2_full - r2_reduced
-}
+##Community Composition
 
-Rich_site_r2 <- part_r2(Rich_Multi_Model, Rich_site_vars)
-Rich_landscape_r2 <- part_r2(Rich_Multi_Model, Rich_landscape_vars)
-Rich_design_r2 <- part_r2(Rich_Multi_Model, Rich_design_vars)
+R2_ComComp <- glmm.hp(glmmTMB(ComComp ~ ResDay + Position + GGC + GC + GC:Position + X500m.Dominant.Landscape.Class + Graze +  Graze:Position + (1 | Property), family = gaussian(), data = ComVar_Subsected,na.action = "na.fail"))
 
-Rich_site_r2
-Rich_landscape_r2
-Rich_design_r2
+##Functional Richness
+R2_FRich <- glmm.hp(glmmTMB(FRic ~ ResDay +Position + GC + GGC + Height + (1 | Property), family = nbinom2, data = ComVar,na.action = "na.fail",control = glmmTMBControl(optimizer = optim, optArgs = list(method = "BFGS"))))
 
-
-##Abundance----
-Abun_Multi_Model <- glmmTMB(Count ~ GC + GGC + Height + HabDiv + Position + ResDay+ (1 | Property), family = nbinom2, data = ComVar)
-
-summary(Abun_Multi_Model)
-
-r2_Abun_full <- r.squaredGLMM(Abun_Full_Model)[1, "R2m"]
-
-Abun_site_vars <- c("GC","GGC","Height")
-Abun_landscape_vars <- c("HabDiv")
-Abun_design_vars <- c("Position","ResDay")
-
-Abun_site_r2 <- part_r2(Abun_Multi_Model, Abun_site_vars)
-Abun_landscape_r2 <- part_r2(Abun_Multi_Model, Abun_landscape_vars)
-Abun_design_r2 <- part_r2(Abun_Multi_Model, Abun_design_vars)
-
-Abun_site_r2
-Abun_landscape_r2
-Abun_design_r2
-
-##Community Composition----
-
-Comp_Multi_Model <- glmmTMB(ComComp ~ GC * Position + GGC + Graze + X500m.Dominant.Landscape.Class + ResDay + (1 | Property), family = gaussian(), data = ComVar_Subsected,na.action = "na.fail")
-
-summary(Comp_Multi_Model)
-
-r2_Comp_full <- r.squaredGLMM(Comp_Multi_Model)[1, "R2m"]
-
-Comp_site_vars <- c("GC","GGC")
-Comp_landscape_vars <- c("Graze","X500m.Dominant.Landscape.Class")
-Comp_design_vars <- c("Position","ResDay")
-
-Comp_site_r2 <- part_r2(Comp_Multi_Model, Comp_site_vars)
-Comp_landscape_r2 <- part_r2(Comp_Multi_Model, Comp_landscape_vars)
-Comp_design_r2 <- part_r2(Comp_Multi_Model, Comp_design_vars)
-
-Comp_site_r2
-Comp_landscape_r2
-Comp_design_r2
-
-##Functional Richness----
-
-summary(Fun_Rich_Top)
-
-r2_Comp_full <- r.squaredGLMM(Fun_Rich_Top)[1, "R2m"]
-
-FRic_site_vars <- c("GC","GGC","Height")
-FRic_design_vars <- c("Position","ResDay")
-
-FRic_site_r2 <- part_r2(Fun_Rich_Top, FRic_site_vars)
-FRic_design_r2 <- part_r2(Fun_Rich_Top, FRic_design_vars)
-
-FRic_site_r2
-FRic_design_r2
-
-
-#Figures----
+#FIGURES----
 
 ##Species Richness----
 head(Site_Rich2);dim(Site_Rich2)
@@ -870,16 +790,11 @@ mtext(side=3,line=0,at = -15,'b)',cex=0.8)
 polygon(x = c(Site_Rich2$ResDay[AAA],rev(Site_Rich2$ResDay[AAA])), y = c(Site_Rich2$lci[AAA],rev(Site_Rich2$uci[AAA])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=Site_Rich2$ResDay[AAA],y = Site_Rich2$fit[AAA],lwd = 2,col = 'grey30')
 
-mtext(side=3,line=1,at = -25,'-------------------Site-------------------',cex=0.9, font = 2)
+mtext(side=3,line=1,at = -25,'--------------------------Site--------------------------',cex=0.9, font = 2)
 
 
-mtext(bquote(R^2 == 0.061), side=1,line=-10,at = 50,cex=1.1)
-mtext("Site", side=1,line=-10,at = 40,cex=1.1)
-mtext(bquote(R^2 == 0.061), side=1,line=-8,at = 50,cex=1.1)
-mtext("Landscape", side=1,line=-8,at = 35,cex=1.1)
-mtext(bquote(R^2 == 0.224), side=1,line=-6,at = 50,cex=1.1)
-mtext("Fixed", side=1,line=-6,at = 39,cex=1.1)
-
+barplot(R2_SR$delta[,4],cex.lab=1.4,cex.axis=1.4,xaxt = 'n',ylab = "Relative contribution (%)")
+axis(side=1, at=c(0.6,2,3.2,4.4,5.8),labels=c("Day", "Position" ,"GC","GC:\nPosition","Habitat\nDiversity"),cex.axis=0.9,tick = F)
 
 par(mfg = c(2, 1, 2, 3))
 plot(x = ComVar$HabDiv,y = ComVar$Species_Rich,xlab = "Habitat Diveristy within 500m",ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.4,cex.axis=1.4,xaxt = 'n')
@@ -1167,7 +1082,7 @@ mtext("Fixed", side=1,line=-8,at = 40.5,cex=0.9)
 
 
 
-#Supporting Figures----
+#SUPPORTING FIGURES----
 
 
 ##Functional Dispersion Unneeded??----
