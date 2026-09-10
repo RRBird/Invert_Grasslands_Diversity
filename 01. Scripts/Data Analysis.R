@@ -793,9 +793,9 @@ lines(x=Site_Rich2$ResDay[AAA],y = Site_Rich2$fit[AAA],lwd = 2,col = 'grey30')
 mtext(side=3,line=1,at = -25,'--------------------Site--------------------',cex=0.9, font = 2)
 
 
-barplot(R2_SR$delta[,4],cex.lab=1.4,cex.axis=1.4,xaxt = 'n',ylab = "Relative contribution (%)")
+barplot(R2_SR$delta[,3],cex.lab=1.4,cex.axis=1.2,las=1,xaxt = 'n',ylab = expression(R^2))
 axis(side=1, at=c(0.6,2,3.2,4.4,5.8),labels=c("Day", "Position" ,"GC","GC x\nPosition","Habitat\nDiversity"),cex.axis=0.9,tick = F)
-mtext(side=3,line=0,at = -2,'c)',cex=0.8)
+mtext(side=3,line=0,at = -0,'c)',cex=0.8)
 
 plot(x = ComVar$HabDiv,y = ComVar$Species_Rich,xlab = "Habitat Diveristy within 500m",ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.4,cex.axis=1.4,xaxt = 'n')
 axis(side=1, at=seq(from=min(Land_Rich2$HabDiv),to=max(Land_Rich2$HabDiv),length.out=5),labels=round(seq(from=min(ComVar$X500m.Simspson),to=max(ComVar$X500m.Simspson),length.out=5),1),cex.axis=1.4)
@@ -888,9 +888,9 @@ mtext(side=3,line=0,at = -15,'e)',cex=0.8)
 polygon(x = c(Site_Abun2$ResDay[CCCC],rev(Site_Abun2$ResDay[CCCC])), y = c(Site_Abun2$lci[CCCC],rev(Site_Abun2$uci[CCCC])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=Site_Abun2$ResDay[CCCC],y = Site_Abun2$fit[CCCC],lwd = 2,col = 'grey30')
 
-barplot(R2_Abund$delta[,4],cex.lab=1.2,cex.axis=1.2,xaxt = 'n',ylab = "Relative contribution (%)")
+barplot(R2_Abund$delta[,3],cex.lab=1.2,cex.axis=1,las=1,xaxt = 'n',ylab =expression(R^2))
 axis(side=1, at=c(0.7,1.9,3.1,4.4,5.7,7),labels=c("D", "P" ,"G","GG","H","HD"),cex.axis=0.8,tick = F)
-mtext(side=3,line=0,at = -1.2,'f)',cex=0.8)
+mtext(side=3,line=0,at = -0.3,'f)',cex=0.8)
 
 
 plot(x = ComVar$HabDiv,y = ComVar$Count,xlab = "Habitat Diveristy in 500m",ylab = 'Abundance', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
@@ -978,7 +978,7 @@ lines(x=Site_Comp2$ResDay[E_E_E],y = Site_Comp2$fit[E_E_E],lwd = 2,col = 'grey30
 
 mtext(side=3,line=1,at = -45,'-----------------------Site-----------------------',cex=0.9, font = 2)
 
-barplot(R2_ComComp$hierarchical.partitioning[,4],cex.lab=1.4,cex.axis=1.4,xaxt = 'n',ylab = "Relative contribution (%)")
+barplot(R2_ComComp$hierarchical.partitioning[,3],cex.lab=1.4,las=1,cex.axis=1.1,xaxt = 'n',ylab =expression(R^2))
 axis(side=1, at=c(0.6,1.8,3.1,4.3,5.5,6.9,8.2,9.6),labels=c("D", "P" ,"GG","G","Gx\nP","DH", "Gr","Gr x\nP"),cex.axis=0.9,tick = F)
 mtext(side=3,line=0,at = -1,'d)',cex=0.8)
 
@@ -1075,7 +1075,7 @@ mtext(side=3,line=0,at = -15,'e)',cex=0.8)
 polygon(x = c(Site_Fun_Rich2$ResDay[GGGG],rev(Site_Fun_Rich2$ResDay[GGGG])), y = c(Site_Fun_Rich2$lci[GGGG],rev(Site_Fun_Rich2$uci[GGGG])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=Site_Fun_Rich2$ResDay[GGGG],y = Site_Fun_Rich2$fit[GGGG],lwd = 2,col = 'grey30')
 
-barplot(R2_FRich$delta[,4],cex.lab=1.4,cex.axis=1.4,xaxt = 'n',ylab = "Relative contribution (%)")
+barplot(R2_FRich$delta[,3],cex.lab=1.4,cex.axis=1.1,las=1,xaxt = 'n',ylab = expression(R^2))
 axis(side=1, at=c(0.6,2,3.2,4.4,5.8),labels=c("Day", "Pos" ,"GC","Green\nGC","Height"),cex.axis=1,tick = F)
 mtext(side=3,line=0,at = -0,'f)',cex=0.8)
 
