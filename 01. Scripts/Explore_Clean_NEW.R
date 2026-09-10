@@ -492,6 +492,7 @@ image.plot(legend.only=TRUE,
            col=gradient_cols, legend.lab="Propotion Grazing Land",
            legend.line =2,
            smallplot=c(0.17, 0.20, 0.22, 0.50))
+legend("bottomright",legend = c("Escaprment", "Valley"), pch = c(17,19), col = 'grey30',pt.cex = 1.4,cex = 1.2)
 
 
 ##by position and ground cover----
@@ -505,6 +506,7 @@ image.plot(legend.only=TRUE,
            col=gradient_cols, legend.lab="Ground Cover",
            legend.line =2.3,
            smallplot=c(0.17, 0.20, 0.20, 0.45))
+legend("bottomright",legend = c("Escaprment", "Valley"), pch = c(17,19), col = 'grey30',pt.cex = 1.4,cex = 1.2)
 
 ##Putting together a PCA plot for model----
 

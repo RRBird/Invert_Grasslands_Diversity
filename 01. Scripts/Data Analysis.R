@@ -790,16 +790,16 @@ mtext(side=3,line=0,at = -15,'b)',cex=0.8)
 polygon(x = c(Site_Rich2$ResDay[AAA],rev(Site_Rich2$ResDay[AAA])), y = c(Site_Rich2$lci[AAA],rev(Site_Rich2$uci[AAA])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=Site_Rich2$ResDay[AAA],y = Site_Rich2$fit[AAA],lwd = 2,col = 'grey30')
 
-mtext(side=3,line=1,at = -25,'--------------------------Site--------------------------',cex=0.9, font = 2)
+mtext(side=3,line=1,at = -25,'--------------------Site--------------------',cex=0.9, font = 2)
 
 
 barplot(R2_SR$delta[,4],cex.lab=1.4,cex.axis=1.4,xaxt = 'n',ylab = "Relative contribution (%)")
-axis(side=1, at=c(0.6,2,3.2,4.4,5.8),labels=c("Day", "Position" ,"GC","GC:\nPosition","Habitat\nDiversity"),cex.axis=0.9,tick = F)
+axis(side=1, at=c(0.6,2,3.2,4.4,5.8),labels=c("Day", "Position" ,"GC","GC x\nPosition","Habitat\nDiversity"),cex.axis=0.9,tick = F)
+mtext(side=3,line=0,at = -2,'c)',cex=0.8)
 
-par(mfg = c(2, 1, 2, 3))
 plot(x = ComVar$HabDiv,y = ComVar$Species_Rich,xlab = "Habitat Diveristy within 500m",ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.4,cex.axis=1.4,xaxt = 'n')
 axis(side=1, at=seq(from=min(Land_Rich2$HabDiv),to=max(Land_Rich2$HabDiv),length.out=5),labels=round(seq(from=min(ComVar$X500m.Simspson),to=max(ComVar$X500m.Simspson),length.out=5),1),cex.axis=1.4)
-mtext(side=3,line=0,at = -3.1,'c)',cex=0.8)
+mtext(side=3,line=0,at = -3.1,'d)',cex=0.8)
 
 polygon(x = c(Land_Rich2$HabDiv[BB],rev(Land_Rich2$HabDiv[BB])), y = c(Land_Rich2$lci[BB],rev(Land_Rich2$uci[BB])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=Land_Rich2$HabDiv[BB],y = Land_Rich2$fit[BB],lwd = 2,col = 'grey30')
@@ -807,7 +807,7 @@ lines(x=Land_Rich2$HabDiv[BB],y = Land_Rich2$fit[BB],lwd = 2,col = 'grey30')
 
 plot(x = 1:2,y = Land_Rich2$fit[B_B],xlab = " ",ylab = 'Species Richness', type = 'p',pch = 16,cex =2,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,20),cex.lab =1.4,cex.axis = 1.4)
 axis(side=1,at=c(0.8,2.2),labels=c('Escarpment','Valley'),cex.axis=1.4)
-mtext(side=3,line=0,at = -0.25,'d)',cex=0.8)
+mtext(side=3,line=0,at = -0.25,'e)',cex=0.8)
 arrows(x0=1:2, y0=Land_Rich2$lci [B_B],x1=1:2, y1=Land_Rich2$uci[B_B],angle=90,length=0.1, code=3, lwd=2,col = "black")
 points(x = jitter(raw_x1, factor = 1),y = ComVar$Species_Rich, pch = 16, cex = 0.4, col = "black")
 
@@ -816,7 +816,7 @@ mtext(side=3,line=1,at = 1.5,'--------------------------------Landscape---------
 
 plot(x = ComVar$ResDay,y = ComVar$Species_Rich,xlab = "Day (position-adjusted)",ylab = 'Species Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd= 2,cex.lab=1.4,cex.axis=1.4,xaxt = 'n')
 axis(side=1, at=seq(from=min(Land_Rich2$ResDay),to=max(Land_Rich2$ResDay),length.out=5),labels=round(seq(from=min(ComVar$ResDay),to=max(ComVar$ResDay),length.out=5),0),cex.axis=1.4)
-mtext(side=3,line=0,at = -15,'e)',cex=0.8)
+mtext(side=3,line=0,at = -15,'f)',cex=0.8)
 
 polygon(x = c(Land_Rich2$ResDay[BBB],rev(Land_Rich2$ResDay[BBB])), y = c(Land_Rich2$lci[BBB],rev(Land_Rich2$uci[BBB])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=Land_Rich2$ResDay[BBB],y = Land_Rich2$fit[BBB],lwd = 2,col = 'grey30')
@@ -872,7 +872,8 @@ lines(x=Site_Abun2$Height[CCC],y = Site_Abun2$fit[CCC],lwd = 2,col = 'grey30')
 mtext(side=3,line=1,at = -7,'------------------------Site------------------------',cex=0.8, font = 2)
 
 plot(x = 1:2,y = Site_Abun2$fit[C_C_C],xlab = " ",ylab = 'Abundance', type = 'p',pch = 16,cex =1.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,40),cex.lab =1.2,cex.axis = 1.2)
-axis(side=1,at=c(0.7,2.3),labels=c('Escarpment','Valley'),cex.axis=0.9)
+axis(side=1,at=c(1,2),tick=T,labels=c(' ',' '))
+axis(side=1,at=c(0.4,2.5),labels=c('Escarpment','Valley'),cex.axis=1.2,tick=F)
 mtext(side=3,line=0,at = -0.25,'d)',cex=0.8)
 arrows(x0=1:2, y0=Site_Abun2$lci [C_C_C],x1=1:2, y1=Site_Abun2$uci[C_C_C],angle=90,length=0.05, code=3, lwd=2,col = "black")
 points(x = jitter(raw_x1, factor = 1),y = ComVar$Count, pch = 16, cex = 0.4, col = "grey30")
@@ -887,26 +888,23 @@ mtext(side=3,line=0,at = -15,'e)',cex=0.8)
 polygon(x = c(Site_Abun2$ResDay[CCCC],rev(Site_Abun2$ResDay[CCCC])), y = c(Site_Abun2$lci[CCCC],rev(Site_Abun2$uci[CCCC])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=Site_Abun2$ResDay[CCCC],y = Site_Abun2$fit[CCCC],lwd = 2,col = 'grey30')
 
-mtext(bquote(R^2 == 0.131), side=1,line=-6,at = 60,cex=0.8)
-mtext("Site", side=1,line=-6,at = 46,cex=0.8)
-mtext(bquote(R^2 == 0.094), side=1,line=-4,at = 60,cex=0.8)
-mtext("Landscape", side=1,line=-4,at = 40,cex=0.8)
-mtext(bquote(R^2 == 0.183), side=1,line=-2,at = 60,cex=0.8)
-mtext("Fixed", side=1,line=-2,at = 45,cex=0.8)
+barplot(R2_Abund$delta[,4],cex.lab=1.2,cex.axis=1.2,xaxt = 'n',ylab = "Relative contribution (%)")
+axis(side=1, at=c(0.7,1.9,3.1,4.4,5.7,7),labels=c("D", "P" ,"G","GG","H","HD"),cex.axis=0.8,tick = F)
+mtext(side=3,line=0,at = -1.2,'f)',cex=0.8)
 
 
-par(mfg = c(3, 1, 3, 3))
 plot(x = ComVar$HabDiv,y = ComVar$Count,xlab = "Habitat Diveristy in 500m",ylab = 'Abundance', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
 axis(side=1, at=seq(from=min(Land_Abun2$HabDiv),to=max(Land_Abun2$HabDiv),length.out=4),labels=round(seq(from=min(ComVar$X500m.Simspson),to=max(ComVar$X500m.Simspson),length.out=4),1),cex.axis=1.2)
-mtext(side=3,line=0,at = -3.1,'f)',cex=0.8)
+mtext(side=3,line=0,at = -3.1,'g)',cex=0.8)
 
 polygon(x = c(Land_Abun2$HabDiv[DD],rev(Land_Abun2$HabDiv[DD])), y = c(Land_Abun2$lci[DD],rev(Land_Abun2$uci[DD])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=Land_Abun2$HabDiv[DD],y = Land_Abun2$fit[DD],lwd = 2,col = 'grey30')
 
 
 plot(x = 1:2,y = Land_Abun2$fit[D_D],xlab = " ",ylab = 'Abundance', type = 'p',pch = 16,cex =1.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,3),ylim = c(0,40),cex.lab =1.2,cex.axis = 1.2)
-axis(side=1,at=c(0.7,2.3),labels=c('Escarpment','Valley'),cex.axis=0.9)
-mtext(side=3,line=0,at = -0.25,'g)',cex=0.8)
+axis(side=1,at=c(1,2),labels=c(' ',' '),tick=T)
+axis(side=1,at=c(0.3,2.4),labels=c('Escarpment','Valley'),cex.axis=1.2,tick=F)
+mtext(side=3,line=0,at = -0.25,'h)',cex=0.8)
 arrows(x0=1:2, y0=Land_Abun2$lci [D_D],x1=1:2, y1=Land_Abun2$uci[D_D],angle=90,length=0.05, code=3, lwd=2,col = "black")
 points(x = jitter(raw_x1, factor = 1),y = ComVar$Count, pch = 16, cex = 0.4, col = "grey30")
 
@@ -915,7 +913,7 @@ mtext(side=3,line=1,at = 1.5,'----------------------Landscape-------------------
 
 plot(x = ComVar$ResDay,y = ComVar$Count,xlab = "Day (position-adjusted)",ylab = 'Abundance', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
 axis(side=1, at=seq(from=min(Land_Abun2$ResDay),to=max(Land_Abun2$ResDay),length.out=4),labels=round(seq(from=min(ComVar$ResDay),to=max(ComVar$ResDay),length.out=4),0),cex.axis=1.2)
-mtext(side=3,line=0,at = -15,'h)',cex=0.8)
+mtext(side=3,line=0,at = -15,'i)',cex=0.8)
 
 polygon(x = c(Land_Abun2$ResDay[DDD],rev(Land_Abun2$ResDay[DDD])), y = c(Land_Abun2$lci[DDD],rev(Land_Abun2$uci[DDD])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=Land_Abun2$ResDay[DDD],y = Land_Abun2$fit[DDD],lwd = 2,col = 'grey30')
@@ -980,17 +978,14 @@ lines(x=Site_Comp2$ResDay[E_E_E],y = Site_Comp2$fit[E_E_E],lwd = 2,col = 'grey30
 
 mtext(side=3,line=1,at = -45,'-----------------------Site-----------------------',cex=0.9, font = 2)
 
-mtext(bquote(R^2 == 0.019), side=1,line=-8,at = 40,cex=0.9)
-mtext("Site", side=1,line=-8,at = 30,cex=0.9)
-mtext(bquote(R^2 == 0.201), side=1,line=-6,at = 40,cex=0.9)
-mtext("Landscape", side=1,line=-6,at = 25,cex=0.9)
-mtext(bquote(R^2 == 0.226), side=1,line=-4,at = 40,cex=0.9)
-mtext("Fixed", side=1,line=-4,at = 29,cex=0.9)
+barplot(R2_ComComp$hierarchical.partitioning[,4],cex.lab=1.4,cex.axis=1.4,xaxt = 'n',ylab = "Relative contribution (%)")
+axis(side=1, at=c(0.6,1.8,3.1,4.3,5.5,6.9,8.2,9.6),labels=c("D", "P" ,"GG","G","Gx\nP","DH", "Gr","Gr x\nP"),cex.axis=0.9,tick = F)
+mtext(side=3,line=0,at = -1,'d)',cex=0.8)
 
-par(mfg = c(2, 1, 2, 4))
+
 plot(x = ComVar_Subsected$Graze,y = ComVar_Subsected$ComComp,xlab = "Grazing Land in 1km (%)",ylab = 'Community Dissimiliaty Index', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
 axis(side=1, at=seq(from=min(Land_Comp2$Graze),to=max(Land_Comp2$Graze),length.out=5),labels=round(seq(from=min(ComVar_Subsected$Natual_Grazing_1km),to=max(ComVar_Subsected$Natual_Grazing_1km),length.out=5),0),cex.axis=1.2)
-mtext(side=3,line=0,at = -1.9,'d)',cex=0.8)
+mtext(side=3,line=0,at = -1.9,'e)',cex=0.8)
 
 polygon(x = c(Land_Comp2$Graze[FF],rev(Land_Comp2$Graze[FF])), y = c(Land_Comp2$lci[FF],rev(Land_Comp2$uci[FF])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=Land_Comp2$Graze[FF],y = Land_Comp2$fit[FF],lwd = 2,col = 'grey30')
@@ -1007,14 +1002,14 @@ mtext(side=1,line =1.5, at=0.8,'Woody\nClosed',cex=0.6)
 mtext(side=1,line =1.5, at=2,'Herbaceous\nOpen',cex=0.6)
 mtext(side=1,line =1.5, at=3.2,'Woody\nOpen',cex=0.6)
 mtext(side=1,line =2.5,"Dominant Surrounding Habitat",cex = 0.8)
-mtext(side=3,line=0,at = -0.26,'e)',cex=0.8)
+mtext(side=3,line=0,at = -0.26,'f)',cex=0.8)
 arrows(x0=1:3, y0=Land_Comp2$lci[FFF],x1=1:3, y1=Land_Comp2$uci[FFF],angle=90,length=0.05, code=3, lwd=2,col = "black")
 points(x = jitter(raw_x2, factor = 1),y = ComVar_Subsected$ComComp, pch = 16, cex = 0.4, col = "grey30")
 
 
 plot(x = ComVar_Subsected$ResDay,y = ComVar_Subsected$ComComp,xlab = "Day (position-adjusted) ",ylab = 'Community Dissimiliaty Index', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
 axis(side=1, at=seq(from=min(Land_Comp2$ResDay),to=max(Land_Comp2$ResDay),length.out=5),labels=round(seq(from=min(ComVar_Subsected$ResDay),to=max(ComVar_Subsected$ResDay),length.out=5),0),cex.axis=1.2)
-mtext(side=3,line=0,at = -15.5,'f)',cex=0.8)
+mtext(side=3,line=0,at = -15.5,'g)',cex=0.8)
 
 polygon(x = c(Land_Comp2$ResDay[F_F_F],rev(Land_Comp2$ResDay[F_F_F])), y = c(Land_Comp2$lci[F_F_F],rev(Land_Comp2$uci[F_F_F])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=Land_Comp2$ResDay[F_F_F],y = Land_Comp2$fit[F_F_F],lwd = 2,col = 'grey30')
@@ -1053,6 +1048,9 @@ mtext(side=3,line=0,at = -2,'b)',cex=0.8)
 polygon(x = c(Site_Fun_Rich2$GGC[G_G],rev(Site_Fun_Rich2$GGC[G_G])), y = c(Site_Fun_Rich2$lci[G_G],rev(Site_Fun_Rich2$uci[G_G])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=Site_Fun_Rich2$GGC[G_G],y = Site_Fun_Rich2$fit[G_G],lwd = 2,col = 'grey30')
 
+mtext(side=3,line=1,at = 0.5,'------------------------------------Site------------------------------------',cex=0.9, font = 2)
+
+
 plot(x = ComVar$Height,y = ComVar$FRic,xlab = "Grass Height (cm)",ylab = 'Functional Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
 axis(side=1, at=seq(from=min(Site_Fun_Rich2$Height),to=max(Site_Fun_Rich2$Height),length.out=5),labels=round(seq(from=min(ComVar$Plant_Height),to=max(ComVar$Plant_Height),length.out=5),0),cex.axis=1.2)
 mtext(side=3,line=0,at = -1.5,'c)',cex=0.8)
@@ -1067,6 +1065,8 @@ mtext(side=3,line=0,at = -0.25,'d)',cex=0.8)
 arrows(x0=1:2, y0=Site_Fun_Rich2$lci [G_G_G],x1=1:2, y1=Site_Fun_Rich2$uci[G_G_G],angle=90,length=0.1, code=3, lwd=2,col = "black")
 points(x = jitter(raw_x1, factor = 1),y = ComVar$FRic, pch = 16, cex = 0.4, col = "grey30")
 
+mtext(side=3,line=1,at = 3.5,'-----------------------Site-----------------------',cex=0.9, font = 2)
+
 
 plot(x = ComVar$ResDay,y = ComVar$FRic,xlab = "Day (position-adjusted)",ylab = 'Functional Richness', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
 axis(side=1, at=seq(from=min(Site_Fun_Rich2$ResDay),to=max(Site_Fun_Rich2$ResDay),length.out=5),labels=round(seq(from=min(ComVar$ResDay),to=max(ComVar$ResDay),length.out=5),0),cex.axis=1.2)
@@ -1075,10 +1075,9 @@ mtext(side=3,line=0,at = -15,'e)',cex=0.8)
 polygon(x = c(Site_Fun_Rich2$ResDay[GGGG],rev(Site_Fun_Rich2$ResDay[GGGG])), y = c(Site_Fun_Rich2$lci[GGGG],rev(Site_Fun_Rich2$uci[GGGG])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=Site_Fun_Rich2$ResDay[GGGG],y = Site_Fun_Rich2$fit[GGGG],lwd = 2,col = 'grey30')
 
-mtext(bquote(R^2 == 0.117), side=1,line=-10,at = 50,cex=0.9)
-mtext("Site", side=1,line=-10,at = 41,cex=0.9)
-mtext(bquote(R^2 == 0.031), side=1,line=-8,at = 50,cex=0.9)
-mtext("Fixed", side=1,line=-8,at = 40.5,cex=0.9)
+barplot(R2_FRich$delta[,4],cex.lab=1.4,cex.axis=1.4,xaxt = 'n',ylab = "Relative contribution (%)")
+axis(side=1, at=c(0.6,2,3.2,4.4,5.8),labels=c("Day", "Pos" ,"GC","Green\nGC","Height"),cex.axis=1,tick = F)
+mtext(side=3,line=0,at = -0,'f)',cex=0.8)
 
 
 
