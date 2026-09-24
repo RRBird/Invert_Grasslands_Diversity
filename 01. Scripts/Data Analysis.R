@@ -947,14 +947,14 @@ raw_x2 <- ifelse(ComVar_Subsected$X500m.Dominant.Landscape.Class ==
 dev.new(height=15,width=30,dpi=80,pointsize=14,noRStudioGD = T)
 par(mar=c(4,4,3,2),mfrow=c(2,4),mgp=c(2.5,0.7,0),xpd = T)
 
-plot(x = ComVar_Subsected$GGC,y = ComVar_Subsected$ComComp,xlab = "Green Ground Cover (%)",ylab = 'Community Dissimiliaty Index', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+plot(x = ComVar_Subsected$GGC,y = ComVar_Subsected$ComComp,xlab = "Green Ground Cover (%)",ylab = 'Community Composition', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
 axis(side=1, at=seq(from=min(Site_Comp2$GGC),to=max(Site_Comp2$GGC),length.out=5),labels=round(seq(from=min(ComVar_Subsected$Prop_Green_GC),to=max(ComVar_Subsected$Prop_Green_GC),length.out=5),0),cex.axis=1.2)
 mtext(side=3,line=0,at = -2.1,'a)',cex=0.8)
 
 polygon(x = c(Site_Comp2$GGC[EE],rev(Site_Comp2$GGC[EE])), y = c(Site_Comp2$lci[EE],rev(Site_Comp2$uci[EE])),col = rgb(0.5, 0.5, 0.5, 0.5),border=NA)
 lines(x=Site_Comp2$GGC[EE],y = Site_Comp2$fit[EE],lwd = 2,col = 'grey30')
 
-plot(x = ComVar_Subsected$GC,y = ComVar_Subsected$ComComp,xlab = "Ground Cover (%)",ylab = 'Community Dissimiliaty Index', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+plot(x = ComVar_Subsected$GC,y = ComVar_Subsected$ComComp,xlab = "Ground Cover (%)",ylab = 'Community Composition', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
 axis(side=1, at=seq(from=min(Site_Comp2$GC),to=max(Site_Comp2$GC),length.out=5),labels=round(seq(from=min(ComVar_Subsected$Ground_Cover),to=max(ComVar_Subsected$Ground_Cover),length.out=5),0),cex.axis=1.2)
 mtext(side=3,line=0,at = -3.2,'b)',cex=0.8)
 
@@ -968,7 +968,7 @@ legend("bottomleft",legend = c("Escaprment", "Valley"), lty = c(1,2), col = 'gre
 
 
 
-plot(x = ComVar_Subsected$ResDay,y = ComVar_Subsected$ComComp,xlab = "Day (position-adjusted) ",ylab = 'Community Dissimiliaty Index', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+plot(x = ComVar_Subsected$ResDay,y = ComVar_Subsected$ComComp,xlab = "Day (position-adjusted) ",ylab = 'Community Composition', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
 axis(side=1, at=seq(from=min(Site_Comp2$ResDay),to=max(Site_Comp2$ResDay),length.out=5),labels=round(seq(from=min(ComVar_Subsected$ResDay),to=max(ComVar_Subsected$ResDay),length.out=5),0),cex.axis=1.2)
 mtext(side=3,line=0,at = -15.5,'c)',cex=0.8)
 
@@ -983,7 +983,7 @@ axis(side=1, at=c(0.6,1.8,3.1,4.3,5.5,6.9,8.2,9.6),labels=c("D", "P" ,"GG","G","
 mtext(side=3,line=0,at = -1,'d)',cex=0.8)
 
 
-plot(x = ComVar_Subsected$Graze,y = ComVar_Subsected$ComComp,xlab = "Grazing Land in 1km (%)",ylab = 'Community Dissimiliaty Index', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+plot(x = ComVar_Subsected$Graze,y = ComVar_Subsected$ComComp,xlab = "Grazing Land in 1km (%)",ylab = 'Community Composition', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
 axis(side=1, at=seq(from=min(Land_Comp2$Graze),to=max(Land_Comp2$Graze),length.out=5),labels=round(seq(from=min(ComVar_Subsected$Natual_Grazing_1km),to=max(ComVar_Subsected$Natual_Grazing_1km),length.out=5),0),cex.axis=1.2)
 mtext(side=3,line=0,at = -1.9,'e)',cex=0.8)
 
@@ -996,7 +996,7 @@ lines(x=Land_Comp2$Graze[F_F],y = Land_Comp2$fit[F_F],lwd = 2,col = 'grey30',lty
 legend("bottomleft",legend = c("Escaprment", "Valley"), lty = c(1,2), col = 'grey30',pt.cex = 1,cex = 1.2)
 
 
-plot(x = 1:3,y = Land_Comp2$fit[FFF],xlab = " ",ylab = 'Community Dissimiliaty Index', type = 'p',pch = 16,cex =1.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(-0.7,0.4),cex.lab =1.2,cex.axis = 1.2)
+plot(x = 1:3,y = Land_Comp2$fit[FFF],xlab = " ",ylab = 'Community Composition', type = 'p',pch = 16,cex =1.5,col = 'black', las = 1,xaxt = "n",xlim = c(0,4),ylim = c(-0.7,0.4),cex.lab =1.2,cex.axis = 1.2)
 axis(side=1,at=c(1,2,3),labels=c("","",""),cex.axis=0.9)
 mtext(side=1,line =1.5, at=0.8,'Woody\nClosed',cex=0.6)
 mtext(side=1,line =1.5, at=2,'Herbaceous\nOpen',cex=0.6)
@@ -1007,7 +1007,7 @@ arrows(x0=1:3, y0=Land_Comp2$lci[FFF],x1=1:3, y1=Land_Comp2$uci[FFF],angle=90,le
 points(x = jitter(raw_x2, factor = 1),y = ComVar_Subsected$ComComp, pch = 16, cex = 0.4, col = "grey30")
 
 
-plot(x = ComVar_Subsected$ResDay,y = ComVar_Subsected$ComComp,xlab = "Day (position-adjusted) ",ylab = 'Community Dissimiliaty Index', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
+plot(x = ComVar_Subsected$ResDay,y = ComVar_Subsected$ComComp,xlab = "Day (position-adjusted) ",ylab = 'Community Composition', type = 'p', pch = 16,cex =0.2,col = 'black', las = 1, lwd = 2,cex.lab=1.2,cex.axis=1.2,xaxt = 'n')
 axis(side=1, at=seq(from=min(Land_Comp2$ResDay),to=max(Land_Comp2$ResDay),length.out=5),labels=round(seq(from=min(ComVar_Subsected$ResDay),to=max(ComVar_Subsected$ResDay),length.out=5),0),cex.axis=1.2)
 mtext(side=3,line=0,at = -15.5,'g)',cex=0.8)
 
