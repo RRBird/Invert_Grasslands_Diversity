@@ -130,7 +130,7 @@ cordata <- merge(cordata,property, by = "Property")
 
 head(cordata);dim(cordata)
 
-cordata <- cordata %>% dplyr::select(Plant_Height, Ground_Cover,Prop_Green_GC,Weed_Estimate,Grass_Status, Natual_Grazing_1km,Cropping_1km,X500m.Simspson,X500m.Dominant.Landscape.Class,Day_Sampled,Dominant_Herb_Weed,Dominat_Grass,Position)
+cordata <- cordata %>% dplyr::select(Plant_Height, Ground_Cover,Prop_Green_GC,Weed_Estimate, Natual_Grazing_1km,Cropping_1km,X500m.Simspson,X500m.Dominant.Landscape.Class,Day_Sampled,Position)
 
 
 str(cordata)
@@ -146,14 +146,6 @@ cordata$X500m.Dominant.Landscape.Class <- as.factor(
 cordata$X500m.Dominant.Landscape.Class <- as.numeric(
   cordata$X500m.Dominant.Landscape.Class)
 
-cordata$Grass_Status <- as.factor(cordata$Grass_Status)
-cordata$Grass_Status <- as.numeric(cordata$Grass_Status)
-
-cordata$Dominant_Herb_Weed <- as.factor(cordata$Dominant_Herb_Weed)
-cordata$Dominant_Herb_Weed <- as.numeric(cordata$Dominant_Herb_Weed)
-
-cordata$Dominat_Grass <- as.factor(cordata$Dominat_Grass)
-cordata$Dominat_Grass <- as.numeric(cordata$Dominat_Grass)
 
 cordata$Position <- as.factor(cordata$Position)
 cordata$Position <- as.numeric(cordata$Position)
@@ -163,8 +155,8 @@ str(cordata) #confirmed no character columns left
 
 cor <- cor(cordata,method = "spearman")
 
-colnames(cor) <- c("Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Habitat Diversity","Habitat Structure", "Day","Dom Weed","Dom Grass","Position")
-rownames(cor) <- c("Height", "Ground Cover","Green Ground Cover","Weed Cover","Grass Status","Grazing 1km","Crops 1km","Habitat Diversity","Habitat Structure", "Day","Dom Weed","Dom Grass","Position")
+colnames(cor) <- c("Height", "Ground Cover","Green Ground Cover","Weed Cover","Grazing 1km","Crops 1km","Habitat Diversity","Habitat Structure", "Day","Position")
+rownames(cor) <- c("Height", "Ground Cover","Green Ground Cover","Weed Cover","Grazing 1km","Crops 1km","Habitat Diversity","Habitat Structure", "Day","Position")
 
 dev.new(height=8,width=8,dpi=80,pointsize=14,noRStudioGD = T)
 corrplot::corrplot(cor,method="color",  
